@@ -73,7 +73,7 @@ export default function EmailPopup() {
           tags: ['learnopenclaw'],
           utm_source: 'learnopenclaw',
           utm_medium: 'popup',
-          utm_campaign: 'popup-cheatsheet',
+          utm_campaign: 'loc-popup-cheatsheet',
           landing_page: window.location.pathname,
           referrer: document.referrer || 'direct',
         }),
