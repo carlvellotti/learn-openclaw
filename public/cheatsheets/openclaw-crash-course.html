@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenClaw Crash Course — Learn OpenClaw</title>
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700,800,900&f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Satoshi', system-ui, sans-serif;
+      background: #e5e7eb;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 40px 40px;
+      min-height: 100vh;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .toolbar button {
+      font-family: 'Satoshi', system-ui, sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s ease;
+    }
+    .toolbar .btn-pdf { background: #0f172a; color: white; }
+    .toolbar .btn-pdf:hover { background: #1e293b; }
+    .toolbar .btn-image { background: #ff4d4d; color: white; }
+    .toolbar .btn-image:hover { background: #e63946; }
+    .toolbar .btn-image.saving { opacity: 0.7; cursor: wait; }
+
+    /* ── PAGE ── */
+    .page {
+      width: 8.5in;
+      height: 11in;
+      background: #050810;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+      padding: 30px 36px 22px;
+      display: flex;
+      flex-direction: column;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    @media print {
+      body { background: none; padding: 0; }
+      .page { box-shadow: none; }
+      .toolbar { display: none; }
+    }
+
+    /* ── HEADER ── */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+    .header-left h1 {
+      font-family: 'Clash Display', 'Satoshi', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: #f0f4ff;
+      line-height: 1.1;
+    }
+    .header-left .subtitle {
+      font-size: 11.5px;
+      color: #8892b0;
+      margin-top: 4px;
+      font-weight: 500;
+    }
+    .header-right {
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .header-right .url {
+      font-size: 10px;
+      color: #ff4d4d;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+    .header-right .tagline {
+      font-size: 9px;
+      color: #5a6480;
+      margin-top: 2px;
+    }
+
+    /* ── ARCHITECTURE BANNER ── */
+    .arch-banner {
+      background: #0a0f1a;
+      border: 1px solid rgba(136, 146, 176, 0.12);
+      border-radius: 6px;
+      padding: 10px 16px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .arch-banner .label {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #ff4d4d;
+      flex-shrink: 0;
+    }
+    .arch-flow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      color: #8892b0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .arch-flow .node {
+      color: #f0f4ff;
+      font-weight: 600;
+      background: rgba(255, 77, 77, 0.1);
+      border: 1px solid rgba(255, 77, 77, 0.2);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+    }
+    .arch-flow .arrow { color: #5a6480; }
+    .arch-flow .branch {
+      color: #00e5cc;
+      font-size: 9.5px;
+    }
+
+    /* ── MAIN GRID ── */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* ── STEP CARDS ── */
+    .step {
+      background: #0a0f1a;
+      border: 1px solid rgba(136, 146, 176, 0.1);
+      border-radius: 6px;
+      padding: 12px 14px 10px;
+      min-width: 0;
+      overflow: hidden;
+    }
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .step-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #ff4d4d;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .step-title {
+      font-family: 'Clash Display', 'Satoshi', sans-serif;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #f0f4ff;
+    }
+
+    .step p, .step li {
+      font-size: 10.5px;
+      color: #8892b0;
+      line-height: 1.45;
+    }
+    .step ul {
+      list-style: none;
+      margin-top: 4px;
+    }
+    .step ul li {
+      padding-left: 10px;
+      position: relative;
+      margin-bottom: 2px;
+    }
+    .step ul li::before {
+      content: '›';
+      position: absolute;
+      left: 0;
+      color: #ff4d4d;
+      font-weight: 700;
+    }
+
+    /* ── CODE BLOCKS ── */
+    .code-block {
+      background: #050810;
+      border: 1px solid rgba(136, 146, 176, 0.08);
+      border-radius: 4px;
+      padding: 8px 10px;
+      margin-top: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9.5px;
+      line-height: 1.5;
+      color: #8892b0;
+      white-space: pre;
+      overflow: hidden;
+      max-width: 100%;
+    }
+    .code-block .cm { color: #5a6480; }
+    .code-block .kw { color: #ff4d4d; }
+    .code-block .st { color: #00e5cc; }
+    .code-block .fn { color: #f0f4ff; }
+
+    /* ── CONFIG TABLE ── */
+    .config-table {
+      width: 100%;
+      max-width: 100%;
+      margin-top: 6px;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    .config-table td {
+      font-size: 9.5px;
+      padding: 3px 0;
+      color: #8892b0;
+      border-bottom: 1px solid rgba(136, 146, 176, 0.06);
+      vertical-align: top;
+    }
+    .config-table td:first-child {
+      font-family: 'JetBrains Mono', monospace;
+      color: #00e5cc;
+      font-size: 9px;
+      font-weight: 500;
+      padding-right: 8px;
+      white-space: nowrap;
+    }
+
+    /* ── INLINE CODE ── */
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      color: #00e5cc;
+      background: rgba(0, 229, 204, 0.08);
+      padding: 1px 4px;
+      border-radius: 3px;
+    }
+
+    /* ── HIGHLIGHT BOX ── */
+    .highlight-box {
+      background: rgba(255, 77, 77, 0.06);
+      border-left: 3px solid #ff4d4d;
+      padding: 6px 10px;
+      margin-top: 6px;
+      border-radius: 0 4px 4px 0;
+    }
+    .highlight-box p {
+      font-size: 10px;
+      color: #8892b0;
+      line-height: 1.4;
+    }
+    .highlight-box strong {
+      color: #f0f4ff;
+    }
+
+    /* ── CRON TABLE ── */
+    .cron-table {
+      width: 100%;
+      margin-top: 6px;
+      border-collapse: collapse;
+    }
+    .cron-table td {
+      font-size: 9.5px;
+      padding: 2.5px 0;
+      color: #8892b0;
+      border-bottom: 1px solid rgba(136, 146, 176, 0.06);
+    }
+    .cron-table td:first-child {
+      font-family: 'JetBrains Mono', monospace;
+      color: #f0f4ff;
+      font-size: 9px;
+      padding-right: 8px;
+      white-space: nowrap;
+    }
+
+    /* ── SECURITY CHECKLIST ── */
+    .checklist {
+      list-style: none;
+      margin-top: 4px;
+    }
+    .checklist li {
+      font-size: 10px;
+      color: #8892b0;
+      padding: 2px 0 2px 16px;
+      position: relative;
+      line-height: 1.4;
+    }
+    .checklist li::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: #00e5cc;
+      font-weight: 700;
+      font-size: 10px;
+    }
+
+    /* ── SPAN 2 COLS ── */
+    .span-2 {
+      grid-column: span 2;
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(136, 146, 176, 0.1);
+    }
+    .footer-left {
+      font-size: 10px;
+      color: #5a6480;
+    }
+    .footer-left a {
+      color: #ff4d4d;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .footer-right {
+      font-size: 9px;
+      color: #5a6480;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="toolbar">
+    <button class="btn-pdf" onclick="window.print()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Save as PDF
+    </button>
+    <button class="btn-image" onclick="saveAsImage(this)">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      Download Image
+    </button>
+  </div>
+
+  <div class="page">
+
+    <!-- HEADER -->
+    <div class="header">
+      <div class="header-left">
+        <h1>OpenClaw Crash Course</h1>
+        <div class="subtitle">From zero to your own AI assistant in 10 minutes. The 6 steps that actually matter.</div>
+      </div>
+      <div class="header-right">
+        <div class="url">learnopenclaw.com</div>
+        <div class="tagline">The free, comprehensive guide</div>
+      </div>
+    </div>
+
+    <!-- ARCHITECTURE BANNER -->
+    <div class="arch-banner">
+      <div class="label">How it<br>works</div>
+      <div class="arch-flow">
+        <span class="node">You</span>
+        <span class="arrow">→</span>
+        <span class="node">Channel</span>
+        <span class="arrow">→</span>
+        <span class="node">Gateway</span>
+        <span class="arrow">→</span>
+        <span class="node">Agent</span>
+        <span class="arrow">→</span>
+        <span class="node">Skills</span>
+        <span style="margin-left: 12px; color: #5a6480; font-size: 9px;">Gateway also connects to: <span class="branch">Memory</span> + <span class="branch">External APIs</span></span>
+      </div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="main-grid">
+
+      <!-- STEP 1: Install -->
+      <div class="step">
+        <div class="step-header">
+          <div class="step-num">1</div>
+          <div class="step-title">Install & Launch</div>
+        </div>
+        <div class="code-block"><span class="cm"># Install globally</span>
+<span class="fn">npm install</span> -g @anthropic-ai/openclaw
+
+<span class="cm"># Run the setup wizard</span>
+<span class="fn">openclaw</span> onboard
+
+<span class="cm"># Start the gateway</span>
+<span class="fn">openclaw</span> start
+
+<span class="cm"># Verify it's running</span>
+<span class="fn">openclaw</span> status</div>
+        <div class="highlight-box">
+          <p><strong>Requires:</strong> Node.js 22+, an Anthropic API key</p>
+        </div>
+      </div>
+
+      <!-- STEP 2: Config Files -->
+      <div class="step">
+        <div class="step-header">
+          <div class="step-num">2</div>
+          <div class="step-title">Know Your Config Files</div>
+        </div>
+        <p>All personality files live in <code>~/clawd/</code></p>
+        <table class="config-table">
+          <tr><td>SOUL.md</td><td>Personality, tone, values</td></tr>
+          <tr><td>USER.md</td><td>Info about you — name, location, prefs</td></tr>
+          <tr><td>MEMORY.md</td><td>Long-term facts &amp; knowledge</td></tr>
+          <tr><td>RULES.md</td><td>Hard rules for edge cases</td></tr>
+          <tr><td>MESSAGING.md</td><td>Message routing rules</td></tr>
+          <tr><td>HEARTBEAT.md</td><td>Proactive scheduled actions</td></tr>
+        </table>
+        <div class="highlight-box">
+          <p>Main config: <code>~/.openclaw/openclaw.json</code></p>
+        </div>
+      </div>
+
+      <!-- STEP 3: Write SOUL.md -->
+      <div class="step">
+        <div class="step-header">
+          <div class="step-num">3</div>
+          <div class="step-title">Write Your SOUL.md</div>
+        </div>
+        <p>This is the most important file. Start minimal:</p>
+        <div class="code-block"><span class="cm"># ~/clawd/SOUL.md</span>
+
+You are my personal assistant.
+Be concise and direct.
+No pleasantries unless I start them.
+Prefer bullets over paragraphs.
+When uncertain, ask — don't guess.</div>
+        <div class="highlight-box">
+          <p><strong>Don't rush this.</strong> Generic SOUL = generic responses. Add context about your work style over time.</p>
+        </div>
+      </div>
+
+      <!-- STEP 4: Connect a Channel -->
+      <div class="step">
+        <div class="step-header">
+          <div class="step-num">4</div>
+          <div class="step-title">Connect a Channel</div>
+        </div>
+        <p>Pick one to start. Add to <code>openclaw.json</code>:</p>
+        <div class="code-block"><span class="cm">// iMessage (macOS only)</span>
+<span class="st">"channels"</span>: {
+  <span class="st">"imessage"</span>: {
+    <span class="st">"enabled"</span>: <span class="kw">true</span>,
+    <span class="st">"pairedDevices"</span>: [<span class="st">"+15551234567"</span>]
+  }
+}</div>
+        <ul>
+          <li><strong style="color:#f0f4ff">Slack:</strong> needs Bot Token + App Token</li>
+          <li><strong style="color:#f0f4ff">Telegram:</strong> get token from @BotFather</li>
+          <li><strong style="color:#f0f4ff">Discord:</strong> create app at developers portal</li>
+          <li><strong style="color:#f0f4ff">WebChat:</strong> built-in at <code>localhost:18789</code></li>
+        </ul>
+      </div>
+
+      <!-- STEP 5: Lock Down Security -->
+      <div class="step">
+        <div class="step-header">
+          <div class="step-num">5</div>
+          <div class="step-title">Lock Down Security</div>
+        </div>
+        <p>Set these before going live:</p>
+        <div class="code-block"><span class="st">"security"</span>: {
+  <span class="st">"dmPolicy"</span>: <span class="st">"paired-only"</span>,
+  <span class="st">"groupPolicy"</span>: <span class="st">"allowlisted"</span>,
+  <span class="st">"sandboxEnabled"</span>: <span class="kw">true</span>,
+  <span class="st">"allowedPaths"</span>: [<span class="st">"~/Documents"</span>],
+  <span class="st">"maxTokensPerRequest"</span>: <span class="kw">4096</span>
+}</div>
+        <ul class="checklist">
+          <li><code>paired-only</code> — only responds to your devices</li>
+          <li><code>allowlisted</code> — no surprise group chats</li>
+          <li><code>sandbox</code> — limits filesystem access</li>
+          <li>Set spending limits on your AI dashboard</li>
+        </ul>
+      </div>
+
+      <!-- STEP 6: First Automation -->
+      <div class="step">
+        <div class="step-header">
+          <div class="step-num">6</div>
+          <div class="step-title">Your First Automation</div>
+        </div>
+        <p>Add a cron job to <code>openclaw.json</code>:</p>
+        <div class="code-block"><span class="st">"cron"</span>: [{
+  <span class="st">"schedule"</span>: <span class="st">"0 7 * * 1-5"</span>,
+  <span class="st">"prompt"</span>: <span class="st">"Morning briefing:
+    weather, calendar, top tasks,
+    overnight alerts."</span>,
+  <span class="st">"channel"</span>: <span class="st">"imessage"</span>
+}]</div>
+        <table class="cron-table">
+          <tr><td>0 7 * * *</td><td>Every day at 7 AM</td></tr>
+          <tr><td>0 7 * * 1-5</td><td>Weekdays at 7 AM</td></tr>
+          <tr><td>*/30 * * * *</td><td>Every 30 minutes</td></tr>
+          <tr><td>0 17 * * 5</td><td>Fridays at 5 PM</td></tr>
+          <tr><td>0 8 1 * *</td><td>1st of month, 8 AM</td></tr>
+        </table>
+      </div>
+
+      <!-- ESSENTIAL COMMANDS (spans 2 cols) -->
+      <div class="step span-2">
+        <div class="step-header">
+          <div class="step-num" style="background: #00e5cc; color: #050810;">~</div>
+          <div class="step-title">Essential Commands</div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <div>
+            <div class="code-block"><span class="fn">openclaw</span> start          <span class="cm"># Start gateway</span>
+<span class="fn">openclaw</span> start --daemon  <span class="cm"># Background</span>
+<span class="fn">openclaw</span> stop           <span class="cm"># Stop</span>
+<span class="fn">openclaw</span> restart        <span class="cm"># Restart</span>
+<span class="fn">openclaw</span> status         <span class="cm"># Health check</span>
+<span class="fn">openclaw</span> doctor         <span class="cm"># Full diagnostic</span>
+<span class="fn">openclaw</span> config         <span class="cm"># Edit config</span></div>
+          </div>
+          <div>
+            <div class="code-block"><span class="fn">openclaw</span> skill list      <span class="cm"># Browse skills</span>
+<span class="fn">openclaw</span> skill install X <span class="cm"># Install skill</span>
+<span class="fn">openclaw</span> channel add X  <span class="cm"># Add channel</span>
+<span class="fn">openclaw</span> channel test X <span class="cm"># Test channel</span>
+<span class="fn">openclaw</span> memory list    <span class="cm"># View memory</span>
+<span class="fn">openclaw</span> logs --tail 50 <span class="cm"># Recent logs</span>
+<span class="fn">openclaw</span> test model     <span class="cm"># Test AI conn</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TROUBLESHOOTING -->
+      <div class="step">
+        <div class="step-header">
+          <div class="step-num" style="background: #00e5cc; color: #050810;">!</div>
+          <div class="step-title">If Something Breaks</div>
+        </div>
+        <ul>
+          <li><strong style="color:#f0f4ff">Won't start?</strong> Check <code>lsof -i :18789</code> for port conflicts</li>
+          <li><strong style="color:#f0f4ff">No response?</strong> Check <code>dmPolicy</code> — is your device paired?</li>
+          <li><strong style="color:#f0f4ff">API errors?</strong> Run <code>openclaw test model</code></li>
+          <li><strong style="color:#f0f4ff">Cron not firing?</strong> Gateway must be running + valid JSON</li>
+          <li><strong style="color:#f0f4ff">High costs?</strong> Set <code>maxTokensPerRequest</code> + check cron frequency</li>
+          <li><strong style="color:#f0f4ff">Config issues?</strong> Run <code>openclaw doctor</code> for full diagnostic</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+      <div class="footer-left">
+        Full guide at <a href="https://learnopenclaw.com">learnopenclaw.com</a> — 29 pages, 100% free
+      </div>
+      <div class="footer-right">
+        by Carl Vellotti / The Full Stack PM
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function saveAsImage(btn) {
+      btn.classList.add('saving');
+      btn.textContent = 'Generating...';
+      html2canvas(document.querySelector('.page'), {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#050810',
+        logging: false
+      }).then(canvas => {
+        const link = document.createElement('a');
+        const title = document.title.replace(/[^a-z0-9]+/gi, '-').toLowerCase().replace(/-+$/, '');
+        link.download = title + '.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        btn.classList.remove('saving');
+        btn.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> Download Image';
+      }).catch(err => {
+        console.error('Image export failed:', err);
+        btn.classList.remove('saving');
+        btn.textContent = 'Export failed — try PDF instead';
+      });
+    }
+  </script>
+</body>
+</html>

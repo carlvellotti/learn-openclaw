@@ -69,7 +69,8 @@ export default function EmailPopup() {
         body: JSON.stringify({
           email,
           source: 'learnopenclaw-popup',
-          publication: 'fullstackpm',
+          publication: 'cc4e',
+          tags: ['learnopenclaw'],
           utm_source: 'learnopenclaw',
           utm_medium: 'popup',
           utm_campaign: 'popup-cheatsheet',
