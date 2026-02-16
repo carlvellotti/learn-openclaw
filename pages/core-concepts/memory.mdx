@@ -1,0 +1,403 @@
+---
+title: "The OpenClaw Memory System"
+description: "Understand how OpenClaw remembers: daily logs, MEMORY.md long-term storage, hybrid search, and the compaction system. Practical guide to managing your agent's memory."
+keywords: "openclaw memory, openclaw MEMORY.md, openclaw memory management, openclaw memory system, openclaw daily logs, openclaw compaction"
+---
+
+# The OpenClaw Memory System
+
+## Why Memory Matters
+
+Without memory, every conversation with your agent starts from zero. You'd have to re-explain your projects, re-state your preferences, and re-establish context every single time. Memory is what transforms OpenClaw from a chatbot into a genuine assistant that knows you.
+
+OpenClaw's memory system has three layers that work together: short-term conversation context, medium-term daily logs, and long-term curated memory. Understanding how these layers interact — and where they break down — is the key to getting the most out of your agent.
+
+---
+
+## The Three Layers of Memory
+
+### Layer 1: Short-Term (Conversation Context)
+
+This is the immediate context within a single conversation. It works exactly like any LLM chat — the model can see what you've said so far in this session.
+
+**How it works:**
+- Automatically maintained by the LLM's context window
+- Cleared when the conversation ends
+- Limited by the model's context length (varies by provider)
+
+**What you need to do:** Nothing. This is automatic. But be aware that very long conversations will eventually hit the context limit, and the model will start "forgetting" earlier parts of the conversation.
+
+### Layer 2: Medium-Term (Daily Logs)
+
+OpenClaw automatically generates daily log files that capture what happened each day. These are timestamped markdown files that serve as a running record of your interactions.
+
+**How it works:**
+- The `session-memory` hook fires at the end of each conversation
+- It generates a summary of what was discussed and any actions taken
+- Summaries are appended to the daily log file for that date
+- Files are stored in your workspace's memory directory
+
+**Daily log file example:**
+
+```markdown
+# 2026-02-16
+
+## 09:15 - Content Planning
+- Discussed LinkedIn post ideas for the week
+- Decided on a thread about AI sycophancy
+- Carl wants to publish Tuesday morning
+
+## 11:30 - Newsletter Draft
+- Reviewed draft of Weekly Stack #47
+- Suggested restructuring the intro — was too long
+- Carl approved the final version
+
+## 14:45 - Research
+- Looked up competitor pricing for course platforms
+- Compiled comparison of Teachable vs Podia vs Kajabi
+- Saved findings to research notes
+
+## 17:00 - Evening Wrapup
+- Reminded Carl about tomorrow's meeting with Mike at 10am
+- Set up draft for Wednesday LinkedIn post
+```
+
+**What you need to do:** Let the system work automatically. The daily logs are generated without any action on your part. You can review them if you want to recall what happened on a specific day, but the main value is that they feed into the compaction system (more on that below).
+
+### Layer 3: Long-Term (MEMORY.md)
+
+MEMORY.md is your curated long-term memory file. Unlike daily logs, which are auto-generated, MEMORY.md is a document you actively maintain. It contains the persistent facts, preferences, and context that your agent should always know.
+
+**How it works:**
+- Loaded at startup via the `boot-md` hook
+- Always available in your agent's context
+- You add, edit, and remove entries manually (or ask your agent to help)
+- Serves as the single source of truth for long-term facts
+
+**MEMORY.md structure example:**
+
+```markdown
+# MEMORY.md
+
+## Active Projects
+- "Claude Code for PMs" course — targeting March launch, 8 modules drafted
+- Weekly Stack newsletter — published every Wednesday, currently at issue #47
+- LearnOpenClaw.com — documentation site, core concepts section in progress
+
+## Key Decisions Made
+- 2026-01-15: Decided to price the course at $149 (not $99) based on competitor analysis
+- 2026-01-22: Chose Nextra over Docusaurus for the documentation site
+- 2026-02-01: Switched from daily to 3x/week LinkedIn posting schedule
+
+## Ongoing Preferences
+- Writing style: conversational, direct, no corporate jargon
+- When drafting LinkedIn posts, always include a hook in the first line
+- For newsletter, keep total read time under 7 minutes
+- I prefer morning deep work — don't suggest scheduling calls before 11am
+
+## People & Context
+- Mike (collaborator) is building the course platform — check in weekly
+- Aisha (editor) reviews newsletter drafts by Monday EOD
+- Sarah (partner) works night shifts on Tuesdays and Thursdays
+
+## Things That Worked
+- LinkedIn carousel posts get 3x engagement of text-only posts
+- Sending newsletter on Wednesday 7am PT gets best open rates
+- Using "problem → solution → proof" structure for posts
+
+## Things That Didn't Work
+- Posting on LinkedIn on weekends — engagement drops 60%
+- Long-form threads (5+ slides) — people drop off after slide 3
+- Scheduling content more than 2 weeks in advance — context goes stale
+```
+
+---
+
+## The Session-Memory Hook
+
+The `session-memory` hook is what makes medium-term memory automatic. Here's what it does:
+
+1. **Triggers** at the end of each conversation session
+2. **Summarizes** the key points of the conversation
+3. **Appends** the summary to today's daily log file
+4. **Tags** entries with timestamps and topic labels
+
+### Configuration
+
+The session-memory hook is configured in your `openclaw.json` file:
+
+```json
+{
+  "hooks": {
+    "session-memory": {
+      "enabled": true,
+      "summaryLength": "medium",
+      "includeActions": true,
+      "dailyLogPath": "./memory/daily/"
+    }
+  }
+}
+```
+
+**Options:**
+- `summaryLength`: "short" (1-2 lines), "medium" (paragraph), or "long" (detailed)
+- `includeActions`: Whether to log actions the agent took (commands run, files modified)
+- `dailyLogPath`: Where daily logs are stored
+
+### What Gets Logged
+
+Not everything in a conversation is worth remembering. The session-memory hook is designed to capture:
+
+- Decisions you made
+- Tasks completed or started
+- Preferences you expressed
+- Important facts mentioned
+- Action items for the future
+
+It should NOT capture:
+
+- Small talk or greetings
+- Repeated questions you already have in MEMORY.md
+- Temporary debugging sessions that aren't relevant long-term
+
+If you find the logs capturing too much noise, adjust `summaryLength` to "short."
+
+---
+
+## Pre-Compaction: From Daily Logs to Long-Term Memory
+
+Over time, your daily logs accumulate. After a month, you might have 30 files of varying length. Most of that information is either already in MEMORY.md or no longer relevant.
+
+**Pre-compaction** is the process of reviewing daily logs and extracting anything worth keeping into long-term memory.
+
+### How It Works
+
+1. **Review period:** Look at the last 7-14 days of daily logs
+2. **Extract patterns:** What decisions recurred? What preferences emerged? What worked or didn't?
+3. **Update MEMORY.md:** Add new entries, update existing ones, remove outdated info
+4. **Archive or delete daily logs:** Once extracted, the daily logs can be cleaned up
+
+### Manual vs. Assisted Compaction
+
+You can do this yourself, or you can ask your agent to help:
+
+```
+Hey, review the daily logs from the past two weeks and suggest
+updates to MEMORY.md. Show me what you'd add, change, or remove
+before making any edits.
+```
+
+This is a great weekly ritual. Set a cron job to remind you every Sunday evening.
+
+### The Stale Memory Problem
+
+If you never review MEMORY.md, it becomes a time capsule. You'll have entries about projects that finished months ago, preferences that have changed, and people who are no longer relevant to your work.
+
+**Stale memory is worse than no memory.** If your agent thinks you're still working on a project you abandoned in January, it will keep bringing it up, referencing it in suggestions, and wasting your time.
+
+Set a recurring reminder — weekly or biweekly — to review MEMORY.md. It takes 10 minutes and dramatically improves your agent's usefulness.
+
+### Signs Your Memory Needs Maintenance
+
+- Your agent references projects or people that are no longer relevant
+- Suggestions feel outdated or based on old preferences
+- Daily logs contain the same information that's already in MEMORY.md
+- MEMORY.md is longer than 300 lines (time to trim)
+
+---
+
+## Hybrid Search: How OpenClaw Retrieves Memory
+
+When your agent needs to recall something, it doesn't just do a keyword search. OpenClaw uses a **hybrid search** system that combines two approaches:
+
+### The 70/30 Split
+
+- **70% Vector Search (Semantic):** Finds memories based on meaning, not exact words. If you ask about "content strategy," it can find entries about "LinkedIn posting schedule" even though the words don't match.
+- **30% BM25 (Keyword):** Traditional keyword matching. Ensures that exact terms are found reliably — important for names, dates, and specific project titles.
+
+### Why Hybrid?
+
+Pure vector search is great at understanding intent but can miss specific details. Pure keyword search finds exact matches but misses related concepts. The hybrid approach gets the best of both.
+
+**Example:** You ask your agent, "What did we decide about pricing?"
+
+- **Vector search** finds entries about "course cost," "price point analysis," and "competitor pricing" — semantically related
+- **BM25** finds entries containing the exact word "pricing" — direct matches
+- **Combined results** give you a comprehensive answer
+
+### How This Affects What You Write in MEMORY.md
+
+Because of hybrid search, your MEMORY.md entries should:
+
+- **Use natural language**, not cryptic shorthand (vector search needs meaningful text)
+- **Include specific names and terms** (BM25 needs exact keywords)
+- **Group related information together** (helps both search methods)
+
+```markdown
+## Good Entry
+- 2026-01-15: Decided to price the Claude Code for PMs course at $149
+  after comparing Teachable competitors. Mike agreed this positions us
+  in the mid-tier range.
+
+## Bad Entry
+- pricing: $149 ✓
+```
+
+The good entry works for both semantic and keyword search. The bad entry only works for BM25 and gives zero context.
+
+---
+
+## The Boot-MD Hook
+
+The `boot-md` hook runs every time your agent starts a new conversation. It loads specified files into the agent's context so it always has access to critical information.
+
+### Default Configuration
+
+```json
+{
+  "hooks": {
+    "boot-md": {
+      "enabled": true,
+      "files": [
+        "SOUL.md",
+        "IDENTITY.md",
+        "USER.md",
+        "MEMORY.md"
+      ]
+    }
+  }
+}
+```
+
+### What This Means in Practice
+
+Every conversation your agent has begins with it "reading" these four files. This is why the identity layer and memory system are so powerful — they're not optional context that might get retrieved. They're loaded every single time.
+
+The tradeoff is **context budget.** Every token spent on boot files is a token not available for the actual conversation. This is why keeping MEMORY.md concise matters. A 500-line MEMORY.md is eating a significant chunk of your context window before you've even said "hello."
+
+### Optimization Tips
+
+- Keep MEMORY.md under 200 lines. If it's longer, you probably have entries that belong in daily logs instead.
+- Use the `files` array to control exactly what's loaded. If you don't need IDENTITY.md in every conversation, remove it from boot.
+- Consider creating separate memory files for different contexts (work, personal, specific projects) and loading only what's relevant.
+
+---
+
+## The Command-Logger Hook
+
+The `command-logger` hook tracks what your agent actually does — shell commands run, files created or modified, API calls made.
+
+```json
+{
+  "hooks": {
+    "command-logger": {
+      "enabled": true,
+      "logPath": "./memory/commands/",
+      "includeOutput": false
+    }
+  }
+}
+```
+
+### Why This Matters
+
+The command log serves two purposes:
+
+1. **Accountability.** You can review exactly what your agent did, especially important if it has access to shell commands or file operations.
+2. **Debugging.** When something goes wrong, the command log shows you the sequence of actions that led to the problem.
+
+Set `includeOutput` to `false` unless you're debugging something specific. Including command output in logs can create very large files very quickly.
+
+---
+
+## Practical Memory Management
+
+### What Belongs in MEMORY.md
+
+- Active projects and their current status
+- Key decisions and the reasoning behind them
+- Recurring preferences that affect daily interactions
+- Important people and your relationship context
+- Patterns you've discovered (what works, what doesn't)
+- Upcoming deadlines or events
+
+### What Does NOT Belong in MEMORY.md
+
+- Temporary tasks (use a task manager instead)
+- Detailed project plans (link to separate documents)
+- Conversation transcripts (that's what daily logs are for)
+- Information that changes hourly or daily (weather, stock prices)
+- Anything sensitive enough that you'd worry about it being in a plaintext file
+
+### Weekly Memory Review Checklist
+
+Run through this every week, ideally Sunday evening or Monday morning:
+
+1. **Scan daily logs from the past week.** Anything worth adding to MEMORY.md?
+2. **Review active projects.** Remove any that are completed or abandoned.
+3. **Check key decisions.** Are they still accurate? Any updates?
+4. **Update preferences.** Has anything changed in how you want your agent to behave?
+5. **Trim entries older than 3 months.** If they haven't been relevant in 3 months, they probably won't be.
+6. **Check total length.** Aim for under 200 lines. If it's longer, consolidate or remove.
+
+### Setting Up a Memory Review Cron
+
+You can automate the reminder using OpenClaw's cron system:
+
+```json
+{
+  "crons": [
+    {
+      "label": "Weekly Memory Review",
+      "schedule": "0 18 * * 0",
+      "prompt": "It's time for the weekly memory review. Summarize the daily logs from this past week and suggest updates to MEMORY.md. Show me the proposed changes before making them."
+    }
+  ]
+}
+```
+
+This fires every Sunday at 6pm, giving your agent a chance to prepare a summary before your Monday planning session.
+
+---
+
+## Troubleshooting Memory Issues
+
+### "My agent doesn't remember things I told it yesterday"
+
+**Likely cause:** The session-memory hook isn't enabled, or the conversation ended abnormally (crash, timeout) before the hook could fire.
+
+**Fix:** Check that `session-memory` is enabled in your `openclaw.json`. Also check the daily log directory — if yesterday's file is missing or empty, the hook didn't fire.
+
+### "My agent keeps bringing up old projects"
+
+**Likely cause:** MEMORY.md has stale entries.
+
+**Fix:** Run a memory review. Remove or update entries about completed or abandoned projects.
+
+### "Memory search returns irrelevant results"
+
+**Likely cause:** MEMORY.md entries are too short or lack context.
+
+**Fix:** Expand entries to include natural language descriptions. "pricing: $149" tells the search system nothing. "Decided to price the course at $149 based on competitor analysis" gives both semantic and keyword search something to work with.
+
+### "My agent's context window is filling up too fast"
+
+**Likely cause:** Boot files are too large.
+
+**Fix:** Audit your `boot-md` files list. Trim MEMORY.md. Consider splitting memory into domain-specific files and only loading what's relevant.
+
+---
+
+## Summary
+
+| Layer | Source | Persistence | Your Responsibility |
+|-------|--------|-------------|---------------------|
+| **Short-term** | Conversation context | Current session only | None — automatic |
+| **Medium-term** | Daily logs via session-memory hook | Days to weeks | Let it run, review occasionally |
+| **Long-term** | MEMORY.md | Indefinite | Curate weekly, keep it concise and current |
+
+The memory system is the difference between an agent that knows you and one that doesn't. The daily logs handle the automatic capture. MEMORY.md handles the curated knowledge. The hybrid search makes it all retrievable. And the boot-md hook makes sure your agent always starts with the right context.
+
+But none of it works if you don't maintain it. Schedule that weekly review.
+
+Next up: [Skills & ClawHub](/core-concepts/skills) — extending what your agent can do.

@@ -1,0 +1,156 @@
+---
+title: 'DM Policies & Pairing — Control Who Talks to Your OpenClaw Agent'
+description: 'Configure DM policies (allowlist, approval, open) and pairing to control who can message your OpenClaw agent. The first and most important security decision for every channel.'
+keywords: 'openclaw dm policy, openclaw pairing, openclaw allowlist, openclaw security, openclaw who can message agent, openclaw contact approval, openclaw trust handshake'
+---
+
+# DM Policies & Pairing
+
+## Your agent has shell access, can read your files, browse the web, and send messages on your behalf. That power needs guardrails.
+
+Security is the #1 concern for OpenClaw users — and for good reason. When we analyzed community discussions, security-related topics dominated with 387 research items and 1,528 distinct techniques extracted. The pattern was clear: **90% of people installing OpenClaw have no idea how to set it up safely.**
+
+This guide is the plain-English walkthrough we wish existed when we started. No jargon walls. No assumptions that you already know what sandboxing means.
+
+> "The line between an autonomous agent and a dangerous one isn't a prompt. It's a design choice."
+
+---
+
+## Why Security Matters More Than You Think
+
+OpenClaw is not a chatbot sitting inside a browser tab. It is a **persistent, autonomous agent** running on your machine (or a server) with access to:
+
+- **Your file system** — It can read, write, and delete files
+- **A shell** — It can execute arbitrary commands
+- **The internet** — It can browse websites, call APIs, and download content
+- **Your messaging channels** — It can send messages as you on iMessage, Slack, WhatsApp, and more
+- **Your API keys** — If misconfigured, it (or a malicious skill) can exfiltrate credentials
+
+A misconfigured OpenClaw instance is not just a privacy risk. It is an attack surface. Someone who can message your agent could potentially:
+
+1. Trick it into running shell commands via prompt injection
+2. Access files on your machine through crafted messages
+3. Exfiltrate API keys stored in plaintext config files
+4. Send messages to your contacts impersonating you
+5. Install malicious skills that phone home to external servers
+
+The good news: OpenClaw has solid security primitives built in. You just need to know how to use them.
+
+---
+
+## DM Policy: Who Can Talk to Your Agent
+
+The DM policy is your **first line of defense**. It controls who is allowed to send direct messages to your OpenClaw agent on any given channel.
+
+There are three options:
+
+### `allowlist` (Recommended to Start)
+
+Only contacts you have explicitly approved can message your agent.
+
+```yaml
+# In your channel config (e.g., channels/imessage.yaml)
+dmPolicy: allowlist
+allowedContacts:
+  - "+15551234567"
+  - "trusted.friend@icloud.com"
+```
+
+**How it works:** Any message from an unknown sender is silently ignored. Your agent never sees it, never responds to it, and never processes it. This is the safest starting point.
+
+**When to use it:** Personal channels (iMessage, WhatsApp, Signal) where you only want specific people to interact with your agent. This is how most people should start.
+
+**Trade-off:** You need to manually add every contact. Slightly more friction, significantly more safety.
+
+### `approval` (Good Middle Ground)
+
+Unknown contacts can attempt to message your agent, but their first message triggers an approval request to you.
+
+```yaml
+dmPolicy: approval
+```
+
+**How it works:** When someone new messages your agent, you get a notification (via your primary channel or the web interface) asking whether to allow or block them. Until you approve, the agent does not respond.
+
+**When to use it:** Channels where you want some openness but still want to vet who gets access. Good for Telegram or Discord where you might want to accept messages from people you do not know yet.
+
+**Trade-off:** You need to be responsive to approval requests, or new contacts get stuck waiting.
+
+### `open` (Use With Extreme Caution)
+
+Anyone can message your agent. No restrictions.
+
+```yaml
+dmPolicy: open
+```
+
+**How it works:** Every incoming message is processed and responded to. No filtering, no approval.
+
+**When to use it:** Almost never for personal channels. The only reasonable use case is a public-facing bot on a dedicated channel (like a customer support Telegram bot) where the agent has been locked down in every other way — sandboxed, restricted tool access, no file system permissions.
+
+**Why it is dangerous:** An open DM policy on your personal iMessage means anyone with your phone number can interact with your agent. That includes prompt injection attacks, social engineering attempts, and spam. If the agent has shell access and an open DM policy, a stranger can potentially execute commands on your machine.
+
+### Choosing the Right Policy Per Channel
+
+| Channel | Recommended Policy | Why |
+|---------|-------------------|-----|
+| iMessage | `allowlist` | Personal channel, limited contacts |
+| WhatsApp | `allowlist` | Personal channel, phone number is semi-public |
+| Slack | `approval` or `open` | Workspace already has access controls |
+| Telegram | `approval` | Easy to discover bots, moderate risk |
+| Discord | `approval` | Server members can DM, needs vetting |
+| Signal | `allowlist` | Privacy-focused users expect tight controls |
+| WebChat | `open` | Only you have access (localhost) |
+
+---
+
+## Pairing: The Trust Handshake
+
+Pairing is the process of establishing a trusted relationship between your agent and a specific contact. Think of it like Bluetooth pairing — both sides need to agree before communication flows freely.
+
+### How Pairing Works
+
+1. A contact sends a message to your agent (or you initiate pairing)
+2. If your DM policy requires it, you approve the contact
+3. The agent generates a **pairing token** — a short code shared with the contact
+4. The contact confirms the token through their channel
+5. The contact is now paired and can communicate freely
+
+### What Pairing Gives a Contact
+
+A paired contact can:
+
+- Send direct messages that the agent will process
+- Be referenced by the agent when routing messages (e.g., "tell Mom I'll be late")
+- Have their own context and conversation history with the agent
+- Receive proactive messages from the agent (if you configure scheduled messages)
+
+A paired contact **cannot**:
+
+- Access your files or system
+- See other contacts' conversations
+- Modify agent settings or skills
+- Bypass tool restrictions you have set
+
+### When to Pair
+
+- **Family and close friends** on personal channels — so they can interact with your agent naturally
+- **Team members** on Slack — so the agent can route messages and respond in context
+- **Your own devices** — pair your phone, tablet, and laptop so the agent recognizes you across channels
+
+### When Not to Pair
+
+- Random people who message you
+- Contacts you do not fully trust with access to an AI acting on your behalf
+- Anyone on a channel where your agent has elevated permissions (shell, file access)
+
+---
+
+## Next Steps
+
+Now that you control who can talk to your agent, lock down what it can do:
+
+- **[Sandboxing](/security/sandboxing)** — Contain the blast radius with sandbox mode, Docker, and file system restrictions
+- **[API Keys & Tool Policies](/security/api-keys)** — Secure your credentials and control tool permissions
+- **[ClawHub Vetting](/security/clawhub-vetting)** — Safely install community skills
+- **[Network Security & Checklist](/security/network-security)** — Lock down your gateway and work through the full security checklist

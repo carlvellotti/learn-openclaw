@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learn OpenClaw — Theme Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Sans:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0a0a0a; color: #e5e5e5; font-family: 'Inter', sans-serif; padding: 40px 20px; }
+
+.header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+.header h1 {
+  font-size: 32px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 8px;
+}
+.header p {
+  color: #888;
+  font-size: 16px;
+}
+
+.themes-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+@media (max-width: 900px) {
+  .themes-grid { grid-template-columns: 1fr; }
+}
+
+.theme-card {
+  border: 2px solid #222;
+  border-radius: 16px;
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+.theme-card:hover {
+  border-color: #444;
+}
+
+.theme-label {
+  padding: 16px 24px;
+  background: #111;
+  border-bottom: 1px solid #222;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.theme-label h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+}
+.theme-label .tag {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+/* ===== THEME PREVIEWS ===== */
+.preview {
+  padding: 32px 28px;
+  min-height: 520px;
+}
+
+/* --- Theme 1: Amber Glow (OpenClaw-native) --- */
+.theme-amber .tag { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+.theme-amber .preview { background: #111111; }
+.theme-amber .preview h1 { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 28px; color: #fff; margin-bottom: 6px; }
+.theme-amber .preview .subtitle { color: #f59e0b; font-size: 15px; font-weight: 500; margin-bottom: 20px; }
+.theme-amber .preview p { color: #a3a3a3; font-size: 14px; line-height: 1.7; margin-bottom: 16px; }
+.theme-amber .preview code { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); color: #f59e0b; padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+.theme-amber .preview a { color: #f59e0b; text-decoration: none; }
+.theme-amber .preview a:hover { color: #fbbf24; }
+.theme-amber .preview .btn { display: inline-block; background: #f59e0b; color: #000; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; margin-top: 8px; }
+.theme-amber .preview ul { list-style: none; padding: 0; margin: 12px 0; }
+.theme-amber .preview li { padding: 4px 0; color: #a3a3a3; font-size: 14px; }
+.theme-amber .preview li::before { content: "→ "; color: #f59e0b; font-weight: 600; }
+.theme-amber .preview .card { background: #1a1a1a; border: 1px solid #262626; border-radius: 8px; padding: 16px; margin: 16px 0; }
+.theme-amber .preview .card h3 { color: #f59e0b; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.theme-amber .preview h2 { font-size: 20px; font-weight: 700; color: #fff; margin: 20px 0 10px; }
+
+/* --- Theme 2: Ocean Teal (CC4E lineage) --- */
+.theme-teal .tag { background: rgba(29, 211, 176, 0.2); color: #1dd3b0; }
+.theme-teal .preview { background: #111111; }
+.theme-teal .preview h1 { font-family: 'DM Sans', sans-serif; font-weight: 800; font-size: 28px; color: #fff; margin-bottom: 6px; }
+.theme-teal .preview .subtitle { color: #1dd3b0; font-size: 15px; font-weight: 500; margin-bottom: 20px; }
+.theme-teal .preview p { color: #a3a3a3; font-size: 14px; line-height: 1.7; margin-bottom: 16px; }
+.theme-teal .preview code { background: rgba(29, 211, 176, 0.1); border: 1px solid rgba(29, 211, 176, 0.3); color: #1dd3b0; padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+.theme-teal .preview a { color: #1dd3b0; text-decoration: none; }
+.theme-teal .preview a:hover { color: #FF5856; }
+.theme-teal .preview .btn { display: inline-block; background: #FF5856; color: #fff; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; margin-top: 8px; }
+.theme-teal .preview ul { list-style: none; padding: 0; margin: 12px 0; }
+.theme-teal .preview li { padding: 4px 0; color: #a3a3a3; font-size: 14px; }
+.theme-teal .preview li::before { content: "→ "; color: #FF5856; font-weight: 600; }
+.theme-teal .preview .card { background: #1a1a1a; border: 1px solid #262626; border-radius: 8px; padding: 16px; margin: 16px 0; }
+.theme-teal .preview .card h3 { color: #FF5856; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.theme-teal .preview h2 { font-size: 20px; font-weight: 700; color: #fff; margin: 20px 0 10px; }
+
+/* --- Theme 3: Crimson Edge --- */
+.theme-crimson .tag { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+.theme-crimson .preview { background: #0f0f0f; }
+.theme-crimson .preview h1 { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 28px; color: #fff; margin-bottom: 6px; }
+.theme-crimson .preview .subtitle { color: #ef4444; font-size: 15px; font-weight: 500; margin-bottom: 20px; }
+.theme-crimson .preview p { color: #a3a3a3; font-size: 14px; line-height: 1.7; margin-bottom: 16px; }
+.theme-crimson .preview code { background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); color: #f87171; padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+.theme-crimson .preview a { color: #ef4444; text-decoration: none; }
+.theme-crimson .preview a:hover { color: #f87171; }
+.theme-crimson .preview .btn { display: inline-block; background: #ef4444; color: #fff; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; margin-top: 8px; }
+.theme-crimson .preview ul { list-style: none; padding: 0; margin: 12px 0; }
+.theme-crimson .preview li { padding: 4px 0; color: #a3a3a3; font-size: 14px; }
+.theme-crimson .preview li::before { content: "● "; color: #ef4444; }
+.theme-crimson .preview .card { background: #161616; border: 1px solid rgba(239, 68, 68, 0.15); border-radius: 8px; padding: 16px; margin: 16px 0; }
+.theme-crimson .preview .card h3 { color: #ef4444; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.theme-crimson .preview h2 { font-size: 20px; font-weight: 700; color: #fff; margin: 20px 0 10px; border-left: 3px solid #ef4444; padding-left: 12px; }
+
+/* --- Theme 4: Indigo Slate (professional/docs) --- */
+.theme-indigo .tag { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
+.theme-indigo .preview { background: #0c0c14; }
+.theme-indigo .preview h1 { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 28px; color: #fff; margin-bottom: 6px; }
+.theme-indigo .preview .subtitle { color: #818cf8; font-size: 15px; font-weight: 500; margin-bottom: 20px; }
+.theme-indigo .preview p { color: #9ca3af; font-size: 14px; line-height: 1.7; margin-bottom: 16px; }
+.theme-indigo .preview code { background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.25); color: #a5b4fc; padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+.theme-indigo .preview a { color: #818cf8; text-decoration: none; }
+.theme-indigo .preview a:hover { color: #a5b4fc; }
+.theme-indigo .preview .btn { display: inline-block; background: #6366f1; color: #fff; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; margin-top: 8px; }
+.theme-indigo .preview ul { list-style: none; padding: 0; margin: 12px 0; }
+.theme-indigo .preview li { padding: 4px 0; color: #9ca3af; font-size: 14px; }
+.theme-indigo .preview li::before { content: "▸ "; color: #818cf8; }
+.theme-indigo .preview .card { background: #12121c; border: 1px solid #1e1e30; border-radius: 8px; padding: 16px; margin: 16px 0; }
+.theme-indigo .preview .card h3 { color: #818cf8; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.theme-indigo .preview h2 { font-size: 20px; font-weight: 700; color: #fff; margin: 20px 0 10px; }
+
+/* --- Theme 5: Emerald Terminal --- */
+.theme-emerald .tag { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+.theme-emerald .preview { background: #0a120e; }
+.theme-emerald .preview h1 { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 28px; color: #ecfdf5; margin-bottom: 6px; }
+.theme-emerald .preview .subtitle { color: #10b981; font-size: 15px; font-weight: 500; margin-bottom: 20px; }
+.theme-emerald .preview p { color: #86a397; font-size: 14px; line-height: 1.7; margin-bottom: 16px; }
+.theme-emerald .preview code { background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); color: #34d399; padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+.theme-emerald .preview a { color: #10b981; text-decoration: none; }
+.theme-emerald .preview a:hover { color: #34d399; }
+.theme-emerald .preview .btn { display: inline-block; background: #10b981; color: #000; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; margin-top: 8px; }
+.theme-emerald .preview ul { list-style: none; padding: 0; margin: 12px 0; }
+.theme-emerald .preview li { padding: 4px 0; color: #86a397; font-size: 14px; }
+.theme-emerald .preview li::before { content: "$ "; color: #10b981; font-family: 'JetBrains Mono', monospace; }
+.theme-emerald .preview .card { background: #0d1a14; border: 1px solid #163b2a; border-radius: 8px; padding: 16px; margin: 16px 0; }
+.theme-emerald .preview .card h3 { color: #10b981; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.theme-emerald .preview h2 { font-size: 20px; font-weight: 700; color: #ecfdf5; margin: 20px 0 10px; }
+
+/* --- Theme 6: Sunset Gradient --- */
+.theme-sunset .tag { background: linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(236, 72, 153, 0.2)); color: #fb923c; }
+.theme-sunset .preview { background: #111111; }
+.theme-sunset .preview h1 { font-family: 'DM Sans', sans-serif; font-weight: 800; font-size: 28px; background: linear-gradient(135deg, #fb923c, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 6px; }
+.theme-sunset .preview .subtitle { color: #fb923c; font-size: 15px; font-weight: 500; margin-bottom: 20px; }
+.theme-sunset .preview p { color: #a3a3a3; font-size: 14px; line-height: 1.7; margin-bottom: 16px; }
+.theme-sunset .preview code { background: rgba(249, 115, 22, 0.1); border: 1px solid rgba(249, 115, 22, 0.25); color: #fb923c; padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+.theme-sunset .preview a { color: #fb923c; text-decoration: none; }
+.theme-sunset .preview a:hover { color: #ec4899; }
+.theme-sunset .preview .btn { display: inline-block; background: linear-gradient(135deg, #f97316, #ec4899); color: #fff; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; margin-top: 8px; }
+.theme-sunset .preview ul { list-style: none; padding: 0; margin: 12px 0; }
+.theme-sunset .preview li { padding: 4px 0; color: #a3a3a3; font-size: 14px; }
+.theme-sunset .preview li::before { content: "→ "; color: #ec4899; font-weight: 600; }
+.theme-sunset .preview .card { background: #1a1a1a; border: 1px solid #2a2020; border-radius: 8px; padding: 16px; margin: 16px 0; }
+.theme-sunset .preview .card h3 { color: #ec4899; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.theme-sunset .preview h2 { font-size: 20px; font-weight: 700; color: #fff; margin: 20px 0 10px; }
+
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Learn OpenClaw — Theme Preview</h1>
+  <p>Pick your favorite combination of colors, fonts, and vibe. Click to tell Carl which one.</p>
+</div>
+
+<div class="themes-grid">
+
+  <!-- Theme 1: Amber Glow -->
+  <div class="theme-card theme-amber">
+    <div class="theme-label">
+      <h2>1. Amber Glow</h2>
+      <span class="tag">OpenClaw-native</span>
+    </div>
+    <div class="preview">
+      <h1>Learn OpenClaw</h1>
+      <p class="subtitle">The comprehensive guide to your always-on AI assistant</p>
+      <p>OpenClaw is the fastest-growing open source project in history. But <strong>70% of the content out there is surface-level</strong>. This guide goes deep — from <code>SOUL.md</code> to sub-agents.</p>
+      <div class="card">
+        <h3>Security Checklist</h3>
+        <p>90% of people installing OpenClaw have no idea how to set it up safely. Start here.</p>
+      </div>
+      <h2>What's Inside</h2>
+      <ul>
+        <li>Architecture & mental models</li>
+        <li>Security hardening for real people</li>
+        <li>Channel setup (iMessage, Slack, WhatsApp)</li>
+        <li>SOUL.md personality design</li>
+      </ul>
+      <a href="#" class="btn">Get the Cheat Sheet</a>
+      <p style="margin-top: 16px; font-size: 12px; color: #666;">Font: Inter / Colors: Amber #f59e0b + Dark neutrals</p>
+    </div>
+  </div>
+
+  <!-- Theme 2: Ocean Teal -->
+  <div class="theme-card theme-teal">
+    <div class="theme-label">
+      <h2>2. Ocean Teal</h2>
+      <span class="tag">CC4E lineage</span>
+    </div>
+    <div class="preview">
+      <h1>Learn OpenClaw</h1>
+      <p class="subtitle">The comprehensive guide to your always-on AI assistant</p>
+      <p>OpenClaw is the fastest-growing open source project in history. But <strong>70% of the content out there is surface-level</strong>. This guide goes deep — from <code>SOUL.md</code> to sub-agents.</p>
+      <div class="card">
+        <h3>Security Checklist</h3>
+        <p>90% of people installing OpenClaw have no idea how to set it up safely. Start here.</p>
+      </div>
+      <h2>What's Inside</h2>
+      <ul>
+        <li>Architecture & mental models</li>
+        <li>Security hardening for real people</li>
+        <li>Channel setup (iMessage, Slack, WhatsApp)</li>
+        <li>SOUL.md personality design</li>
+      </ul>
+      <a href="#" class="btn">Get the Cheat Sheet</a>
+      <p style="margin-top: 16px; font-size: 12px; color: #666;">Font: DM Sans / Colors: Teal #1dd3b0 + Coral #FF5856</p>
+    </div>
+  </div>
+
+  <!-- Theme 3: Crimson Edge -->
+  <div class="theme-card theme-crimson">
+    <div class="theme-label">
+      <h2>3. Crimson Edge</h2>
+      <span class="tag">Bold & sharp</span>
+    </div>
+    <div class="preview">
+      <h1>Learn OpenClaw</h1>
+      <p class="subtitle">The comprehensive guide to your always-on AI assistant</p>
+      <p>OpenClaw is the fastest-growing open source project in history. But <strong>70% of the content out there is surface-level</strong>. This guide goes deep — from <code>SOUL.md</code> to sub-agents.</p>
+      <div class="card">
+        <h3>Security Checklist</h3>
+        <p>90% of people installing OpenClaw have no idea how to set it up safely. Start here.</p>
+      </div>
+      <h2>What's Inside</h2>
+      <ul>
+        <li>Architecture & mental models</li>
+        <li>Security hardening for real people</li>
+        <li>Channel setup (iMessage, Slack, WhatsApp)</li>
+        <li>SOUL.md personality design</li>
+      </ul>
+      <a href="#" class="btn">Get the Cheat Sheet</a>
+      <p style="margin-top: 16px; font-size: 12px; color: #666;">Font: Space Grotesk / Colors: Red #ef4444 + Charcoal</p>
+    </div>
+  </div>
+
+  <!-- Theme 4: Indigo Slate -->
+  <div class="theme-card theme-indigo">
+    <div class="theme-label">
+      <h2>4. Indigo Slate</h2>
+      <span class="tag">Professional docs</span>
+    </div>
+    <div class="preview">
+      <h1>Learn OpenClaw</h1>
+      <p class="subtitle">The comprehensive guide to your always-on AI assistant</p>
+      <p>OpenClaw is the fastest-growing open source project in history. But <strong>70% of the content out there is surface-level</strong>. This guide goes deep — from <code>SOUL.md</code> to sub-agents.</p>
+      <div class="card">
+        <h3>Security Checklist</h3>
+        <p>90% of people installing OpenClaw have no idea how to set it up safely. Start here.</p>
+      </div>
+      <h2>What's Inside</h2>
+      <ul>
+        <li>Architecture & mental models</li>
+        <li>Security hardening for real people</li>
+        <li>Channel setup (iMessage, Slack, WhatsApp)</li>
+        <li>SOUL.md personality design</li>
+      </ul>
+      <a href="#" class="btn">Get the Cheat Sheet</a>
+      <p style="margin-top: 16px; font-size: 12px; color: #666;">Font: Plus Jakarta Sans / Colors: Indigo #6366f1 + Deep slate</p>
+    </div>
+  </div>
+
+  <!-- Theme 5: Emerald Terminal -->
+  <div class="theme-card theme-emerald">
+    <div class="theme-label">
+      <h2>5. Emerald Terminal</h2>
+      <span class="tag">Hacker vibes</span>
+    </div>
+    <div class="preview">
+      <h1>Learn OpenClaw</h1>
+      <p class="subtitle">The comprehensive guide to your always-on AI assistant</p>
+      <p>OpenClaw is the fastest-growing open source project in history. But <strong>70% of the content out there is surface-level</strong>. This guide goes deep — from <code>SOUL.md</code> to sub-agents.</p>
+      <div class="card">
+        <h3>Security Checklist</h3>
+        <p>90% of people installing OpenClaw have no idea how to set it up safely. Start here.</p>
+      </div>
+      <h2>What's Inside</h2>
+      <ul>
+        <li>Architecture & mental models</li>
+        <li>Security hardening for real people</li>
+        <li>Channel setup (iMessage, Slack, WhatsApp)</li>
+        <li>SOUL.md personality design</li>
+      </ul>
+      <a href="#" class="btn">Get the Cheat Sheet</a>
+      <p style="margin-top: 16px; font-size: 12px; color: #4a6b5d;">Font: Inter / Colors: Emerald #10b981 + Forest dark</p>
+    </div>
+  </div>
+
+  <!-- Theme 6: Sunset Gradient -->
+  <div class="theme-card theme-sunset">
+    <div class="theme-label">
+      <h2>6. Sunset Gradient</h2>
+      <span class="tag">Eye-catching</span>
+    </div>
+    <div class="preview">
+      <h1>Learn OpenClaw</h1>
+      <p class="subtitle">The comprehensive guide to your always-on AI assistant</p>
+      <p>OpenClaw is the fastest-growing open source project in history. But <strong>70% of the content out there is surface-level</strong>. This guide goes deep — from <code>SOUL.md</code> to sub-agents.</p>
+      <div class="card">
+        <h3>Security Checklist</h3>
+        <p>90% of people installing OpenClaw have no idea how to set it up safely. Start here.</p>
+      </div>
+      <h2>What's Inside</h2>
+      <ul>
+        <li>Architecture & mental models</li>
+        <li>Security hardening for real people</li>
+        <li>Channel setup (iMessage, Slack, WhatsApp)</li>
+        <li>SOUL.md personality design</li>
+      </ul>
+      <a href="#" class="btn">Get the Cheat Sheet</a>
+      <p style="margin-top: 16px; font-size: 12px; color: #666;">Font: DM Sans / Colors: Orange #f97316 → Pink #ec4899 gradient</p>
+    </div>
+  </div>
+
+</div>
+
+<div style="text-align: center; margin-top: 60px; padding: 40px; background: #111; border-radius: 12px; max-width: 600px; margin-left: auto; margin-right: auto;">
+  <h2 style="color: #fff; font-size: 20px; margin-bottom: 12px;">Quick Summary</h2>
+  <table style="width: 100%; text-align: left; border-collapse: collapse; font-size: 13px;">
+    <tr style="border-bottom: 1px solid #222;">
+      <td style="padding: 8px; color: #888;">#</td>
+      <td style="padding: 8px; color: #fff;">Theme</td>
+      <td style="padding: 8px; color: #888;">Font</td>
+      <td style="padding: 8px; color: #888;">Vibe</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #222;">
+      <td style="padding: 8px; color: #f59e0b;">1</td>
+      <td style="padding: 8px; color: #fff;">Amber Glow</td>
+      <td style="padding: 8px; color: #888;">Inter</td>
+      <td style="padding: 8px; color: #888;">Warm, matches OpenClaw brand</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #222;">
+      <td style="padding: 8px; color: #1dd3b0;">2</td>
+      <td style="padding: 8px; color: #fff;">Ocean Teal</td>
+      <td style="padding: 8px; color: #888;">DM Sans</td>
+      <td style="padding: 8px; color: #888;">Familiar CC4E lineage</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #222;">
+      <td style="padding: 8px; color: #ef4444;">3</td>
+      <td style="padding: 8px; color: #fff;">Crimson Edge</td>
+      <td style="padding: 8px; color: #888;">Space Grotesk</td>
+      <td style="padding: 8px; color: #888;">Bold, distinctive</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #222;">
+      <td style="padding: 8px; color: #818cf8;">4</td>
+      <td style="padding: 8px; color: #fff;">Indigo Slate</td>
+      <td style="padding: 8px; color: #888;">Plus Jakarta Sans</td>
+      <td style="padding: 8px; color: #888;">Clean, professional docs</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #222;">
+      <td style="padding: 8px; color: #10b981;">5</td>
+      <td style="padding: 8px; color: #fff;">Emerald Terminal</td>
+      <td style="padding: 8px; color: #888;">Inter</td>
+      <td style="padding: 8px; color: #888;">Matrix/hacker aesthetic</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px; color: #fb923c;">6</td>
+      <td style="padding: 8px; color: #fff;">Sunset Gradient</td>
+      <td style="padding: 8px; color: #888;">DM Sans</td>
+      <td style="padding: 8px; color: #888;">Eye-catching, modern</td>
+    </tr>
+  </table>
+  <p style="color: #666; font-size: 13px; margin-top: 20px;">You can also mix & match — e.g. "Amber colors with Space Grotesk font"</p>
+</div>
+
+</body>
+</html>

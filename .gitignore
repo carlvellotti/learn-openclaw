@@ -1,0 +1,9 @@
+node_modules/
+.next/
+out/
+.vercel/
+*.log
+.DS_Store
+public/og-preview.png
+public/favicon-32.png
+public/_favicon-tmp.html

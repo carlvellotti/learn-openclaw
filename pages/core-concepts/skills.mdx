@@ -1,0 +1,461 @@
+---
+title: "Skills & ClawHub — Extending OpenClaw"
+description: "Browse 5,705+ community skills on ClawHub, install the essentials, and learn how to build your own. Covers web search, image generation, voice, integrations, and security."
+keywords: "openclaw skills, openclaw ClawHub, openclaw plugins, best openclaw skills, openclaw extensions, openclaw integrations"
+---
+
+# Skills & ClawHub
+
+## Giving Your Agent Superpowers
+
+Out of the box, OpenClaw can chat. That's it. No web search, no image generation, no calendar access, no voice. Skills are what transform it from a conversation partner into a capable assistant.
+
+Think of skills like apps for your phone. Your phone is useful without apps, but it's dramatically more useful with the right ones installed. The same is true for OpenClaw.
+
+---
+
+## What Skills Are
+
+A skill is a self-contained extension that gives OpenClaw a new capability. Each skill:
+
+- Has a defined interface (what it can do, what inputs it needs)
+- Runs in a sandboxed environment
+- Can be installed, updated, and removed independently
+- May require API keys or external service access
+
+Skills are stored in your workspace's `skills/` directory and registered in your `openclaw.json` configuration.
+
+### Skills vs. Plugins vs. Built-In Tools
+
+OpenClaw has three types of capabilities, and the terminology can be confusing:
+
+| Type | What It Is | Where It Comes From |
+|------|-----------|---------------------|
+| **Built-in Tools** | Core capabilities shipped with OpenClaw | Included by default (~20 tools) |
+| **Skills** | OpenClaw-native extensions | ClawHub or custom-built |
+| **Plugins** | MCP-based integrations | MCP protocol servers |
+
+**Built-in tools** are things like file operations, shell access, web fetch, and basic utilities. You don't install these — they're already there.
+
+**Skills** are the OpenClaw-native extension format. They follow the AgentSkills specification and are designed specifically for the platform.
+
+**Plugins** use the Model Context Protocol (MCP) and can connect OpenClaw to any MCP-compatible server. This includes tools built for other MCP clients (like Claude Code). Plugins offer broader compatibility but may not integrate as deeply as native skills.
+
+For most users, skills are the primary way to extend your agent's capabilities.
+
+---
+
+## ClawHub: The Marketplace
+
+ClawHub is OpenClaw's community marketplace. As of early 2026, it hosts **5,705+ skills** created by the community. It's accessible directly from OpenClaw or through the web at clawhub.com.
+
+### Browsing ClawHub
+
+You can browse skills by category, popularity, or recency:
+
+```
+/skills browse web-search
+/skills browse image-generation
+/skills browse integrations
+/skills trending
+```
+
+Each skill listing shows:
+
+- **Name and description** — what it does
+- **Author** — who built it
+- **Install count** — how many people use it
+- **Rating** — community score
+- **Last updated** — when it was last maintained
+- **Required API keys** — what external services it needs
+
+### Installing a Skill
+
+Installation is a single command:
+
+```
+/skills install @author/skill-name
+```
+
+After installation, the skill is added to your workspace and registered in `openclaw.json`:
+
+```json
+{
+  "skills": {
+    "@niceperson/brave-web-search": {
+      "enabled": true,
+      "config": {
+        "apiKey": "${BRAVE_API_KEY}"
+      }
+    }
+  }
+}
+```
+
+### Updating and Removing Skills
+
+```
+/skills update @author/skill-name
+/skills update --all
+/skills remove @author/skill-name
+```
+
+Always review changelogs before updating. A skill update could change behavior, add new permissions requirements, or break your existing workflows.
+
+---
+
+## Recommended Starter Skills
+
+These are the skills that most users should install first. They cover the most common use cases and have been well-maintained by the community.
+
+### Web Search
+
+**Why you need it:** Without web search, your agent can't look anything up. It's limited to its training data and whatever's in your workspace.
+
+**Recommended:** Brave Search API integration
+
+```
+/skills install @niceperson/brave-web-search
+```
+
+**Setup:** Requires a Brave Search API key (free tier gives 2,000 queries/month).
+
+**What it enables:**
+- Real-time information retrieval
+- Fact-checking
+- Research tasks
+- News monitoring
+- Finding documentation and references
+
+### Image Generation
+
+**Why you need it:** Useful for content creation, visual brainstorming, and generating assets without leaving your chat.
+
+**Recommended:** Nano Banana (uses Flux models) or DALL-E integration
+
+```
+/skills install @niceperson/nano-banana
+```
+
+**Setup:** Requires an API key from the respective service.
+
+**What it enables:**
+- Generate images from text descriptions
+- Create social media graphics
+- Visual mockups and wireframes
+- Avatar and identity images for your agent
+
+### Voice and Text-to-Speech
+
+**Why you need it:** Turns your agent from text-only to a voice assistant. Useful for hands-free interaction, listening to long responses, or just preference.
+
+**Recommended:** ElevenLabs SAG skill
+
+```
+/skills install @niceperson/elevenlabs-sag
+```
+
+**Setup:** Requires an ElevenLabs API key.
+
+**What it enables:**
+- Text-to-speech for agent responses
+- Voice input for your messages
+- Custom voice profiles
+- Audio content generation (podcast intros, etc.)
+
+### Audio Transcription
+
+**Why you need it:** Convert voice notes, meeting recordings, and audio files into text your agent can work with.
+
+**Recommended:** OpenAI Whisper integration
+
+```
+/skills install @niceperson/whisper-transcription
+```
+
+**Setup:** Requires an OpenAI API key.
+
+**What it enables:**
+- Transcribe voice memos
+- Convert meeting recordings to text
+- Process podcast episodes
+- Transcribe audio from video files
+
+### Calendar and Email
+
+**Why you need it:** The difference between "tell me about my day" getting a generic answer vs. actually seeing your schedule and inbox.
+
+**Recommended:** Google Calendar and Gmail integrations
+
+```
+/skills install @niceperson/google-calendar
+/skills install @niceperson/gmail-reader
+```
+
+**Setup:** Requires Google OAuth setup.
+
+**What it enables:**
+- Daily briefings with your actual schedule
+- Meeting prep (pull context for upcoming meetings)
+- Email summaries and drafting
+- Schedule management and conflict detection
+
+---
+
+## Security: The Malicious Skills Problem
+
+This is the most important section on this page. Read it carefully.
+
+### The Scale of the Problem
+
+Over **400 malicious skills** have been found on ClawHub. The community and maintainers catch most of them, but new ones appear regularly. Because skills can execute code, access your file system, and make network requests, a malicious skill can:
+
+- **Exfiltrate data** — Send your files, conversations, or API keys to external servers
+- **Modify your workspace** — Alter your SOUL.md, MEMORY.md, or other configuration files
+- **Abuse your API keys** — Use your OpenAI/Anthropic credits for the author's benefit
+- **Install persistence** — Set up cron jobs or hooks that survive skill removal
+
+### How to Protect Yourself
+
+**1. Always review the code before installing.**
+
+Every skill's source code is visible on ClawHub. Before installing, read through it. You don't need to understand every line, but look for:
+
+- Outbound network requests to unfamiliar domains
+- File operations outside the skill's expected scope
+- Base64-encoded strings (often used to hide malicious payloads)
+- References to environment variables or API keys that the skill shouldn't need
+
+**2. Check the author's reputation.**
+
+- How many skills have they published?
+- When did they join ClawHub?
+- Do their other skills have good reviews?
+- Are they active in the community?
+
+A skill from a brand-new account with no other contributions is higher risk than one from a well-known community member.
+
+**3. Look at install counts and ratings.**
+
+Widely-used skills with high ratings are generally safer — more eyes on the code. But don't treat popularity as a guarantee. A few malicious skills have reached high install counts before being caught.
+
+**4. Check the "last updated" date.**
+
+Skills that haven't been updated in months may have unpatched vulnerabilities. They might also be abandoned, meaning no one is maintaining them.
+
+**5. Use the sandbox.**
+
+OpenClaw's sandbox mode restricts what skills can do. Enable it for any skill you're not fully confident in:
+
+```json
+{
+  "skills": {
+    "@unknown-author/new-skill": {
+      "enabled": true,
+      "sandbox": true,
+      "permissions": ["network:api.example.com", "files:read"]
+    }
+  }
+}
+```
+
+The `permissions` array explicitly limits what the skill can access. This is defense in depth — even if the skill tries to do something malicious, the sandbox blocks it.
+
+**6. Monitor your agent's behavior after installing a new skill.**
+
+Watch for unusual activity:
+- Unexpected network requests (check the command-logger hook)
+- Changes to files you didn't ask for
+- Increased API usage
+- New cron jobs or hooks that you didn't configure
+
+---
+
+## Built-In Tools
+
+Before you go hunting for skills, check what's already included. OpenClaw ships with approximately 20 built-in tools:
+
+### File Operations
+- `read_file` — Read file contents
+- `write_file` — Create or overwrite files
+- `edit_file` — Make targeted edits to existing files
+- `list_files` — List directory contents
+- `delete_file` — Remove files
+
+### Shell Access
+- `run_shell` — Execute shell commands
+- `run_script` — Run Python/Node scripts
+
+### Web
+- `web_fetch` — Fetch and parse web pages
+- `web_search` — Basic web search (limited without a dedicated search skill)
+
+### Utilities
+- `get_time` — Current date and time
+- `set_timer` — Set a reminder
+- `calculate` — Math operations
+- `generate_uuid` — Generate unique identifiers
+
+### Memory
+- `read_memory` — Query memory files
+- `write_memory` — Update memory files
+- `search_memory` — Hybrid search across all memory
+
+These cover a lot of basic needs. You may not need as many skills as you think.
+
+---
+
+## Creating Your Own Skills
+
+If you can't find what you need on ClawHub, you can build your own skill using the AgentSkills format.
+
+### Basic Structure
+
+A skill is a directory with a specific structure:
+
+```
+my-skill/
+  ├── manifest.json      # Metadata and configuration
+  ├── index.js           # Main skill logic (or index.py)
+  ├── README.md          # Documentation
+  └── test/              # Tests (optional but recommended)
+      └── index.test.js
+```
+
+### manifest.json
+
+```json
+{
+  "name": "my-custom-skill",
+  "version": "1.0.0",
+  "description": "What this skill does",
+  "author": "your-username",
+  "main": "index.js",
+  "permissions": ["network:api.example.com"],
+  "config": {
+    "apiKey": {
+      "type": "string",
+      "required": true,
+      "description": "API key for the external service"
+    }
+  },
+  "tools": [
+    {
+      "name": "do_something",
+      "description": "Description of what this tool does",
+      "parameters": {
+        "input": {
+          "type": "string",
+          "description": "The input to process"
+        }
+      }
+    }
+  ]
+}
+```
+
+### Skill Logic Example
+
+```javascript
+// index.js
+export default {
+  async do_something({ input }, { config, memory }) {
+    const response = await fetch('https://api.example.com/process', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${config.apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ input })
+    });
+
+    const data = await response.json();
+    return {
+      result: data.output,
+      metadata: {
+        processedAt: new Date().toISOString()
+      }
+    };
+  }
+};
+```
+
+### Publishing to ClawHub
+
+Once your skill is working locally:
+
+```
+/skills publish ./my-skill
+```
+
+This uploads your skill to ClawHub, makes it available to the community, and creates a listing page. Include a thorough README — it's the main thing people look at when deciding whether to install your skill.
+
+### Best Practices for Skill Development
+
+- **Request minimal permissions.** Only ask for what you need. Users are (rightly) suspicious of skills that request broad access.
+- **Handle errors gracefully.** Don't crash or return raw error messages. Provide helpful feedback.
+- **Document configuration.** Every config option should have a clear description.
+- **Include tests.** Even basic tests build trust and catch regressions.
+- **Version semantically.** Breaking changes should bump the major version.
+- **Respect rate limits.** If your skill calls an external API, implement proper rate limiting and backoff.
+
+---
+
+## Skill Configuration Tips
+
+### Managing API Keys
+
+Never hardcode API keys in skill configs. Use environment variables:
+
+```json
+{
+  "skills": {
+    "@niceperson/brave-web-search": {
+      "config": {
+        "apiKey": "${BRAVE_API_KEY}"
+      }
+    }
+  }
+}
+```
+
+Set the environment variable in your shell profile or use OpenClaw's secrets management:
+
+```
+/secrets set BRAVE_API_KEY your-key-here
+```
+
+### Enabling and Disabling Skills
+
+You don't have to uninstall a skill to stop using it. Toggle the `enabled` flag:
+
+```json
+{
+  "@niceperson/image-gen": {
+    "enabled": false
+  }
+}
+```
+
+Disabled skills stay installed but don't load. This is useful for skills you only need occasionally, or when you're debugging and want to isolate a problem.
+
+### Skill Priority and Conflicts
+
+If multiple skills provide similar capabilities (e.g., two web search skills), OpenClaw uses the first one listed in `openclaw.json`. You can control priority by reordering the skills in your configuration.
+
+---
+
+## Summary
+
+| Concept | What to Know |
+|---------|-------------|
+| **Skills** | OpenClaw-native extensions from ClawHub (5,705+ available) |
+| **Plugins** | MCP-based integrations for broader compatibility |
+| **Built-in Tools** | ~20 tools included by default — check these first |
+| **Essential Skills** | Web search, image gen, voice/TTS, transcription, calendar/email |
+| **Security** | Always review code, check author reputation, use sandbox mode |
+| **Custom Skills** | AgentSkills format, publish to ClawHub |
+
+Start with the five recommended starter skills. They cover the most common use cases and will immediately make your agent more capable. Add more as you discover specific needs, but always prioritize security over convenience.
+
+Next up: [Automation](/core-concepts/automation) — scheduling your agent to work for you around the clock.

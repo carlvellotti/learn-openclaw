@@ -1,0 +1,92 @@
+---
+title: 'Slack Setup — Connect OpenClaw to Slack'
+description: 'Set up OpenClaw with Slack using Socket Mode or Events API. Covers bot tokens, channel restrictions, threading, scopes, and tips for rock-solid always-on reliability.'
+keywords: 'openclaw Slack, openclaw Slack setup, openclaw Socket Mode, openclaw Slack bot, openclaw Slack Events API, openclaw Slack token, openclaw team channel'
+---
+
+# Slack
+
+Slack is the most reliable channel for always-on use. If you are running OpenClaw for work or want rock-solid stability, start here.
+
+### Setup Overview
+
+You will create a Slack App in your workspace and connect it to OpenClaw using Socket Mode (recommended) or webhook-based Events API.
+
+```yaml
+# channels/slack.yaml
+channel: slack
+enabled: true
+mode: socket  # Recommended: socket or events
+dmPolicy: approval
+groupPolicy: mention
+requireMention: true
+botToken: ${SLACK_BOT_TOKEN}
+appToken: ${SLACK_APP_TOKEN}
+signingSecret: ${SLACK_SIGNING_SECRET}
+```
+
+### Socket Mode vs Events API
+
+**Socket Mode (Recommended)**
+
+```yaml
+mode: socket
+```
+
+Socket Mode creates a persistent WebSocket connection between your agent and Slack. No public URL needed. No webhook configuration. No firewall rules.
+
+This is the most reliable option for always-on use because:
+- No external URL to maintain
+- Works behind NAT and firewalls
+- Reconnects automatically on network interruptions
+- No need to configure SSL certificates
+
+**Events API**
+
+```yaml
+mode: events
+webhookUrl: https://your-domain.com/slack/events
+```
+
+Events API requires a publicly accessible URL for Slack to send events to. More complex to set up, but necessary if you need to run the agent on infrastructure that does not support outbound WebSocket connections.
+
+### Key Config Options
+
+| Option | Values | What It Does |
+|--------|--------|-------------|
+| `dmPolicy` | `allowlist`, `approval`, `open` | Controls who can DM the bot |
+| `groupPolicy` | `mention`, `always`, `never` | When to respond in channels |
+| `requireMention` | `true` / `false` | Require @bot mention in channels |
+| `mode` | `socket`, `events` | Connection method |
+| `channels` | Array of channel IDs | Restrict to specific channels |
+| `respondInThreads` | `true` / `false` | Reply in threads vs top-level |
+
+### Tips and Gotchas
+
+**Socket Mode is the gold standard for reliability.** We have run Slack with Socket Mode for weeks continuously with zero dropped connections. If you are choosing a single channel for your agent, this is it.
+
+**Use `respondInThreads: true` in busy channels.** Without threading, the agent's responses clutter the main channel. With threading, conversations stay contained and other channel members are not disrupted.
+
+**Create a dedicated channel for agent interaction.** Rather than having the bot respond in `#general`, create `#ai-assistant` or `#openclaw` and restrict the bot to that channel. Keeps things clean.
+
+**Scopes matter.** When creating your Slack App, request only the scopes you need:
+
+```
+chat:write        — Send messages
+channels:history  — Read channel messages
+groups:history    — Read private channel messages
+im:history        — Read DMs
+users:read        — Look up user information
+```
+
+Do not request `admin` scopes unless you have a specific reason. Principle of least privilege applies here.
+
+**Keep tokens in environment variables.** Never put `SLACK_BOT_TOKEN` or `SLACK_APP_TOKEN` in your config files directly. Use environment variables or OpenClaw's secrets manager. See the [API Keys & Tool Policies guide](/security/api-keys) for details.
+
+---
+
+## Next Steps
+
+- **[Channel Overview](/channels/overview)** — Compare all channels and build a multi-channel strategy
+- **[Telegram](/channels/telegram)** — Easy bot setup for tech users and automations
+- **[DM Policies & Pairing](/security/dm-policies)** — Lock down DM policies and tool permissions

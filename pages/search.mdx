@@ -1,0 +1,30 @@
+---
+title: 'Search'
+description: 'Search across all Learn OpenClaw guides and reference pages.'
+---
+
+# Search
+
+<div id="search" />
+
+<link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
+
+<script
+  dangerouslySetInnerHTML={{
+    __html: `
+      window.addEventListener('DOMContentLoaded', () => {
+        const el = document.getElementById('search');
+        if (el && window.PagefindUI) {
+          new PagefindUI({ element: '#search', showSubResults: true });
+        } else {
+          const script = document.createElement('script');
+          script.src = '/pagefind/pagefind-ui.js';
+          script.onload = () => {
+            new PagefindUI({ element: '#search', showSubResults: true });
+          };
+          document.head.appendChild(script);
+        }
+      });
+    `
+  }}
+/>

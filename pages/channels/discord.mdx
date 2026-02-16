@@ -1,0 +1,78 @@
+---
+title: 'Discord Setup — Connect OpenClaw to Discord'
+description: 'Set up OpenClaw with Discord for community servers and group use. Covers bot tokens, guild and channel restrictions, reconnection config, permissions, and rate limit tips.'
+keywords: 'openclaw Discord, openclaw Discord setup, openclaw Discord bot, openclaw Discord server, openclaw Discord permissions, openclaw community channel, openclaw Discord gateway'
+---
+
+# Discord
+
+Discord is a good choice if you want your agent in a community server, a small group, or if you are already a Discord user.
+
+### Setup Overview
+
+Create a Discord Bot in the Developer Portal, invite it to your server, and configure the channel in OpenClaw.
+
+```yaml
+# channels/discord.yaml
+channel: discord
+enabled: true
+botToken: ${DISCORD_BOT_TOKEN}
+dmPolicy: approval
+groupPolicy: mention
+requireMention: true
+allowedGuilds:
+  - "123456789012345678"  # Your server ID
+allowedChannels:
+  - "987654321098765432"  # Specific channel IDs
+```
+
+### Key Config Options
+
+| Option | Values | What It Does |
+|--------|--------|-------------|
+| `dmPolicy` | `allowlist`, `approval`, `open` | Controls who can DM the bot |
+| `groupPolicy` | `mention`, `always`, `never` | When to respond in server channels |
+| `requireMention` | `true` / `false` | Require @bot mention |
+| `allowedGuilds` | Array of server IDs | Restrict to specific servers |
+| `allowedChannels` | Array of channel IDs | Restrict to specific channels |
+| `respondInThreads` | `true` / `false` | Use threads for replies |
+
+### Tips and Gotchas
+
+**Gateway instability is a known issue.** Discord's WebSocket gateway can experience crashes, zombie connections (where the bot appears online but is not receiving events), and rate limiting during high traffic. If your bot stops responding but shows as online, this is likely the cause.
+
+**Implement reconnection logic.** OpenClaw handles basic reconnection, but for production Discord use, monitor the connection:
+
+```yaml
+# channels/discord.yaml
+reconnect:
+  enabled: true
+  maxAttempts: 10
+  backoffMs: 5000
+heartbeat:
+  enabled: true
+  intervalMs: 30000
+  timeoutMs: 10000
+```
+
+**Restrict to specific guilds and channels.** Discord bots can be invited to any server by anyone with the invite link. Use `allowedGuilds` and `allowedChannels` to ensure your bot only responds in servers and channels you control.
+
+**Bot permissions should be minimal.** When generating the invite link, only select the permissions you need:
+
+```
+Send Messages
+Read Message History
+Use Slash Commands
+```
+
+Do not give the bot `Administrator` permissions. This is one of the most common and most dangerous mistakes.
+
+**Rate limits are aggressive.** Discord rate-limits bots heavily. If your agent is in a busy server, it may hit rate limits and drop messages. Use `respondInThreads: true` and `requireMention: true` to reduce the volume of messages the bot needs to process.
+
+---
+
+## Next Steps
+
+- **[Channel Overview](/channels/overview)** — Compare all channels and build a multi-channel strategy
+- **[Signal](/channels/signal)** — End-to-end encrypted messaging for privacy-focused use
+- **[DM Policies & Pairing](/security/dm-policies)** — Lock down bot permissions and DM policies

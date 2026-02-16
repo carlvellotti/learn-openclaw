@@ -1,0 +1,346 @@
+---
+title: "Sub-Agents — Building Agent Teams"
+description: "Learn how to use OpenClaw sub-agents to handle tasks in parallel. Covers sessions_spawn, architecture patterns, practical examples, and when to delegate work to background agents."
+keywords: "openclaw sub agents, openclaw multi agent, openclaw sessions_spawn, openclaw parallel tasks, openclaw agent architecture, openclaw background agents"
+---
+
+# Sub-Agents — Building Agent Teams
+
+Your main OpenClaw agent is powerful on its own. But some tasks are too big, too slow, or too varied for a single agent to handle well. That is where sub-agents come in.
+
+A **sub-agent** is a background agent that your main agent spawns to handle a specific task independently. While the sub-agent works, your main agent continues doing other things. When the sub-agent finishes, it reports back with results.
+
+Think of it like a manager delegating work. You do not need your CEO to personally research every topic, draft every document, and check every inbox. The CEO tells people what to do, they go do it, and they come back with results. Sub-agents work the same way.
+
+---
+
+## Why Sub-Agents Matter
+
+Without sub-agents, your OpenClaw assistant handles everything sequentially. You ask a question, it works on it, and nothing else happens until it finishes. That is fine for simple tasks. But consider these scenarios:
+
+- You ask OpenClaw to **research five competitors** and summarize each one. Without sub-agents, it researches them one at a time. With sub-agents, it can research all five simultaneously.
+- You want a **morning briefing** that includes weather, calendar, email summaries, and news. Without sub-agents, it gathers each piece of information one after another. With sub-agents, it gathers everything in parallel and assembles the briefing when all the pieces are ready.
+- You need to **process a batch of documents** — summarize each one, extract key points, and compare them. A single agent would grind through them sequentially. Sub-agents can divide and conquer.
+
+The result is faster responses, better use of your API budget (parallel calls finish sooner, which means fewer context tokens wasted on waiting), and cleaner separation of responsibilities.
+
+---
+
+## The `sessions_spawn` Command
+
+The core mechanism for creating sub-agents is the `sessions_spawn` command. When your main agent decides it needs help, it calls `sessions_spawn` with instructions for the new agent.
+
+Here is what a basic `sessions_spawn` call looks like in practice:
+
+```
+sessions_spawn({
+  instruction: "Research the top 5 project management tools released in 2025. For each, summarize the key features, pricing, and target audience. Return a structured comparison.",
+  onComplete: "Incorporate the research results into the weekly product landscape report."
+})
+```
+
+When this runs:
+
+1. The Gateway creates a **new session** for the sub-agent
+2. The sub-agent receives the instruction and starts working
+3. Your main agent is **free to continue** doing other things
+4. When the sub-agent finishes, its results are delivered back to the main agent's session
+5. The main agent picks up where it left off and uses the results
+
+### Key Parameters
+
+The `sessions_spawn` command accepts several parameters that control how the sub-agent behaves:
+
+| Parameter | Purpose | Example |
+|---|---|---|
+| `instruction` | What you want the sub-agent to do | "Summarize the top 10 articles about AI regulation" |
+| `onComplete` | What the main agent should do with results | "Add findings to the research document" |
+| `model` | Which AI model the sub-agent should use | "claude-sonnet-4-20250514" or "gpt-4o" |
+| `skills` | Which skills the sub-agent has access to | ["web-search", "file-read"] |
+| `timeout` | Maximum time the sub-agent can run | 300 (seconds) |
+
+### Specifying a Model
+
+One of the most useful parameters is `model`. You might want your main agent to run on a powerful (and expensive) model like Claude Opus or GPT-4, but there is no reason to burn that budget on a sub-agent doing simple summarization. You can point sub-agents at cheaper, faster models:
+
+```
+sessions_spawn({
+  instruction: "Summarize this article in 3 bullet points: [article text]",
+  model: "gpt-4o-mini"
+})
+```
+
+This is a major cost optimization strategy. Your coordinator agent thinks with the expensive model. Your worker agents execute with cheaper ones. More on this in the [Cost Management](/advanced/cost-management) guide.
+
+---
+
+## When to Use Sub-Agents
+
+Sub-agents are not always the right tool. Spawning a sub-agent has overhead — creating a new session, initializing context, and coordinating results all take time and tokens. For simple, quick tasks, it is faster to just have your main agent do the work directly.
+
+Here is a decision framework:
+
+### Use Sub-Agents When
+
+- **The task takes more than 30 seconds.** Research, web scraping, document processing — anything that takes a while benefits from parallelization.
+- **You have multiple independent tasks.** If task B does not depend on the results of task A, run them in parallel.
+- **The task requires specialized skills.** Some sub-agents might need web search access while others need file system access. Separating concerns keeps things clean.
+- **You want to protect your main agent's context window.** Sub-agents work in their own sessions. Their intermediate work (all those search results, draft text, and intermediate reasoning) does not pollute your main agent's context. Only the final results come back.
+- **You are building a repeatable workflow.** If your morning briefing always needs weather + calendar + email + news, structuring each as a sub-agent task makes the workflow modular and maintainable.
+
+### Avoid Sub-Agents When
+
+- **The task is simple and fast.** "What time is it in Tokyo?" does not need a sub-agent.
+- **Tasks are deeply interdependent.** If step 2 requires the full output of step 1, and step 3 requires the full output of step 2, parallelization does not help. You are back to sequential processing.
+- **You are near your concurrency limits.** Running too many sub-agents simultaneously can hit API rate limits or overwhelm your system resources.
+- **The coordination overhead exceeds the time saved.** If spawning and coordinating three sub-agents takes longer than just doing the three tasks sequentially, skip it.
+
+---
+
+## Architecture Patterns
+
+There are several proven ways to structure sub-agent workflows. You do not need to memorize these — think of them as recipes you can adapt.
+
+### Pattern 1: Coordinator + Workers
+
+This is the most common pattern. One main agent (the coordinator) breaks a big task into smaller pieces and assigns each piece to a worker sub-agent.
+
+```
+Main Agent (Coordinator)
+  ├── Sub-Agent 1: Research competitor A
+  ├── Sub-Agent 2: Research competitor B
+  ├── Sub-Agent 3: Research competitor C
+  └── Sub-Agent 4: Research competitor D
+
+Main Agent assembles all results into final report
+```
+
+**When to use:** Batch processing, research tasks, any situation where the same type of work needs to happen multiple times with different inputs.
+
+**Example instruction in your SOUL.md:**
+
+```markdown
+## Research Protocol
+
+When asked to research multiple items:
+1. Spawn one sub-agent per item using sessions_spawn
+2. Each sub-agent should use gpt-4o-mini for cost efficiency
+3. Wait for all results
+4. Synthesize findings into a single structured response
+```
+
+### Pattern 2: Pipeline
+
+In a pipeline, sub-agents handle sequential stages of a process. The output of one stage feeds into the next. This is useful when each stage requires different skills or models.
+
+```
+Sub-Agent 1: Gather raw data (web search skill)
+      ↓
+Sub-Agent 2: Clean and structure the data (analysis skill)
+      ↓
+Sub-Agent 3: Generate insights and recommendations (reasoning model)
+      ↓
+Main Agent: Deliver final output to user
+```
+
+**When to use:** Content creation workflows, data processing, any multi-stage process where each stage benefits from isolation.
+
+**Why not just use the main agent?** Context window management. If stage 1 returns 10,000 tokens of raw data, you do not want all of that cluttering your main agent's context. The pipeline sub-agent processes it, extracts what matters, and passes a clean summary forward.
+
+### Pattern 3: Specialist Routing
+
+Instead of the main agent doing everything, it acts as a router — identifying what type of task came in and dispatching it to the right specialist sub-agent.
+
+```
+Main Agent (Router)
+  ├── "Schedule a meeting" → Calendar Specialist Sub-Agent
+  ├── "Research this topic" → Research Specialist Sub-Agent
+  ├── "Draft an email" → Writing Specialist Sub-Agent
+  └── "Check my portfolio" → Finance Specialist Sub-Agent
+```
+
+**When to use:** When you have distinct task categories that benefit from specialized system prompts, skills, or models. Each specialist can have its own mini-SOUL.md with domain-specific instructions.
+
+**Example instruction in your SOUL.md:**
+
+```markdown
+## Task Routing
+
+When a request comes in, classify it and delegate:
+- Calendar/scheduling requests → spawn a sub-agent with the google-calendar skill
+- Research requests → spawn a sub-agent with web-search and the research protocol
+- Writing requests → spawn a sub-agent with the writing style guide context
+- Everything else → handle directly
+```
+
+### Pattern 4: Fan-Out / Fan-In
+
+This is a refined version of Coordinator + Workers with explicit aggregation logic. Multiple sub-agents fan out to gather information, and then the main agent fans in to synthesize it.
+
+```
+Main Agent: "Create a market analysis for AI note-taking apps"
+  │
+  ├── Fan Out:
+  │   ├── Sub-Agent: Gather pricing data for 10 products
+  │   ├── Sub-Agent: Collect user reviews and sentiment
+  │   ├── Sub-Agent: Research feature comparisons
+  │   └── Sub-Agent: Find market size and growth data
+  │
+  └── Fan In:
+      Main Agent synthesizes all four streams into
+      a cohesive market analysis document
+```
+
+**When to use:** Any analysis or report that requires gathering multiple types of information and combining them into a single deliverable.
+
+---
+
+## Practical Examples
+
+### Example 1: Morning Briefing with Sub-Agents
+
+This is one of the most popular OpenClaw use cases, and sub-agents make it dramatically faster.
+
+**Without sub-agents** (sequential, slow):
+1. Check weather → 5 seconds
+2. Read calendar → 3 seconds
+3. Summarize emails → 15 seconds
+4. Get news headlines → 8 seconds
+5. Compile briefing → 5 seconds
+6. **Total: ~36 seconds**
+
+**With sub-agents** (parallel, fast):
+1. Spawn four sub-agents simultaneously (weather, calendar, email, news)
+2. All four work in parallel → longest one takes ~15 seconds
+3. Compile briefing → 5 seconds
+4. **Total: ~20 seconds**
+
+In your SOUL.md, the instruction might look like:
+
+```markdown
+## Morning Briefing Protocol
+
+Every morning at 7:00 AM:
+1. Spawn sub-agents in parallel:
+   - Weather: Get the forecast for Seattle, WA
+   - Calendar: List today's meetings with times and attendees
+   - Email: Summarize unread emails, flag anything urgent
+   - News: Get top 5 headlines in AI and product management
+2. Once all sub-agents report back, compile into a structured briefing
+3. Send via iMessage
+```
+
+### Example 2: Batch Content Research
+
+You are writing a newsletter and need to research five topics:
+
+```markdown
+## Content Research Request
+
+When I say "research these topics for the newsletter":
+1. Parse the list of topics
+2. For each topic, spawn a sub-agent with these instructions:
+   - Search for 3-5 recent articles on the topic
+   - Summarize key points from each article
+   - Identify one contrarian or surprising angle
+   - Return a structured brief (200 words max)
+3. Use gpt-4o-mini for each research sub-agent
+4. Compile all briefs into a single research document
+5. Save to the content folder
+```
+
+### Example 3: Multi-Source Fact Checking
+
+```markdown
+## Fact Check Protocol
+
+When asked to verify a claim:
+1. Spawn three sub-agents, each searching different source types:
+   - Sub-Agent 1: Search academic/research sources
+   - Sub-Agent 2: Search news and journalistic sources
+   - Sub-Agent 3: Search official/government sources
+2. Each sub-agent returns: sources found, whether they support/contradict/are neutral, confidence level
+3. Main agent synthesizes the findings and provides a verdict with citations
+```
+
+---
+
+## Limitations
+
+Sub-agents are powerful, but they have boundaries you should know about.
+
+### No Sub-Sub-Agents (Yet)
+
+Currently, a sub-agent **cannot spawn its own sub-agents**. The hierarchy is flat: your main agent can spawn sub-agents, but those sub-agents cannot delegate further. This means your main agent needs to do all the task decomposition upfront.
+
+This limitation is expected to be lifted in a future OpenClaw release, enabling recursive delegation. For now, design your workflows with a single level of delegation.
+
+### Context Isolation
+
+Sub-agents do **not** automatically inherit your main agent's full conversation history. They receive only the instruction you give them. This is usually a feature (it keeps their context clean), but it means you need to be explicit in your instructions. If a sub-agent needs background information, include it in the instruction.
+
+### Concurrency Limits
+
+The number of sub-agents you can run simultaneously depends on:
+
+- **Your API provider's rate limits** — Most providers limit concurrent requests
+- **Your system resources** — Each sub-agent session consumes memory
+- **Your budget** — More parallel agents means more simultaneous API calls
+
+A practical limit for most setups is **3-5 concurrent sub-agents**. You can push higher, but monitor for rate limit errors.
+
+### No Direct Sub-Agent Communication
+
+Sub-agents cannot talk to each other directly. All communication flows through the main agent. If sub-agent A produces something that sub-agent B needs, the main agent must receive A's output and pass it to B. This reinforces the coordinator pattern.
+
+### Result Delivery Timing
+
+Sub-agents finish at different times. Your main agent needs logic to handle this — either wait for all results before proceeding, or process results as they arrive. The `onComplete` parameter helps manage this, but complex orchestration still requires thoughtful design.
+
+---
+
+## Best Practices
+
+1. **Start simple.** Get one sub-agent working before building complex multi-agent workflows. Test your instructions, verify results come back correctly, then scale up.
+
+2. **Be explicit in instructions.** Sub-agents do not have your conversation context. Write their instructions as if you are briefing a new contractor who knows nothing about your project.
+
+3. **Use cheaper models for sub-agents.** Your coordinator needs the best reasoning model. Your workers often need something fast and cheap. Match the model to the task complexity.
+
+4. **Set timeouts.** Always include a timeout parameter. A sub-agent stuck in a loop or waiting on a failed API call should not hang your entire system.
+
+5. **Log and monitor.** Check your Gateway logs to see sub-agent activity. This helps you debug failures and optimize performance over time.
+
+6. **Keep the hierarchy flat.** Since sub-sub-agents are not supported, design your task decomposition to work with a single level of delegation. If a task seems to need recursive delegation, break it into sequential stages instead.
+
+7. **Test with small batches first.** Before spawning 20 sub-agents for a big research task, test with 2-3 to make sure your instructions produce the output format you expect.
+
+---
+
+## Sub-Agents vs. Skills
+
+You might wonder when to use a sub-agent versus when to use a skill. They solve different problems:
+
+| Aspect | Sub-Agent | Skill |
+|---|---|---|
+| **What it is** | A background agent session | A pre-built capability/extension |
+| **Runs in** | Its own session (isolated) | The current agent's session |
+| **Good for** | Complex, multi-step tasks | Single, well-defined actions |
+| **Context** | Gets only what you pass it | Has access to current conversation |
+| **Parallelism** | Runs in background | Runs inline (blocks the agent) |
+| **Examples** | Research a topic, process a batch | Check weather, read a file, send an email |
+
+In practice, sub-agents often *use* skills. You spawn a sub-agent and give it access to the web-search skill. The sub-agent is the worker; the skill is the tool the worker uses.
+
+---
+
+## What's Next
+
+Sub-agents become even more powerful when combined with other OpenClaw features:
+
+- **[Cron jobs](/core-concepts/automation)** — Schedule sub-agent workflows to run automatically
+- **[Cost Management](/advanced/cost-management)** — Optimize which models your sub-agents use
+- **[Voice Mode](/advanced/voice)** — Trigger sub-agent workflows with voice commands
+- **[Deployment](/advanced/deployment)** — Run your sub-agent workflows on an always-on server
+
+The key insight is that sub-agents turn OpenClaw from a single assistant into an **agent team**. Your main agent becomes a manager, and you become the executive giving high-level direction. The more you delegate to sub-agents, the more OpenClaw can accomplish in parallel — and the more it starts to feel like having an actual staff working for you.

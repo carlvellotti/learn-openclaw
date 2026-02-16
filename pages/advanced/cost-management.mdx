@@ -1,0 +1,392 @@
+---
+title: "Cost Management — Running OpenClaw Without Going Broke"
+description: "Practical guide to managing OpenClaw API costs. Covers model selection strategy, failover chains, token monitoring, hidden costs from TTS and image generation, and tips to reduce spending without reducing quality."
+keywords: "openclaw cost, openclaw API costs, openclaw model selection, openclaw token usage, openclaw budget, openclaw cheap, openclaw pricing, openclaw model failover"
+---
+
+# Cost Management — Running OpenClaw Without Going Broke
+
+OpenClaw is free and open source. The software costs nothing. But the AI models it calls? Those cost money. And if you are not thoughtful about how you configure things, you can burn through $50-100+ in a week without realizing it.
+
+This is the number one surprise for new OpenClaw users. They set up their assistant, start using it enthusiastically, and then get an API bill that makes their stomach drop. It does not have to be that way. With the right configuration, most people can run a highly capable OpenClaw assistant for **$15-40 per month** in total API costs.
+
+This page covers everything you need to know about where the money goes and how to control it.
+
+---
+
+## Where the Money Goes
+
+Before you can optimize costs, you need to understand the cost structure. OpenClaw does not charge you anything — you pay the AI providers directly for every API call your assistant makes.
+
+Here is a breakdown of the cost categories:
+
+| Cost Category | What Generates It | Typical Range |
+|---|---|---|
+| **LLM calls** | Every message, every agent response, every sub-agent task | 70-85% of total cost |
+| **Text-to-Speech** | ElevenLabs voice output | 5-15% if using voice |
+| **Speech-to-Text** | Whisper audio transcription | 1-3% if using voice |
+| **Web search** | Skills that search the web | 2-5% |
+| **Image generation** | DALL-E, Midjourney, or other image models | Varies wildly |
+| **Embeddings** | Memory system vector searches | 1-2% |
+| **Phone calls** | Twilio minutes | $1-5/month if used |
+
+The dominant cost is LLM calls. That is where your optimization efforts should focus.
+
+---
+
+## Model Selection Strategy
+
+The single most impactful thing you can do to control costs is **use the right model for the right task**. Not every message needs the most powerful (and expensive) model.
+
+### Model Pricing Overview
+
+Prices change frequently, but here are approximate costs per 1 million tokens as of early 2025 (check current pricing at each provider's site):
+
+| Model | Input (per 1M tokens) | Output (per 1M tokens) | Best For |
+|---|---|---|---|
+| **Claude Opus** | $15.00 | $75.00 | Complex reasoning, nuanced writing |
+| **Claude Sonnet** | $3.00 | $15.00 | General-purpose, good balance |
+| **Claude Haiku** | $0.25 | $1.25 | Simple tasks, classification, extraction |
+| **GPT-4o** | $2.50 | $10.00 | General-purpose, multimodal |
+| **GPT-4o-mini** | $0.15 | $0.60 | Simple tasks, high volume |
+| **Gemini 1.5 Pro** | $1.25 | $5.00 | Long context, document processing |
+| **Gemini 1.5 Flash** | $0.075 | $0.30 | Fast, cheap, simple tasks |
+
+The price difference between the top and bottom of this list is **100x or more**. Using Claude Opus for a task that GPT-4o-mini could handle is like hiring a brain surgeon to put a bandage on a paper cut.
+
+### The Tiered Model Approach
+
+Configure your OpenClaw to use different models for different task complexities:
+
+```yaml
+models:
+  primary: "claude-sonnet-4-20250514"          # Default for most tasks
+  reasoning: "claude-opus-4-0-20250116"          # Complex analysis, important decisions
+  simple: "gpt-4o-mini"                  # Quick questions, simple tasks
+  sub_agents: "gpt-4o-mini"             # Background worker agents
+  summarization: "gemini-1.5-flash"      # Summarizing long documents
+```
+
+Then in your SOUL.md, give your agent guidance on when to escalate:
+
+```markdown
+## Model Selection
+
+Use your default model (Sonnet) for most tasks. Escalate to the reasoning model
+(Opus) only when:
+- The task requires multi-step logical reasoning
+- I explicitly ask for deep analysis
+- The task involves important decisions (financial, career, health)
+- Creative writing that needs to be exceptional quality
+
+Use the simple model (GPT-4o-mini) when:
+- Answering factual questions with clear answers
+- Simple formatting or restructuring text
+- Classification tasks ("Is this email urgent?")
+- Summarizing short pieces of text
+```
+
+### Real-World Impact
+
+Here is what the tiered approach looks like in practice for a typical day with 50 interactions:
+
+| Scenario | Model Used | Est. Cost/Day |
+|---|---|---|
+| All Opus (overkill) | Claude Opus for everything | $3.00-8.00 |
+| All Sonnet (common default) | Claude Sonnet for everything | $0.60-1.50 |
+| **Tiered (recommended)** | Mix of Sonnet, mini, Flash | **$0.30-0.80** |
+
+Over a month, the tiered approach saves $20-150 compared to using a premium model for everything.
+
+---
+
+## Model Failover Chains
+
+What happens when your primary model's API is down? Without a failover chain, your assistant just... stops working. With one, it gracefully switches to an alternative.
+
+### Setting Up Failover
+
+```yaml
+models:
+  failover:
+    - provider: "anthropic"
+      model: "claude-sonnet-4-20250514"
+    - provider: "openai"
+      model: "gpt-4o"
+    - provider: "google"
+      model: "gemini-1.5-pro"
+    - provider: "openai"
+      model: "gpt-4o-mini"     # Last resort: cheap but always available
+```
+
+The Gateway tries each model in order. If Anthropic's API is down, it falls through to OpenAI, then Google. The last entry should always be your cheapest, most reliable option — the model that might not be the best, but is almost never down.
+
+### Failover and Cost
+
+A subtle benefit of failover chains: they can also be used for **cost-based routing**. Some providers offer the same model quality at different prices, or different models with similar capabilities at different price points. Your failover chain can be ordered by cost preference, not just availability.
+
+---
+
+## OAuth vs. API Keys — A Hidden Cost Saver
+
+Here is something many new users miss: **not everything costs tokens**.
+
+When OpenClaw accesses Google Calendar, Gmail, Google Drive, or other services via OAuth, those calls do not go through your LLM API. They are direct service API calls. The LLM model is only involved in deciding what to do and processing the results — not in the actual data retrieval.
+
+| Access Method | What It Costs |
+|---|---|
+| **OAuth (Google, Slack, etc.)** | Free (direct API calls to the service) |
+| **Web search skill** | Costs tokens for the LLM to process search results |
+| **File reading** | Costs tokens proportional to file size |
+| **API key services** | Depends on the service |
+
+The practical takeaway: **set up OAuth integrations wherever possible**. Reading your calendar through OAuth is nearly free. Having your LLM search the web for your calendar information is expensive and less reliable.
+
+---
+
+## Token Monitoring
+
+You cannot optimize what you do not measure. OpenClaw provides several ways to track your token usage.
+
+### Gateway Logs
+
+The Gateway logs every model call with token counts:
+
+```bash
+# View recent model calls with token usage
+tail -f ~/.openclaw/logs/gateway.log | grep "tokens"
+```
+
+A typical log entry looks like:
+
+```
+[2025-01-15 14:23:01] model=claude-sonnet-4-20250514 input_tokens=1,247 output_tokens=892 cost=$0.0156
+```
+
+### Dashboard Metrics
+
+If you are using the web client at `http://localhost:18789`, the dashboard shows:
+
+- Total tokens used today/this week/this month
+- Cost breakdown by model
+- Cost breakdown by task type (chat, cron, sub-agents)
+- Most expensive sessions
+
+### Provider Dashboards
+
+Check your spending directly at each provider:
+
+- **Anthropic:** [console.anthropic.com](https://console.anthropic.com) → Usage
+- **OpenAI:** [platform.openai.com/usage](https://platform.openai.com/usage)
+- **Google:** [aistudio.google.com](https://aistudio.google.com) → Usage
+
+### Setting Spending Alerts
+
+Most providers let you set spending limits or alerts:
+
+**Anthropic:**
+- Set a monthly spend limit in the console
+- Receive email alerts at threshold percentages
+
+**OpenAI:**
+- Set hard spending caps
+- Configure email notifications
+
+**Google:**
+- Set budget alerts in the Google Cloud console
+
+Set alerts at **50%** and **80%** of your monthly budget. This gives you time to adjust before hitting your limit.
+
+---
+
+## The Hidden Costs
+
+LLM tokens get all the attention, but several other services quietly add to your bill.
+
+### Text-to-Speech (ElevenLabs)
+
+Every time your assistant speaks aloud, you pay ElevenLabs for the audio generation. This cost is character-based, not token-based.
+
+| ElevenLabs Plan | Characters/Month | Monthly Cost | Cost per 1,000 chars |
+|---|---|---|---|
+| Free | 10,000 | $0 | $0 (limited) |
+| Starter | 30,000 | $5 | $0.17 |
+| Creator | 100,000 | $22 | $0.22 |
+
+A typical spoken response is 200-500 characters. If your assistant speaks 50 responses per day, that is 10,000-25,000 characters per day, or 300,000-750,000 per month. The Starter plan (30K characters) would not cover daily voice use. The Creator plan (100K) handles moderate use.
+
+**Cost reduction tips:**
+- Use `auto_speak: "talk_mode_only"` so TTS only activates during voice conversations
+- Set `max_speak_length: 300` to limit how much text gets converted to speech
+- For long responses, have the agent speak a summary and deliver the full text via your channel
+
+### Image Generation
+
+If your assistant generates images (DALL-E, Midjourney), each image has a significant cost:
+
+| Service | Cost per Image |
+|---|---|
+| DALL-E 3 (1024x1024) | $0.040 |
+| DALL-E 3 (1024x1792) | $0.080 |
+| Midjourney | Subscription-based |
+
+A single image is cheap. But if you have a workflow that generates 10 images for a presentation, that is $0.40-0.80 per run.
+
+**Cost reduction tip:** Use DALL-E 2 ($0.020 per image) for drafts and previews. Only use DALL-E 3 for final outputs.
+
+### Web Search
+
+Many skills that search the web incur costs beyond the LLM tokens. The search API itself may have a cost, and the LLM needs to process the search results (which can be token-heavy).
+
+**Cost reduction tip:** Be specific in search instructions. "Find the current price of Bitcoin" is one search call. "Research everything about Bitcoin" might trigger dozens of searches, each returning thousands of tokens of results.
+
+### Embeddings (Memory System)
+
+OpenClaw's memory system uses embeddings to find relevant memories. Each memory retrieval involves an embedding API call.
+
+Embedding costs are very low (OpenAI's `text-embedding-3-small` costs $0.02 per 1M tokens), but they add up if your memory system is doing hundreds of retrievals per day.
+
+---
+
+## Practical Tips for Reducing Costs
+
+Here are concrete actions you can take today to lower your OpenClaw spending:
+
+### 1. Audit Your Cron Jobs
+
+Cron jobs run whether you are using your assistant or not. Each cron job triggers a model call. Review your scheduled tasks and ask:
+
+- Does this need to run hourly, or would daily suffice?
+- Does this need the primary model, or would a cheap model work?
+- Is this cron job actually providing value, or did I set it up to test and forget about it?
+
+```yaml
+# Expensive: Hourly news summary using Sonnet
+cron:
+  - schedule: "0 * * * *"    # Every hour
+    model: "claude-sonnet-4-20250514"
+    task: "Summarize top news"
+
+# Cheaper: Twice-daily news summary using Flash
+cron:
+  - schedule: "0 8,18 * * *"  # 8 AM and 6 PM
+    model: "gemini-1.5-flash"
+    task: "Summarize top news"
+```
+
+The cheaper version runs 12x less often and uses a model that is 20x cheaper. Combined: **~240x cost reduction** for that single cron job.
+
+### 2. Shorten System Prompts
+
+Your SOUL.md, USER.md, and other system context get sent with every single message. If your SOUL.md is 5,000 tokens, that is 5,000 input tokens on every interaction before the user even says anything.
+
+- Keep SOUL.md concise. Aim for under 2,000 tokens.
+- Move reference information to files the agent can look up on demand, rather than including it in the system prompt.
+- Use conditional context — only load relevant sections based on the task type.
+
+### 3. Limit Context Window Usage
+
+Long conversations accumulate tokens. A 50-message conversation thread might have 20,000+ tokens of history, all sent with every new message.
+
+```yaml
+sessions:
+  max_context_messages: 20      # Only send last 20 messages
+  summarize_after: 15           # Summarize older messages instead of including verbatim
+```
+
+This keeps your context window lean. The agent still has access to older context through summaries, but you are not paying full token prices for messages from an hour ago.
+
+### 4. Use Sub-Agent Model Routing
+
+When spawning sub-agents, always specify the cheapest appropriate model:
+
+```markdown
+## Sub-Agent Cost Rules (in SOUL.md)
+
+When spawning sub-agents:
+- Research/search tasks → use gpt-4o-mini
+- Summarization → use gemini-1.5-flash
+- Writing/creative tasks → use your default model (Sonnet)
+- Only use Opus when I explicitly request "deep analysis" or "thorough review"
+```
+
+### 5. Batch Similar Requests
+
+Instead of asking five separate questions (five model calls), batch them into one:
+
+**Expensive (5 separate calls):**
+> "What's the weather?" ... "What's on my calendar?" ... "Any urgent emails?" ... "Top news?" ... "What should I focus on today?"
+
+**Cheaper (1 call):**
+> "Give me my morning briefing: weather, calendar, urgent emails, top news, and a suggested focus for today."
+
+The batched version uses one model call instead of five. The input tokens are similar, but you save on the overhead of five separate API round trips.
+
+### 6. Disable Unused Features
+
+If you are not using voice, turn off TTS and STT. If you are not using image generation, remove those skills. Every enabled feature is a potential cost center.
+
+### 7. Set Hard Limits at the Provider Level
+
+As a safety net, set maximum monthly spend limits on each provider account. If something goes wrong — a cron job loops, a sub-agent goes haywire — the spending cap prevents a surprise $500 bill.
+
+---
+
+## Monthly Budget Templates
+
+Here are realistic budget targets for different usage levels:
+
+### Light Usage ($10-15/month)
+
+- 10-20 messages per day
+- Tiered model selection (mostly GPT-4o-mini and Flash)
+- No voice
+- 2-3 cron jobs (daily, using cheap models)
+- No image generation
+
+### Moderate Usage ($20-40/month)
+
+- 30-50 messages per day
+- Tiered model selection (Sonnet as primary, mini for sub-agents)
+- Voice enabled (ElevenLabs Starter plan)
+- 5-10 cron jobs
+- Occasional image generation
+
+### Heavy Usage ($50-80/month)
+
+- 50-100+ messages per day
+- Sonnet as primary, Opus for complex tasks
+- Voice enabled (ElevenLabs Creator plan)
+- 10+ cron jobs
+- Regular image generation
+- Phone calls via Twilio
+
+### Enterprise/Power Usage ($100+/month)
+
+- Constant usage throughout the day
+- Multiple sub-agent workflows
+- Heavy voice and phone usage
+- Real-time monitoring and alerts
+- Multiple users/channels
+
+---
+
+## The Cost Over Time
+
+One last thing to keep in mind: AI model costs have been **dropping consistently**. Models that cost $15/million tokens in 2024 cost $3 in 2025. The trend shows no sign of slowing.
+
+This means two things:
+
+1. **Costs that feel high today will feel reasonable in 6-12 months** as providers release cheaper, more capable models
+2. **Optimizing now teaches you habits** that will serve you well even as prices drop — because you will naturally scale up your usage to match the savings
+
+The goal is not to minimize spending at all costs. It is to spend consciously — putting your budget toward the interactions that matter most and using efficient models for everything else.
+
+---
+
+## What's Next
+
+- **[Sub-Agents](/advanced/sub-agents)** — Learn how to route sub-agents to cheap models
+- **[Deployment](/advanced/deployment)** — See total cost of ownership including hosting
+- **[Voice & Talk Mode](/advanced/voice)** — Understand the voice cost stack
+- **[SOUL.md](/core-concepts/soul-md)** — Write an efficient system prompt that does not waste tokens

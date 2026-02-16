@@ -1,0 +1,577 @@
+---
+title: "Deployment — Running OpenClaw in Production"
+description: "Deploy OpenClaw beyond your laptop. Compare local, Docker, and VPS deployment options with step-by-step setup guides, cost comparisons, and security considerations for each approach."
+keywords: "openclaw deployment, openclaw docker, openclaw VPS, openclaw self-hosted, openclaw always on, openclaw server, openclaw production, openclaw hetzner, openclaw digitalocean"
+---
+
+# Deployment — Running OpenClaw in Production
+
+Running OpenClaw on your laptop is great for getting started. But a laptop sleeps, reboots, travels through airports, and generally does not stay connected 24/7. If you want your assistant to be truly always-on — responding to messages at 3 AM, running scheduled tasks while you sleep, screening calls when your phone is on silent — you need to think about deployment.
+
+This page covers your options, from simplest to most robust, with step-by-step guidance for each.
+
+---
+
+## Deployment Options Overview
+
+| Approach | Always-On | Setup Effort | Monthly Cost | Best For |
+|---|---|---|---|---|
+| **Local (your Mac/PC)** | No (sleeps when you do) | Minimal | $0 | Getting started, testing |
+| **Docker (local)** | No (same machine) | Medium | $0 | Reproducible setup, isolation |
+| **Docker (VPS)** | Yes | Medium-High | $4-12/month | Always-on, single user |
+| **VPS (bare metal)** | Yes | High | $4-12/month | Full control, performance |
+| **Remote Gateway + Tailscale** | Yes (Gateway only) | Medium | $4-12/month + Tailscale (free tier) | Secure remote access |
+
+Most people follow this progression:
+
+1. **Start local** to learn OpenClaw and get comfortable with configuration
+2. **Move to Docker locally** to make the setup reproducible and isolated
+3. **Deploy Docker to a VPS** when they want always-on availability
+4. **Add Tailscale** if they need secure remote access to the Gateway
+
+---
+
+## Option 1: Local Deployment
+
+This is what you are probably running right now. OpenClaw runs directly on your Mac or PC as a background process.
+
+### Pros
+
+- Zero additional cost
+- Simplest setup
+- Direct access to local files, devices, and peripherals
+- Fastest iteration — change config, restart, test immediately
+- Node access to your local devices (camera, microphone, screen)
+
+### Cons
+
+- Stops when your computer sleeps or shuts down
+- Not accessible from other networks without tunneling
+- Ties up system resources on your daily driver
+- No isolation — OpenClaw has access to your entire system
+
+### When to Use
+
+Local deployment is the right choice when you are:
+
+- Learning OpenClaw for the first time
+- Primarily using it during working hours
+- Testing new configurations and skills
+- Do not need 24/7 availability
+
+### Keeping It Running
+
+If you do stick with local deployment, a few tips to maximize uptime:
+
+**Prevent sleep (macOS):**
+
+```bash
+# Prevent sleep while OpenClaw is running
+caffeinate -s &
+```
+
+**Auto-start on login (macOS):**
+
+Create a Launch Agent plist at `~/Library/LaunchAgents/com.openclaw.gateway.plist`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.openclaw.gateway</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/bin/openclaw</string>
+        <string>start</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/tmp/openclaw.stdout.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/openclaw.stderr.log</string>
+</dict>
+</plist>
+```
+
+Then load it:
+
+```bash
+launchctl load ~/Library/LaunchAgents/com.openclaw.gateway.plist
+```
+
+---
+
+## Option 2: Docker Deployment
+
+Docker wraps OpenClaw in a container — an isolated, reproducible environment that works the same way everywhere. Whether you run it on your Mac, a VPS, or your friend's computer, the container behaves identically.
+
+### Why Docker
+
+- **Reproducibility** — Your entire setup is defined in a file. If something breaks, delete the container and recreate it. Everything comes back exactly as it was.
+- **Isolation** — OpenClaw runs in its own sandbox. It cannot accidentally mess with your system files or other applications.
+- **Portability** — Move your setup from your laptop to a server by copying a few files.
+- **Easy updates** — Pull the new image, restart the container. Done.
+
+### Docker Setup Walkthrough
+
+**Step 1: Install Docker**
+
+If you do not already have Docker installed:
+
+- **macOS:** Download [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- **Linux:** Install via your package manager (e.g., `apt install docker.io` on Ubuntu)
+- **Windows:** Download [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+
+Verify it is working:
+
+```bash
+docker --version
+# Docker version 24.x.x or later
+```
+
+**Step 2: Create your project directory**
+
+```bash
+mkdir ~/openclaw-docker
+cd ~/openclaw-docker
+```
+
+**Step 3: Create a `docker-compose.yml` file**
+
+```yaml
+version: "3.8"
+
+services:
+  openclaw:
+    image: openclaw/gateway:latest
+    container_name: openclaw
+    restart: unless-stopped
+    ports:
+      - "18789:18789"
+    volumes:
+      - ./config:/app/config
+      - ./data:/app/data
+      - ./logs:/app/logs
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - TZ=America/Los_Angeles   # Set to your timezone
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:18789/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+```
+
+**Step 4: Create your `.env` file**
+
+```bash
+# AI Provider Keys
+ANTHROPIC_API_KEY=sk-ant-your-key-here
+OPENAI_API_KEY=sk-your-key-here
+
+# Optional: Voice
+ELEVENLABS_API_KEY=your-key-here
+
+# Optional: Phone
+TWILIO_ACCOUNT_SID=your-sid-here
+TWILIO_AUTH_TOKEN=your-token-here
+```
+
+**Step 5: Copy your configuration files**
+
+```bash
+# Copy your existing OpenClaw config into the mounted volume
+cp -r ~/.openclaw/config/* ~/openclaw-docker/config/
+```
+
+This includes your `SOUL.md`, `USER.md`, skills configuration, cron jobs, and channel settings.
+
+**Step 6: Start the container**
+
+```bash
+docker compose up -d
+```
+
+The `-d` flag runs it in the background (detached mode).
+
+**Step 7: Verify it is running**
+
+```bash
+# Check container status
+docker compose ps
+
+# View logs
+docker compose logs -f openclaw
+
+# Test the health endpoint
+curl http://localhost:18789/health
+```
+
+### Managing Your Docker Deployment
+
+Common operations you will use regularly:
+
+```bash
+# Stop OpenClaw
+docker compose down
+
+# Restart after config changes
+docker compose restart
+
+# Update to latest version
+docker compose pull
+docker compose up -d
+
+# View live logs
+docker compose logs -f openclaw
+
+# Access the container shell (for debugging)
+docker exec -it openclaw /bin/sh
+```
+
+### Docker Resource Limits
+
+You can limit how much of your system Docker uses:
+
+```yaml
+services:
+  openclaw:
+    # ... other settings ...
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+```
+
+For most setups, OpenClaw runs well with 1-2 CPU cores and 1-2 GB of RAM.
+
+---
+
+## Option 3: VPS Deployment
+
+A VPS (Virtual Private Server) is a remote computer you rent from a cloud provider. It runs 24/7, has a stable internet connection, and costs surprisingly little.
+
+This is the recommended approach for anyone who wants a truly always-on assistant.
+
+### Choosing a VPS Provider
+
+| Provider | Cheapest Plan | RAM | Storage | Data Center Locations |
+|---|---|---|---|---|
+| **Hetzner** | ~$4/month | 2 GB | 20 GB SSD | EU (Germany, Finland) |
+| **Vultr** | ~$6/month | 1 GB | 25 GB SSD | Global (30+ locations) |
+| **DigitalOcean** | ~$6/month | 1 GB | 25 GB SSD | Global (15+ locations) |
+| **Linode (Akamai)** | ~$5/month | 1 GB | 25 GB SSD | Global (11+ locations) |
+| **Oracle Cloud** | Free tier | 1 GB | 50 GB | Limited locations |
+
+**Recommendations:**
+
+- **Best value:** Hetzner. Their cheapest ARM VPS provides excellent specs for the price. If you are in Europe, the latency is excellent. From the US, it is still very usable.
+- **Best for US users:** Vultr or DigitalOcean. Choose a data center close to you for lower latency.
+- **Free option:** Oracle Cloud has a generous always-free tier, but the setup is more complex and availability of free instances can be limited.
+
+### VPS Setup Walkthrough
+
+This walkthrough uses Ubuntu on any VPS provider. The steps are the same regardless of which provider you choose.
+
+**Step 1: Create the VPS**
+
+Sign up for your chosen provider and create a new server with:
+
+- **OS:** Ubuntu 22.04 LTS or 24.04 LTS
+- **Size:** 1-2 GB RAM minimum (2 GB recommended)
+- **Storage:** 20+ GB SSD
+- **Region:** Closest to you
+
+**Step 2: Secure the server**
+
+SSH into your new server and run initial security setup:
+
+```bash
+# Connect to your server
+ssh root@your-server-ip
+
+# Update packages
+apt update && apt upgrade -y
+
+# Create a non-root user
+adduser openclaw
+usermod -aG sudo openclaw
+
+# Set up SSH key authentication for the new user
+mkdir -p /home/openclaw/.ssh
+cp ~/.ssh/authorized_keys /home/openclaw/.ssh/
+chown -R openclaw:openclaw /home/openclaw/.ssh
+
+# Disable password authentication (SSH keys only)
+sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Set up the firewall
+ufw allow OpenSSH
+ufw allow 18789    # OpenClaw Gateway port (restrict later with Tailscale)
+ufw enable
+```
+
+**Step 3: Install Docker**
+
+```bash
+# Switch to your new user
+su - openclaw
+
+# Install Docker
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker openclaw
+
+# Log out and back in for group changes to take effect
+exit
+ssh openclaw@your-server-ip
+
+# Verify Docker works
+docker run hello-world
+```
+
+**Step 4: Deploy OpenClaw with Docker**
+
+Follow the same Docker setup steps from Option 2 above, but on your VPS instead of your local machine:
+
+```bash
+mkdir ~/openclaw-docker
+cd ~/openclaw-docker
+# Create docker-compose.yml, .env, and config files as described above
+docker compose up -d
+```
+
+**Step 5: Verify it is running**
+
+```bash
+docker compose ps
+curl http://localhost:18789/health
+```
+
+Your OpenClaw instance is now running 24/7 on a server that does not sleep, does not travel, and does not need you to keep a laptop open.
+
+### VPS Maintenance
+
+Things to do periodically:
+
+```bash
+# Update the OS (monthly)
+sudo apt update && sudo apt upgrade -y
+
+# Update OpenClaw (when new versions release)
+cd ~/openclaw-docker
+docker compose pull
+docker compose up -d
+
+# Check disk usage (quarterly)
+df -h
+
+# Review logs for errors
+docker compose logs --tail 100 openclaw
+```
+
+---
+
+## Option 4: Remote Gateway with Tailscale
+
+The challenge with a VPS is access. You do not want your OpenClaw Gateway exposed to the entire internet — that is a security risk. But you do want to reach it from your devices.
+
+**Tailscale** solves this. It creates a private, encrypted network between your devices and your VPS. Only your devices can reach the Gateway. Everyone else sees nothing.
+
+### What Tailscale Does
+
+Think of Tailscale as a private tunnel between your devices. Your laptop, phone, and VPS all join the same Tailscale network. They can talk to each other as if they were on the same local network, no matter where they physically are.
+
+This means:
+
+- Your Gateway runs on the VPS but is **not exposed to the public internet**
+- You access it from your laptop or phone through the Tailscale tunnel
+- All traffic between your devices is **encrypted end-to-end**
+- No port forwarding, no firewall rules to manage, no VPN configuration headaches
+
+### Tailscale Setup
+
+**Step 1: Install Tailscale on your VPS**
+
+```bash
+# On your VPS (Ubuntu)
+curl -fsSL https://tailscale.com/install.sh | sh
+sudo tailscale up
+```
+
+This will give you a URL to authenticate. Open it in your browser and approve the device.
+
+**Step 2: Install Tailscale on your devices**
+
+- **macOS/Windows:** Download from [tailscale.com/download](https://tailscale.com/download)
+- **iOS/Android:** Install from the App Store or Google Play
+
+Sign in with the same account you used for the VPS.
+
+**Step 3: Lock down the VPS firewall**
+
+Now that Tailscale is set up, you can remove the public port for the Gateway:
+
+```bash
+# Remove the public Gateway port
+sudo ufw delete allow 18789
+
+# Allow access only through Tailscale
+sudo ufw allow in on tailscale0
+```
+
+**Step 4: Access OpenClaw through Tailscale**
+
+Your VPS now has a Tailscale IP address (usually starts with `100.x.x.x`). Use that instead of the public IP:
+
+```
+http://100.x.x.x:18789
+```
+
+This URL only works from devices on your Tailscale network. The rest of the internet cannot reach it.
+
+### Tailscale Cost
+
+Tailscale's free tier supports up to 100 devices and 3 users. For personal use, you will never exceed this. It is effectively free.
+
+---
+
+## Decision Framework
+
+Use this table to choose your deployment approach:
+
+| Question | Local | Docker (local) | VPS + Docker | VPS + Tailscale |
+|---|---|---|---|---|
+| Do I need 24/7 availability? | No | No | Yes | Yes |
+| Am I comfortable with Docker? | N/A | Yes | Yes | Yes |
+| Do I want to spend money on hosting? | No | No | Yes ($4-12/mo) | Yes ($4-12/mo) |
+| Do I need other people to message my assistant? | Hard | Hard | Yes | Yes |
+| Do I need phone call support (Twilio)? | Possible | Possible | Easy | Easy |
+| Do I want easy updates and reproducibility? | No | Yes | Yes | Yes |
+| Do I need maximum security? | Medium | Medium | Medium | High |
+| Am I just getting started? | **Yes** | Maybe | No | No |
+
+### The Recommended Path
+
+1. **Month 1:** Run locally. Learn the system. Break things. Fix them.
+2. **Month 2:** Dockerize your setup. Get comfortable with containers.
+3. **Month 3:** Deploy to a VPS. Enjoy always-on availability.
+4. **Month 3+:** Add Tailscale if you want tighter security.
+
+---
+
+## Cost Comparison
+
+Here is what a typical deployment costs per month, including both hosting and API usage:
+
+| Component | Local | Docker + VPS | VPS + Tailscale |
+|---|---|---|---|
+| Hosting | $0 | $4-12 | $4-12 |
+| Tailscale | $0 | $0 | $0 (free tier) |
+| LLM API (moderate use) | $10-30 | $10-30 | $10-30 |
+| ElevenLabs TTS (optional) | $5-22 | $5-22 | $5-22 |
+| Twilio (optional) | $2-5 | $2-5 | $2-5 |
+| **Total** | **$10-57** | **$14-69** | **$14-69** |
+
+The API costs dominate regardless of deployment approach. The hosting cost is a rounding error compared to what you spend on model calls. This is important to internalize — do not let a $6/month VPS be the reason you skip always-on deployment. See the [Cost Management](/advanced/cost-management) guide for how to optimize the API spend.
+
+---
+
+## Security Considerations
+
+Each deployment approach has different security implications:
+
+### Local
+
+- **Risk:** Low (traffic stays on your machine)
+- **Watch for:** OpenClaw running with excessive file system permissions
+- **Recommendation:** Use the built-in sandboxing features
+
+### Docker (local or VPS)
+
+- **Risk:** Low-Medium (container isolation adds a layer)
+- **Watch for:** Sensitive data in `.env` files with loose permissions
+- **Recommendation:** Set `.env` file permissions to `600` (owner read/write only)
+
+```bash
+chmod 600 ~/openclaw-docker/.env
+```
+
+### VPS (public)
+
+- **Risk:** Medium (exposed to the internet)
+- **Watch for:** Open ports, weak SSH configuration, unpatched OS
+- **Recommendation:** Always use SSH keys (never passwords), keep the OS updated, minimize open ports
+
+### VPS + Tailscale
+
+- **Risk:** Low (Gateway not publicly accessible)
+- **Watch for:** Tailscale device compromise (if someone gets your Tailscale credentials)
+- **Recommendation:** Enable Tailscale MFA, review connected devices regularly
+
+For a complete security guide, see the [Network Security & Checklist](/security/network-security).
+
+---
+
+## Backups
+
+Regardless of deployment approach, back up your OpenClaw data:
+
+### What to Back Up
+
+- **`config/`** — Your SOUL.md, USER.md, skills, cron jobs, channel configurations
+- **`data/`** — Memory, conversation history, stored files
+- **`.env`** — Your API keys and secrets
+
+### Simple Backup Script
+
+```bash
+#!/bin/bash
+# backup-openclaw.sh
+
+BACKUP_DIR="$HOME/openclaw-backups"
+DATE=$(date +%Y-%m-%d)
+SOURCE="$HOME/openclaw-docker"
+
+mkdir -p "$BACKUP_DIR"
+
+tar -czf "$BACKUP_DIR/openclaw-backup-$DATE.tar.gz" \
+  --exclude='logs' \
+  "$SOURCE/config" \
+  "$SOURCE/data" \
+  "$SOURCE/.env"
+
+# Keep only last 30 backups
+ls -t "$BACKUP_DIR"/openclaw-backup-*.tar.gz | tail -n +31 | xargs rm -f 2>/dev/null
+
+echo "Backup complete: $BACKUP_DIR/openclaw-backup-$DATE.tar.gz"
+```
+
+Set it to run daily with cron:
+
+```bash
+crontab -e
+# Add this line:
+0 2 * * * /home/openclaw/backup-openclaw.sh
+```
+
+---
+
+## What's Next
+
+- **[Cost Management](/advanced/cost-management)** — Optimize your API spending across all deployment options
+- **[Voice & Talk Mode](/advanced/voice)** — Set up voice capabilities (especially useful with an always-on VPS)
+- **[Network Security & Checklist](/security/network-security)** — Harden your deployment
+- **[Sub-Agents](/advanced/sub-agents)** — Run parallel agent workflows on your always-on server

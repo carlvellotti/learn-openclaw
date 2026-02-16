@@ -1,0 +1,676 @@
+---
+title: "OpenClaw Cheat Sheet — Quick Reference"
+description: "The OpenClaw quick reference you'll bookmark. Architecture overview, config files, CLI commands, channel setup, security defaults, cron examples, and common troubleshooting — all on one page."
+keywords: "openclaw cheat sheet, openclaw quick reference, openclaw commands, openclaw cheatsheet, openclaw config, openclaw cli, openclaw troubleshooting"
+---
+
+# OpenClaw Cheat Sheet
+
+Everything you need on one page. Bookmark this.
+
+---
+
+## 1. Architecture at a Glance
+
+```
+You ──▶ Channel ──▶ Gateway ──▶ Agent ──▶ Skill
+                        │                    │
+                        ▼                    ▼
+                     Memory              External APIs
+```
+
+| Component | One-Line Description |
+|---|---|
+| **Gateway** | The central brain — routes messages, calls AI models, coordinates everything. Runs at `ws://127.0.0.1:18789`. |
+| **Channels** | Communication bridges — iMessage, Slack, WhatsApp, Telegram, Discord, Signal, Teams, WebChat. |
+| **Agents** | AI model instances that handle tasks. Simple questions use one agent; complex tasks spawn sub-agents. |
+| **Skills** | Extensions from ClawHub that add capabilities — calendar, email, web search, smart home, and more. |
+| **Memory** | Persistent knowledge store — remembers facts, preferences, and conversation history across sessions. |
+| **Plugins** | Low-level infrastructure — filesystem access, HTTP requests, database queries. Skills are built on top of these. |
+| **Nodes** | Device connectors — link iOS, Android, and macOS devices for device-specific features. |
+| **Pi Runtime** | Execution sandbox where agents run with access to configured tools and skills. |
+| **Sessions** | Conversation contexts — short (single Q&A) or long-running (multi-day projects). |
+| **Lobster** | Visual workflow builder — chain actions into automations, similar to Zapier but with AI reasoning at each step. |
+
+---
+
+## 2. Key Config Files
+
+All personality and behavior files live in `~/clawd/`. The main system config lives in `~/.openclaw/`.
+
+| File | Location | Purpose |
+|---|---|---|
+| `openclaw.json` | `~/.openclaw/` | Main configuration — API keys, model settings, channel configs, cron jobs |
+| `SOUL.md` | `~/clawd/` | Agent personality — tone, values, communication style, behavioral guidelines |
+| `USER.md` | `~/clawd/` | Information about you — name, location, preferences, routines, context the agent needs |
+| `IDENTITY.md` | `~/clawd/` | Agent name, avatar, and public-facing identity |
+| `MEMORY.md` | `~/clawd/` | Long-term memory — facts, preferences, and learned information persisted across sessions |
+| `MESSAGING.md` | `~/clawd/` | Message routing rules — how to handle messages from different sources and channels |
+| `HEARTBEAT.md` | `~/clawd/` | Proactive behaviors — scheduled actions and check-ins the agent initiates on its own |
+| `RULES.md` | `~/clawd/` | Handling rules for specific people, situations, topics, and edge cases |
+| `AGENTS.md` | `~/clawd/` | Workspace guide — sub-agent definitions, delegation rules, multi-agent coordination |
+| `TOOLS.md` | `~/clawd/` | Environment notes — available tools, system capabilities, and integration details |
+
+### Config File Priority
+
+When the agent makes a decision, it consults these files in order:
+
+1. `RULES.md` — Hard rules always take precedence
+2. `SOUL.md` — Personality and behavioral defaults
+3. `USER.md` — Your preferences and context
+4. `MEMORY.md` — Learned facts and accumulated knowledge
+5. `MESSAGING.md` — Channel-specific routing
+
+---
+
+## 3. Essential CLI Commands
+
+### Installation and Setup
+
+```bash
+# Install OpenClaw globally
+npm install -g @anthropic-ai/openclaw
+
+# Run the onboarding wizard — sets up config, API keys, and first channel
+openclaw onboard
+
+# Verify installation
+openclaw --version
+```
+
+### Starting and Stopping
+
+```bash
+# Start the Gateway (foreground)
+openclaw start
+
+# Start the Gateway (background/daemon)
+openclaw start --daemon
+
+# Stop the Gateway
+openclaw stop
+
+# Restart the Gateway
+openclaw restart
+
+# Check if the Gateway is running and healthy
+openclaw status
+```
+
+### Configuration
+
+```bash
+# Open the main config file in your default editor
+openclaw config
+
+# View current configuration (read-only)
+openclaw config --show
+
+# Set a specific config value
+openclaw config set <key> <value>
+
+# Set your default AI model
+openclaw config set model claude-sonnet-4-20250514
+
+# Set up API keys
+openclaw config set anthropicApiKey sk-ant-xxxxx
+openclaw config set openaiApiKey sk-xxxxx
+```
+
+### Skills
+
+```bash
+# Browse available skills on ClawHub
+openclaw skill list
+
+# Search for a specific skill
+openclaw skill search <keyword>
+
+# Install a skill
+openclaw skill install <skill-name>
+
+# Uninstall a skill
+openclaw skill uninstall <skill-name>
+
+# List installed skills
+openclaw skill installed
+
+# Update all installed skills
+openclaw skill update
+```
+
+### Channels
+
+```bash
+# List available channel types
+openclaw channel list
+
+# Add a new channel
+openclaw channel add <channel-type>
+
+# Remove a channel
+openclaw channel remove <channel-name>
+
+# Test a channel connection
+openclaw channel test <channel-name>
+```
+
+### Memory and Logs
+
+```bash
+# View recent memory entries
+openclaw memory list
+
+# Search memory
+openclaw memory search <query>
+
+# Clear memory (use with caution)
+openclaw memory clear
+
+# View Gateway logs
+openclaw logs
+
+# View logs with filtering
+openclaw logs --level error
+openclaw logs --tail 50
+```
+
+### Diagnostics
+
+```bash
+# Full system diagnostic — checks all components, connections, and configs
+openclaw doctor
+
+# Test AI model connectivity
+openclaw test model
+
+# Test a specific channel
+openclaw test channel <channel-name>
+```
+
+---
+
+## 4. Channel Quick-Start
+
+### iMessage
+
+Requires macOS with Messages app configured. Uses the Shortcuts bridge.
+
+```json
+{
+  "channels": {
+    "imessage": {
+      "enabled": true,
+      "pairedDevices": ["+1234567890"]
+    }
+  }
+}
+```
+
+### Slack
+
+Create a Slack app at [api.slack.com/apps](https://api.slack.com/apps), get a Bot Token.
+
+```json
+{
+  "channels": {
+    "slack": {
+      "enabled": true,
+      "botToken": "xoxb-your-bot-token",
+      "appToken": "xapp-your-app-token",
+      "signingSecret": "your-signing-secret"
+    }
+  }
+}
+```
+
+### WhatsApp
+
+Uses the WhatsApp Business API or community bridges.
+
+```json
+{
+  "channels": {
+    "whatsapp": {
+      "enabled": true,
+      "phoneNumber": "+1234567890",
+      "bridge": "whatsapp-web"
+    }
+  }
+}
+```
+
+### Telegram
+
+Create a bot via [@BotFather](https://t.me/BotFather), get the token.
+
+```json
+{
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "botToken": "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
+    }
+  }
+}
+```
+
+### Discord
+
+Create an application at [discord.com/developers](https://discord.com/developers/applications), get a bot token.
+
+```json
+{
+  "channels": {
+    "discord": {
+      "enabled": true,
+      "botToken": "your-discord-bot-token",
+      "guildId": "your-server-id"
+    }
+  }
+}
+```
+
+### Signal
+
+Uses the signal-cli bridge. Requires a dedicated phone number.
+
+```json
+{
+  "channels": {
+    "signal": {
+      "enabled": true,
+      "phoneNumber": "+1234567890"
+    }
+  }
+}
+```
+
+### WebChat
+
+Built-in, no external setup required. Available immediately after starting the Gateway.
+
+```
+http://localhost:18789
+```
+
+---
+
+## 5. Security Defaults
+
+These are the recommended safe defaults for a new installation. Adjust only after reading the full [Security Guide](/security/dm-policies).
+
+### DM and Group Policies
+
+```json
+{
+  "security": {
+    "dmPolicy": "paired-only",
+    "groupPolicy": "allowlisted",
+    "allowlistedGroups": []
+  }
+}
+```
+
+| Policy | Setting | What It Means |
+|---|---|---|
+| `dmPolicy` | `paired-only` | Only respond to DMs from paired/approved contacts |
+| `dmPolicy` | `open` | Respond to DMs from anyone (use with caution) |
+| `groupPolicy` | `allowlisted` | Only respond in explicitly allowlisted groups |
+| `groupPolicy` | `all` | Respond in any group the agent is added to |
+
+### Sandboxing
+
+```json
+{
+  "security": {
+    "sandboxEnabled": true,
+    "allowedPaths": ["~/Documents", "~/Downloads"],
+    "networkAccess": "restricted",
+    "maxTokensPerRequest": 4096
+  }
+}
+```
+
+### API Key Safety
+
+- Store API keys in `openclaw.json`, not in `.md` config files
+- Use environment variables as an alternative: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`
+- Never commit `~/.openclaw/openclaw.json` to version control
+- Set spending limits on your AI provider dashboards
+- Rotate keys periodically
+
+### Quick Security Checklist
+
+| Item | Safe Default | Risk If Wrong |
+|---|---|---|
+| `dmPolicy` | `paired-only` | Agent responds to strangers |
+| `groupPolicy` | `allowlisted` | Agent talks in unexpected groups |
+| `sandboxEnabled` | `true` | Agent can access full filesystem |
+| API key spending limits | Set | Runaway costs |
+| Memory access | Session-scoped | Cross-session data leakage |
+
+---
+
+## 6. Cron Job Examples
+
+Cron jobs are defined in `openclaw.json` under the `cron` array. The schedule uses standard cron syntax.
+
+### Cron Syntax Quick Reference
+
+```
+┌────────── minute (0-59)
+│ ┌──────── hour (0-23)
+│ │ ┌────── day of month (1-31)
+│ │ │ ┌──── month (1-12)
+│ │ │ │ ┌── day of week (0-7, 0 and 7 = Sunday)
+│ │ │ │ │
+* * * * *
+```
+
+| Pattern | Meaning |
+|---|---|
+| `0 7 * * *` | Every day at 7:00 AM |
+| `0 7 * * 1-5` | Weekdays at 7:00 AM |
+| `*/30 * * * *` | Every 30 minutes |
+| `0 9 * * 1` | Every Monday at 9:00 AM |
+| `0 8 1 * *` | First day of every month at 8:00 AM |
+| `0 17 * * 5` | Every Friday at 5:00 PM |
+
+### Practical Examples
+
+**Morning briefing (weekdays at 7 AM):**
+
+```json
+{
+  "schedule": "0 7 * * 1-5",
+  "prompt": "Deliver my daily briefing: weather, calendar, top tasks, and any overnight alerts.",
+  "channel": "imessage"
+}
+```
+
+**Email triage (three times daily on weekdays):**
+
+```json
+{
+  "schedule": "0 8,12,17 * * 1-5",
+  "prompt": "Check my inbox for new messages since the last check. Triage by urgency. Draft responses for routine items.",
+  "channel": "slack"
+}
+```
+
+**Weekly review (Friday at 5 PM):**
+
+```json
+{
+  "schedule": "0 17 * * 5",
+  "prompt": "Weekly review: summarize what I accomplished this week, what's still open, and what's on deck for next week. Check memory for commitments I made.",
+  "channel": "slack"
+}
+```
+
+**Competitor monitoring (Monday at 10 AM):**
+
+```json
+{
+  "schedule": "0 10 * * 1",
+  "prompt": "Weekly competitive intelligence: search for news, product updates, and social media activity from [Competitor A], [Competitor B], and [Competitor C] in the past 7 days.",
+  "channel": "slack"
+}
+```
+
+**Hydration reminder (every 2 hours during work hours):**
+
+```json
+{
+  "schedule": "0 9,11,13,15,17 * * 1-5",
+  "prompt": "Quick reminder: drink some water.",
+  "channel": "imessage"
+}
+```
+
+**Monthly invoice reminder (1st of each month):**
+
+```json
+{
+  "schedule": "0 8 1 * *",
+  "prompt": "It's the first of the month. List all active clients and the invoices I need to send today. Include amounts if I've told you.",
+  "channel": "imessage"
+}
+```
+
+---
+
+## 7. Common Troubleshooting
+
+### Gateway Will Not Start
+
+**Symptoms:** `openclaw start` exits immediately or shows a port conflict error.
+
+**Fixes:**
+
+```bash
+# Check if something else is using port 18789
+lsof -i :18789
+
+# Kill the existing process if needed
+kill -9 <PID>
+
+# Or change the port in openclaw.json
+openclaw config set port 18790
+
+# Check Node.js version (requires 22+)
+node --version
+```
+
+### Agent Not Responding to Messages
+
+**Symptoms:** You send a message through a channel but get no response. The Gateway is running.
+
+**Fixes:**
+
+1. **Check channel connection:** `openclaw channel test <channel-name>`
+2. **Check dmPolicy:** If set to `paired-only`, make sure your number/account is in the paired list
+3. **Check logs for errors:** `openclaw logs --level error --tail 20`
+4. **Verify API key:** `openclaw test model`
+5. **Restart the Gateway:** `openclaw restart`
+
+### "Model Not Found" or API Errors
+
+**Symptoms:** Errors mentioning model names, rate limits, or authentication failures.
+
+**Fixes:**
+
+```bash
+# Verify your API key is set
+openclaw config --show | grep -i apikey
+
+# Test model connectivity
+openclaw test model
+
+# Check your provider dashboard for:
+# - API key validity
+# - Spending limits reached
+# - Rate limit status
+```
+
+Common model names:
+- Anthropic: `claude-sonnet-4-20250514`, `claude-opus-4-0-20250115`
+- OpenAI: `gpt-4o`, `gpt-4o-mini`
+- Google: `gemini-2.0-flash`, `gemini-2.5-pro`
+
+### Memory Not Persisting
+
+**Symptoms:** The agent forgets things you told it in previous sessions.
+
+**Fixes:**
+
+1. **Check that memory is enabled in config:**
+   ```json
+   {
+     "memory": {
+       "enabled": true,
+       "backend": "local"
+     }
+   }
+   ```
+2. **Verify MEMORY.md exists:** `ls ~/clawd/MEMORY.md`
+3. **Check memory manually:** `openclaw memory list`
+4. **Ensure you are not clearing memory on restart** — check for `clearOnRestart: true` in your config
+
+### Cron Jobs Not Firing
+
+**Symptoms:** Scheduled tasks do not run at the expected time.
+
+**Fixes:**
+
+1. **Verify the Gateway is running:** `openclaw status`
+2. **Check cron syntax:** Use [crontab.guru](https://crontab.guru) to validate your schedule
+3. **Check timezone:** Cron schedules use your system timezone. Verify with `date`
+4. **Check the cron config is valid JSON:** Common issue is trailing commas or missing brackets
+5. **Check logs at the scheduled time:** `openclaw logs --tail 50` right after the cron should have fired
+6. **Verify the channel exists and is connected:** The cron output needs somewhere to go
+
+### High API Costs
+
+**Symptoms:** Your AI provider bill is higher than expected.
+
+**Fixes:**
+
+1. **Review cron frequency:** Every-minute crons add up fast. Do you really need `*/1 * * * *`?
+2. **Set `maxTokensPerRequest`** in your security config to cap individual responses
+3. **Use cheaper models for simple tasks:** Route briefings to `gpt-4o-mini` or `claude-haiku`
+4. **Check for runaway sessions:** `openclaw logs | grep "session"` to look for stuck loops
+5. **Set spending limits** on your provider dashboards (Anthropic, OpenAI, Google)
+
+---
+
+## 8. Quick Recipes
+
+Minimal copy-paste snippets for common setups.
+
+### Minimal SOUL.md
+
+```markdown
+You are my personal assistant. Be concise and direct. No pleasantries
+unless I initiate them. Prefer bullet points over paragraphs.
+When uncertain, ask rather than guess.
+```
+
+### Minimal USER.md
+
+```markdown
+## About Me
+- Name: [Your name]
+- Location: [City, State]
+- Timezone: [e.g., America/Los_Angeles]
+- Work: [Job title] at [Company]
+- Communication preference: Brief and direct
+```
+
+### Minimal RULES.md
+
+```markdown
+## General Rules
+- Never share my personal information with anyone
+- If you are unsure about something, ask before acting
+- Save important facts I tell you to memory automatically
+- When I say "remind me," create a reminder and confirm the time
+```
+
+### Minimal openclaw.json (Core Structure)
+
+```json
+{
+  "model": "claude-sonnet-4-20250514",
+  "anthropicApiKey": "sk-ant-xxxxx",
+  "port": 18789,
+  "security": {
+    "dmPolicy": "paired-only",
+    "groupPolicy": "allowlisted",
+    "sandboxEnabled": true
+  },
+  "channels": {
+    "imessage": {
+      "enabled": true,
+      "pairedDevices": ["+1234567890"]
+    }
+  },
+  "cron": [
+    {
+      "schedule": "0 7 * * *",
+      "prompt": "Good morning. Deliver my daily briefing.",
+      "channel": "imessage"
+    }
+  ],
+  "memory": {
+    "enabled": true,
+    "backend": "local"
+  }
+}
+```
+
+---
+
+## 9. Model Routing
+
+OpenClaw supports multiple AI providers simultaneously. You can route different tasks to different models based on cost and capability.
+
+| Use Case | Recommended Model | Why |
+|---|---|---|
+| Complex reasoning | `claude-opus-4-0-20250115` | Highest capability for nuanced tasks |
+| General tasks | `claude-sonnet-4-20250514` | Best balance of quality and cost |
+| Quick responses | `claude-haiku` or `gpt-4o-mini` | Fast and cheap for simple tasks |
+| Cron summaries | `gpt-4o-mini` | Low cost for routine scheduled tasks |
+| Code generation | `claude-sonnet-4-20250514` | Strong code capabilities at moderate cost |
+
+### Fallback Configuration
+
+```json
+{
+  "model": "claude-sonnet-4-20250514",
+  "fallbackModels": ["gpt-4o", "gemini-2.0-flash"],
+  "fallbackOnError": true
+}
+```
+
+If Claude is unavailable, OpenClaw will try GPT-4o, then Gemini, before failing.
+
+---
+
+## 10. Environment Variables
+
+Alternative to storing values in `openclaw.json` — useful for deployments and version control safety.
+
+| Variable | Purpose |
+|---|---|
+| `ANTHROPIC_API_KEY` | Anthropic (Claude) API key |
+| `OPENAI_API_KEY` | OpenAI (GPT) API key |
+| `GOOGLE_AI_API_KEY` | Google (Gemini) API key |
+| `OPENCLAW_PORT` | Gateway port (default: 18789) |
+| `OPENCLAW_HOME` | Config directory (default: `~/.openclaw`) |
+| `OPENCLAW_CLAWD` | Personality files directory (default: `~/clawd`) |
+| `OPENCLAW_LOG_LEVEL` | Logging level: `debug`, `info`, `warn`, `error` |
+
+Set them in your shell profile:
+
+```bash
+export ANTHROPIC_API_KEY="sk-ant-xxxxx"
+export OPENAI_API_KEY="sk-xxxxx"
+```
+
+Or in a `.env` file in `~/.openclaw/` (never commit this file).
+
+---
+
+## 11. Useful Links
+
+| Resource | URL |
+|---|---|
+| GitHub Repository | [github.com/anthropics/openclaw](https://github.com/anthropics/openclaw) |
+| ClawHub (Skills) | [clawhub.com](https://clawhub.com) |
+| Community Discord | [discord.gg/openclaw](https://discord.gg/openclaw) |
+| Subreddit | [r/OpenClaw](https://reddit.com/r/OpenClaw) |
+| This Guide | [learnopenclaw.com](https://learnopenclaw.com) |
+| Security Checklist | [learnopenclaw.com/security/network-security](/security/network-security) |
+| Use Case Playbooks | [learnopenclaw.com/playbooks](/playbooks) |

@@ -1,0 +1,99 @@
+---
+title: 'ClawHub Vetting — Safely Install OpenClaw Community Skills'
+description: 'How to vet ClawHub skills before installing them. Check authors, read source code, spot red flags, and install with sandboxed permissions to protect your OpenClaw agent.'
+keywords: 'openclaw clawhub, openclaw skills security, openclaw skill vetting, openclaw malicious skills, clawhub safe install, openclaw supply chain attack'
+---
+
+# ClawHub Skill Vetting: Trust but Verify
+
+ClawHub is OpenClaw's community skill marketplace — think of it like an app store for agent capabilities. There are thousands of skills available: email management, calendar integration, research tools, home automation, and more.
+
+The problem: **over 400 malicious or unsafe skills have been identified in ClawHub.** These range from skills that exfiltrate API keys to ones that inject hidden instructions into the agent's context.
+
+---
+
+## How to Vet a Skill Before Installing
+
+**1. Check the Author**
+
+- Is the author a known contributor to the OpenClaw project?
+- Do they have other well-reviewed skills?
+- Is their GitHub profile real and active?
+
+**2. Check the Stars and Downloads**
+
+- Skills with very few downloads could be new and unvetted
+- High stars with low recent downloads could indicate a stale or abandoned skill
+- Look for a consistent download trend, not just a spike
+
+**3. Read the Code**
+
+This is the most important step. Before installing any skill:
+
+```bash
+# Clone the skill repo first — do NOT install blindly
+git clone https://github.com/author/skill-name
+cd skill-name
+
+# Look at what files exist
+find . -type f -name "*.ts" -o -name "*.js" -o -name "*.py"
+
+# Search for suspicious patterns
+grep -r "fetch\|axios\|http\|request" --include="*.ts" --include="*.js"
+grep -r "env\|secret\|key\|token\|password" --include="*.ts" --include="*.js"
+grep -r "eval\|exec\|spawn\|child_process" --include="*.ts" --include="*.js"
+```
+
+**Red flags to look for:**
+
+| Pattern | Why It Is Suspicious |
+|---------|---------------------|
+| Outbound HTTP requests to unknown domains | Could be exfiltrating data |
+| Reading environment variables | Could be stealing API keys |
+| Using `eval()` or `exec()` | Could execute arbitrary code |
+| Obfuscated or minified source code | Hiding malicious behavior |
+| Requesting permissions beyond stated purpose | A "weather" skill should not need shell access |
+| No `README` or documentation | Low effort, potentially malicious |
+
+**4. Check Recent Activity**
+
+```bash
+# Look at recent commits
+git log --oneline -20
+
+# Check if there were any suspicious recent changes
+git diff HEAD~5..HEAD
+```
+
+A skill that was dormant for months and suddenly received a large update could have been compromised (supply chain attack).
+
+**5. Use the Community**
+
+The OpenClaw Discord and GitHub Discussions are active communities. Before installing a skill you are unsure about, search for it in these forums. Others may have already reviewed it.
+
+---
+
+## Installing Skills Safely
+
+Even after vetting, install skills with restricted permissions:
+
+```bash
+# Install with restricted permissions
+openclaw skill install author/skill-name --sandbox
+
+# Review what permissions the skill requests
+openclaw skill inspect author/skill-name
+```
+
+The `--sandbox` flag runs the skill in an isolated environment where it cannot access your file system, environment variables, or other skills.
+
+---
+
+## Next Steps
+
+With your skills vetted, make sure the rest of your setup is hardened:
+
+- **[Network Security & Checklist](/security/network-security)** — Lock down your gateway and work through the full security checklist
+- **[DM Policies & Pairing](/security/dm-policies)** — Control who can talk to your agent
+- **[Sandboxing](/security/sandboxing)** — Contain the blast radius with sandbox mode and Docker
+- **[API Keys & Tool Policies](/security/api-keys)** — Secure your credentials and control tool permissions

@@ -1,0 +1,641 @@
+---
+title: "Use Case Playbooks — What to Actually Do with OpenClaw"
+description: "Practical playbooks for the top 10 OpenClaw use cases. Step-by-step setup instructions for personal assistant, content creation, research, daily briefings, email triage, meeting prep, finance, smart home, learning, and small business workflows."
+keywords: "openclaw use cases, openclaw examples, what can openclaw do, openclaw workflows, openclaw automation, openclaw playbooks, openclaw personal assistant, openclaw daily briefing"
+---
+
+# Use Case Playbooks
+
+You have OpenClaw installed. Your SOUL.md is written. You can send it a message and get a response. Now what?
+
+This is where most people stall. The gap between "it works" and "it is useful" is entirely about knowing what to build. This page gives you ten concrete playbooks — real workflows that people are running today. Each one includes what it does, what you need, and how to set it up.
+
+Pick one. Get it working. Then come back for the next one.
+
+---
+
+## How to Read These Playbooks
+
+Each playbook follows the same format:
+
+- **What it does** — A plain description of the workflow
+- **Complexity** — Beginner, Intermediate, or Advanced
+- **Channels** — Which communication channels work best
+- **Skills needed** — What to install from ClawHub or configure manually
+- **Setup steps** — How to get it running
+
+Complexity levels mean:
+
+| Level | What It Means |
+|---|---|
+| **Beginner** | Config files and cron jobs only. No external integrations. |
+| **Intermediate** | Requires one or two external services (calendar API, email access, etc.). |
+| **Advanced** | Multiple integrations, sub-agents, or custom skill development. |
+
+---
+
+## 1. Personal Life Assistant
+
+**What it does:** Your always-on assistant that handles the daily logistics of being a human. Morning briefings, calendar awareness, reminders, weather context, and commute updates. This is the foundational use case — the one that makes OpenClaw feel like it was worth installing.
+
+**Complexity:** Beginner
+
+**Best channels:** iMessage, WhatsApp, Telegram
+
+**Skills needed:** Calendar integration, weather skill, location/commute skill (optional)
+
+### Setup
+
+**Step 1: Write your USER.md with daily context.**
+
+Your assistant needs to know the basics about your life. Add this kind of information to `~/clawd/USER.md`:
+
+```markdown
+## Daily Life
+- I live in Seattle, WA
+- I commute to downtown via the 545 bus or by car (I-90 bridge)
+- I wake up around 7 AM on weekdays, 8:30 AM on weekends
+- I prefer concise morning messages — no more than 10 lines
+- My partner's name is Alex — remind me about their schedule too
+```
+
+**Step 2: Set up a morning briefing cron job.**
+
+Add this to your `HEARTBEAT.md` or configure it in `openclaw.json`:
+
+```json
+{
+  "cron": [
+    {
+      "schedule": "0 7 * * 1-5",
+      "prompt": "Good morning. Give me today's weather in Seattle, my calendar events for today, and any reminders I've set. Keep it under 10 lines.",
+      "channel": "imessage"
+    }
+  ]
+}
+```
+
+**Step 3: Add standing reminders to RULES.md.**
+
+```markdown
+## Reminders
+- If I mention needing to do something "tomorrow" or "this week," save it as a reminder and follow up at an appropriate time.
+- Every Sunday at 6 PM, ask me if I want to plan my week.
+```
+
+**Step 4: Test it.** Send your assistant a message like "What's my day look like?" and verify it pulls calendar data and weather. Then wait for the morning cron to fire and confirm it arrives through your chosen channel.
+
+**What good looks like:** You wake up, check your phone, and your assistant has already sent you a concise summary of your day — weather, meetings, reminders, and anything else you configured. You reply with "push my 2pm to 3pm" and it handles it.
+
+---
+
+## 2. Content Creation Pipeline
+
+**What it does:** A multi-stage workflow that takes you from raw idea to published content. Research, outlining, drafting, editing, and scheduling — with your assistant handling the grunt work at each stage. Can also monitor social media for engagement and trending topics in your niche.
+
+**Complexity:** Advanced
+
+**Best channels:** Slack (for longer-form work), iMessage (for quick triggers)
+
+**Skills needed:** Web search/browsing, file system access, social media APIs (optional), scheduling tool integration (optional)
+
+### Setup
+
+**Step 1: Define your content workflow in SOUL.md.**
+
+```markdown
+## Content Creation
+When I ask you to help me create content, follow this pipeline:
+1. RESEARCH — Search for recent sources, summarize key points, identify angles
+2. OUTLINE — Propose a structured outline with section headers and key points
+3. DRAFT — Write a full draft based on the approved outline
+4. EDIT — Review for clarity, tone, and accuracy. Flag anything uncertain.
+5. FINALIZE — Format for the target platform
+
+Always ask which stage I want before starting. Never skip straight to drafting.
+```
+
+**Step 2: Install research skills.**
+
+```bash
+openclaw skill install web-search
+openclaw skill install web-scraper
+```
+
+**Step 3: Set up a content monitoring cron.**
+
+```json
+{
+  "schedule": "0 9 * * 1,3,5",
+  "prompt": "Search for trending topics in [your niche] from the past 48 hours. Summarize the top 5 trends with links. Suggest 2-3 content ideas based on what's gaining traction.",
+  "channel": "slack"
+}
+```
+
+**Step 4: Create a content ideas capture rule.**
+
+Add to your `RULES.md`:
+
+```markdown
+## Content Ideas
+- When I say "content idea:" followed by a description, save it to my content ideas list with today's date.
+- When I say "show me content ideas," list all saved ideas sorted by date.
+```
+
+**What good looks like:** On Monday morning, your assistant sends you trending topics in your niche. You reply "content idea: write a breakdown of [topic]." Later, you say "let's work on the [topic] piece" and it walks you through research, outline, draft, and edit — each as a separate step you approve before moving forward.
+
+---
+
+## 3. Research Assistant
+
+**What it does:** Ongoing monitoring and summarization of topics you care about. Your assistant tracks specific subjects, summarizes new articles, compiles competitive intelligence, and maintains a running knowledge base you can query at any time.
+
+**Complexity:** Intermediate
+
+**Best channels:** Slack, Telegram, WebChat
+
+**Skills needed:** Web search, web scraping, memory (for storing findings)
+
+### Setup
+
+**Step 1: Define your research topics in USER.md.**
+
+```markdown
+## Research Interests
+- AI agent frameworks (especially open-source alternatives)
+- Product management tools and methodologies
+- Competitor: [Company A], [Company B], [Company C]
+- Industry: B2B SaaS, developer tools
+```
+
+**Step 2: Set up monitoring cron jobs.**
+
+```json
+{
+  "cron": [
+    {
+      "schedule": "0 8 * * 1-5",
+      "prompt": "Search for news and articles published in the last 24 hours about [topic]. Summarize the top 3 most relevant findings. Include links.",
+      "channel": "slack"
+    },
+    {
+      "schedule": "0 10 * * 1",
+      "prompt": "Do a weekly competitive intelligence check on [Company A], [Company B], and [Company C]. Look for product launches, blog posts, hiring patterns, and social media activity. Summarize findings.",
+      "channel": "slack"
+    }
+  ]
+}
+```
+
+**Step 3: Add a research storage rule.**
+
+In `RULES.md`:
+
+```markdown
+## Research
+- When you share research findings, always store key takeaways in memory with the topic tag.
+- When I ask "what do we know about [topic]," recall all stored findings on that topic.
+```
+
+**What good looks like:** Every morning you get a concise digest of what happened in your areas of interest. On Mondays you get a competitive roundup. At any point you can ask "what do we know about [competitor]'s pricing changes?" and get a compiled answer drawn from weeks of accumulated research.
+
+---
+
+## 4. Daily Briefing System
+
+**What it does:** An automated morning summary that pulls together everything you need to start your day — news, calendar, tasks, weather, and any overnight notifications. This is the single most popular use case in the OpenClaw community and often the first thing people set up.
+
+**Complexity:** Beginner
+
+**Best channels:** iMessage, WhatsApp, Telegram
+
+**Skills needed:** Calendar integration, weather skill, news/RSS skill (optional)
+
+### Setup
+
+**Step 1: Design your briefing format in SOUL.md.**
+
+```markdown
+## Daily Briefing Format
+When delivering a morning briefing, use this structure:
+1. One-line weather summary
+2. Calendar events for today (time and title only)
+3. Top 3 tasks or reminders due today
+4. One interesting news item from my areas of interest (optional)
+
+Keep the entire briefing under 15 lines. No greetings or pleasantries — just the information.
+```
+
+**Step 2: Configure the cron job.**
+
+```json
+{
+  "schedule": "0 7 * * *",
+  "prompt": "Deliver my daily briefing.",
+  "channel": "imessage"
+}
+```
+
+That is all you need for a basic version. The cron fires at 7 AM daily, the prompt references the briefing format you defined in SOUL.md, and it arrives through iMessage like a text from a friend.
+
+**Step 3: Iterate on the format.**
+
+After a few days, you will know what is useful and what is noise. Common adjustments:
+
+- Remove the news item if it feels irrelevant
+- Add "hours until next meeting" so you know how much focus time you have
+- Add a weekend variant that skips calendar and tasks
+- Adjust timing — some people prefer 6:30 AM, others 8 AM
+
+**What good looks like:** You glance at your phone in the morning and everything you need is already there in a clean, scannable format. No apps to open, no dashboards to check. Just the information, delivered.
+
+---
+
+## 5. Email Triage
+
+**What it does:** Your assistant reads your inbox, categorizes messages by urgency, drafts responses to routine emails, and flags anything that needs your personal attention. This is not about replacing your email client — it is about making sure you never miss something important and never waste time on something that does not matter.
+
+**Complexity:** Intermediate
+
+**Best channels:** Slack (for triage summaries), iMessage (for urgent flags)
+
+**Skills needed:** Email integration (Gmail API or IMAP), file system access
+
+### Setup
+
+**Step 1: Install and configure email access.**
+
+```bash
+openclaw skill install email-reader
+```
+
+You will need to configure OAuth credentials for Gmail or provide IMAP credentials for other providers. Follow the skill's setup instructions — this is the most involved step.
+
+**Step 2: Define triage rules in RULES.md.**
+
+```markdown
+## Email Triage Rules
+- **Urgent:** Emails from my manager, direct reports, or containing words like "urgent," "ASAP," "deadline today." Flag these immediately via iMessage.
+- **Respond:** Emails that need a reply but are not time-sensitive. Draft a response for my review.
+- **FYI:** Newsletters, automated notifications, CC'd threads. Summarize in one line each.
+- **Ignore:** Marketing emails, cold outreach, spam that made it through filters. Do not surface these.
+```
+
+**Step 3: Set up the triage cron.**
+
+```json
+{
+  "cron": [
+    {
+      "schedule": "0 8,12,17 * * 1-5",
+      "prompt": "Check my email inbox for new messages since the last check. Triage them according to my rules. Send me the summary.",
+      "channel": "slack"
+    }
+  ]
+}
+```
+
+**Step 4: Add a draft review workflow.**
+
+In your `SOUL.md`:
+
+```markdown
+## Email Drafts
+When drafting email responses:
+- Match the tone and length of the original sender
+- Never commit me to specific times without checking my calendar
+- Always present drafts for my approval before sending
+- Format as: "TO: [recipient] | SUBJECT: [subject]" followed by the draft body
+```
+
+**What good looks like:** Three times a day, you get a clean summary in Slack — two urgent items (already flagged to your phone), three items with draft responses ready for your approval, and a one-line summary of everything else. You review the drafts, approve or edit them, and your inbox is handled in five minutes instead of forty-five.
+
+---
+
+## 6. Meeting Prep
+
+**What it does:** Before every meeting, your assistant pulls context on attendees, summarizes past interactions, gathers relevant documents, and prepares talking points. You walk into every meeting briefed and prepared without spending fifteen minutes doing it manually.
+
+**Complexity:** Intermediate
+
+**Best channels:** Slack, iMessage
+
+**Skills needed:** Calendar integration, web search, memory, CRM or contacts integration (optional)
+
+### Setup
+
+**Step 1: Configure meeting prep timing.**
+
+```json
+{
+  "cron": [
+    {
+      "schedule": "*/30 8-18 * * 1-5",
+      "prompt": "Check my calendar. If I have a meeting starting in the next 30 minutes that I haven't been prepped for yet, prepare a meeting brief.",
+      "channel": "slack"
+    }
+  ]
+}
+```
+
+**Step 2: Define what a meeting brief looks like in SOUL.md.**
+
+```markdown
+## Meeting Prep Format
+When preparing a meeting brief, include:
+1. Meeting title, time, and attendees
+2. For each attendee: their role/title and my last interaction with them (from memory)
+3. The likely topic or agenda (infer from the meeting title and any attached documents)
+4. 2-3 suggested talking points or questions
+5. Any action items I owe to any of the attendees
+
+Keep the entire brief under 20 lines.
+```
+
+**Step 3: Build attendee context over time.**
+
+In `RULES.md`:
+
+```markdown
+## People Context
+- After any meeting, if I share notes or takeaways, store them in memory tagged with the attendees' names.
+- When I mention someone by name, check memory for previous context and mention it if relevant.
+```
+
+This playbook gets more powerful over time as your memory system accumulates context on the people you work with.
+
+**What good looks like:** Thirty minutes before your 2 PM with a client, you get a Slack message: their role, the last time you spoke, what you discussed, the open action items, and three suggested questions. You skim it in 60 seconds and walk in prepared.
+
+---
+
+## 7. Trading and Finance
+
+**What it does:** Portfolio monitoring, market news alerts, research automation, and financial data tracking. This is one of the most popular use cases in the OpenClaw community — finance-focused users were among the earliest adopters. Note: this is for monitoring and research, not for executing trades.
+
+**Complexity:** Advanced
+
+**Best channels:** Telegram (popular with traders), Slack, iMessage
+
+**Skills needed:** Web search, financial data APIs, custom skills for brokerage data (optional)
+
+### Setup
+
+**Step 1: Define your portfolio and watchlist in USER.md.**
+
+```markdown
+## Finance
+- Portfolio: AAPL, MSFT, NVDA, VOO, BND
+- Watchlist: TSLA, AMZN, META, PLTR
+- Crypto: BTC, ETH, SOL
+- Alert thresholds: Notify me if any holding moves more than 3% in a day
+- I care about: Fed announcements, earnings reports, macro trends
+```
+
+**Step 2: Set up market monitoring crons.**
+
+```json
+{
+  "cron": [
+    {
+      "schedule": "0 6 * * 1-5",
+      "prompt": "Pre-market briefing: Check futures, any overnight news affecting my portfolio or watchlist, and upcoming earnings this week. Keep it concise.",
+      "channel": "telegram"
+    },
+    {
+      "schedule": "0 16 * * 1-5",
+      "prompt": "Market close summary: How did my portfolio holdings perform today? Any notable movers on my watchlist? Summarize in 10 lines or fewer.",
+      "channel": "telegram"
+    },
+    {
+      "schedule": "0 9 * * 6",
+      "prompt": "Weekly market recap: Summarize this week's market activity relevant to my portfolio and watchlist. Include any upcoming events for next week.",
+      "channel": "telegram"
+    }
+  ]
+}
+```
+
+**Step 3: Set up alert rules.**
+
+In `RULES.md`:
+
+```markdown
+## Financial Alerts
+- If a portfolio holding drops more than 3% intraday, alert me immediately via iMessage.
+- If there's breaking news about any company in my portfolio or watchlist, summarize it and send via the channel I'm currently active on.
+- Never give investment advice. Present data and let me make decisions.
+```
+
+**What good looks like:** At 6 AM you get a pre-market brief. Throughout the day, you get alerted only when something material happens. At market close you get a summary. On Saturday you get a weekly recap. All data, no opinion, no noise.
+
+---
+
+## 8. Smart Home and Life Automation
+
+**What it does:** Coordination of household logistics — grocery lists, household tasks, family coordination, recurring chores, and integration with smart home devices. This turns OpenClaw into the operating system for your household.
+
+**Complexity:** Intermediate
+
+**Best channels:** iMessage (for family group coordination), WhatsApp
+
+**Skills needed:** List management, calendar integration, smart home skills (HomeKit/Home Assistant, optional)
+
+### Setup
+
+**Step 1: Define household context in USER.md.**
+
+```markdown
+## Household
+- Family: Me, Alex (partner), two kids (ages 8 and 5)
+- Grocery store: We shop at Costco (Saturdays) and QFC (midweek)
+- Recurring needs: dog food every 3 weeks, kids' vitamins monthly
+- Meal planning: We try to plan dinners Sunday for the whole week
+```
+
+**Step 2: Set up household cron jobs.**
+
+```json
+{
+  "cron": [
+    {
+      "schedule": "0 18 * * 4",
+      "prompt": "It's Thursday evening. Ask me what we need from the grocery store this weekend. Start with any recurring items that might be due. Compile into a list I can share.",
+      "channel": "imessage"
+    },
+    {
+      "schedule": "0 10 * * 0",
+      "prompt": "It's Sunday morning. Ask me about meal planning for the week. Suggest 5 dinner ideas based on what's been working (check memory for past meal plans).",
+      "channel": "imessage"
+    }
+  ]
+}
+```
+
+**Step 3: Add a shared list system.**
+
+In `RULES.md`:
+
+```markdown
+## Lists
+- Maintain a running grocery list. When I say "add [item] to the grocery list," add it.
+- When I say "show me the grocery list," display it organized by store section.
+- Maintain a household to-do list separately from grocery.
+- When I say "what needs doing around the house," show the household to-do list.
+```
+
+**What good looks like:** Thursday evening your assistant asks about groceries for the weekend, pre-populated with recurring items. Sunday it helps plan meals. Throughout the week, anyone in the family can text the assistant "add milk to the list" and it is captured. Saturday morning you pull up the grocery list, organized by aisle, and it takes half the time.
+
+---
+
+## 9. Learning and Education
+
+**What it does:** Structured learning support — flashcard generation from your notes, spaced repetition scheduling, research compilation on topics you are studying, and progress tracking. Useful for anyone studying for certifications, learning a new domain, or doing ongoing professional development.
+
+**Complexity:** Intermediate
+
+**Best channels:** Slack (for study sessions), iMessage (for flashcard quizzes)
+
+**Skills needed:** Memory (for knowledge tracking), web search, file system access
+
+### Setup
+
+**Step 1: Define what you are learning in USER.md.**
+
+```markdown
+## Learning
+- Currently studying: AWS Solutions Architect certification
+- Study schedule: Weekday mornings 6-7 AM, Saturday mornings 9-11 AM
+- Learning style: I prefer examples over theory. Quiz me frequently.
+- Weak areas: Networking (VPCs, subnets), IAM policies
+```
+
+**Step 2: Set up a study session cron.**
+
+```json
+{
+  "cron": [
+    {
+      "schedule": "0 6 * * 1-5",
+      "prompt": "Study session time. Quiz me on 5 flashcard questions from my current study topic. Focus on my weak areas. After I answer, tell me which I got right and explain the ones I missed.",
+      "channel": "imessage"
+    },
+    {
+      "schedule": "0 9 * * 6",
+      "prompt": "Saturday study session. Review what I studied this week. Identify areas where I'm improving and areas that still need work. Suggest today's study focus.",
+      "channel": "slack"
+    }
+  ]
+}
+```
+
+**Step 3: Add a note capture workflow.**
+
+In `RULES.md`:
+
+```markdown
+## Learning Notes
+- When I share study notes or paste content from a textbook, extract the key concepts and generate flashcard-style Q&A pairs. Store them in memory.
+- When I say "quiz me," pull from stored flashcards using spaced repetition — prioritize cards I've gotten wrong recently.
+- Track my accuracy over time and tell me when I ask.
+```
+
+**What good looks like:** Every weekday morning at 6 AM, you get five quiz questions on your phone. You answer while having coffee. It tells you which you got right, explains the ones you missed, and stores your accuracy. Saturday morning, it reviews your week and focuses your study session on the areas you are weakest. Over time, the flashcard pool grows from your own notes and the quizzes get smarter.
+
+---
+
+## 10. Small Business Operations
+
+**What it does:** Client management, invoice reminders, social media scheduling, and basic operational coordination for freelancers, consultants, and small business owners. OpenClaw becomes your back-office assistant, handling the administrative overhead that eats into productive time.
+
+**Complexity:** Advanced
+
+**Best channels:** Slack (for business operations), iMessage (for client-facing alerts)
+
+**Skills needed:** Email integration, calendar integration, web search, CRM skills (optional), invoicing tool integration (optional)
+
+### Setup
+
+**Step 1: Define your business context in USER.md.**
+
+```markdown
+## Business
+- Business: [Your Business Name], [type of business]
+- Clients: [Client A] — monthly retainer, [Client B] — project-based, [Client C] — hourly
+- Invoicing: I send invoices on the 1st of each month via [tool]
+- Social media: Active on LinkedIn and Twitter, posting schedule is Tue/Thu/Sat
+- Key metrics I track: monthly revenue, client satisfaction, pipeline value
+```
+
+**Step 2: Set up operational cron jobs.**
+
+```json
+{
+  "cron": [
+    {
+      "schedule": "0 9 * * 1",
+      "prompt": "Weekly business review. Remind me of: invoices due this week, client deliverables due, any follow-ups I owe. Check my calendar for client meetings this week and prep brief context for each.",
+      "channel": "slack"
+    },
+    {
+      "schedule": "0 8 1 * *",
+      "prompt": "It's the first of the month. Remind me to send invoices to all active clients. List each client, their rate, and the amount due based on what I've told you.",
+      "channel": "imessage"
+    },
+    {
+      "schedule": "0 7 * * 2,4,6",
+      "prompt": "Today is a posting day. Check my content ideas list and suggest a social media post for today. Draft it in my voice based on SOUL.md. Present for approval before posting.",
+      "channel": "slack"
+    }
+  ]
+}
+```
+
+**Step 3: Add client management rules.**
+
+In `RULES.md`:
+
+```markdown
+## Client Management
+- Maintain a record of each client: last contact date, open deliverables, notes from our last interaction.
+- If I haven't contacted a client in 2 weeks, flag it in my Monday review.
+- When I mention a client by name, always pull up their context from memory.
+- Track all client commitments I make and remind me of deadlines.
+```
+
+**What good looks like:** Monday morning you get a business review — which invoices to send, which deliverables are due, which clients you owe a follow-up. Tuesday morning you get a draft social media post ready for approval. The first of the month, you get a complete invoicing checklist. Client context is always at your fingertips because the system has been tracking it.
+
+---
+
+## Combining Playbooks
+
+These playbooks are not mutually exclusive. Most people run three to five of them simultaneously. A common combination:
+
+- **Daily Briefing** (the foundation everyone starts with)
+- **Email Triage** (high-impact time saver)
+- **Personal Life Assistant** (reminders, calendar, weather)
+- **One domain-specific playbook** (research, finance, business, etc.)
+
+Start with the Daily Briefing. Get it working and tuned to your preferences over a week or two. Then layer in the next one. Trying to set up all ten at once is a recipe for frustration.
+
+---
+
+## Building Your Own Playbooks
+
+Once you have a few playbooks running, you will start seeing patterns for workflows specific to your life that nobody else has built. The structure is always the same:
+
+1. **Define the context** in `USER.md` — what does the assistant need to know?
+2. **Define the behavior** in `SOUL.md` — how should it handle this type of task?
+3. **Define the rules** in `RULES.md` — what are the guardrails and special cases?
+4. **Schedule the triggers** in cron — when should it run proactively?
+5. **Pick the channel** — where should the output go?
+
+Every playbook is just a combination of these five elements. The magic is not in any single feature of OpenClaw. It is in the combination of always-on availability, memory, scheduling, and multi-channel delivery — configured for your specific life.
+
+---
+
+## Next Steps
+
+- **New to OpenClaw?** Start with [What is OpenClaw?](/getting-started/what-is-openclaw) to understand the architecture
+- **Need to lock things down?** Read the [Security Guide](/security/dm-policies) before enabling email or calendar access
+- **Want a quick reference?** The [Cheat Sheet](/cheatsheet) has all the commands and config files in one place
+- **Curious about channels?** The [Channel Guide](/channels/channel-guide) helps you pick the right ones for your playbooks

@@ -1,0 +1,234 @@
+---
+title: 'Network Security & Checklist — Lock Down Your OpenClaw Gateway'
+description: 'Secure your OpenClaw gateway, configure remote access safely, set up logging and auditing, and work through the complete security checklist to harden your installation.'
+keywords: 'openclaw network security, openclaw gateway, openclaw remote access, openclaw tailscale, openclaw logging, openclaw security checklist, openclaw audit, openclaw incident response'
+---
+
+# Network Security: Keeping the Gateway Locked
+
+The OpenClaw gateway is the HTTP server that handles communication between your channels, the web interface, and the agent's core. By default, it listens on `127.0.0.1` (localhost) — meaning only your machine can access it.
+
+---
+
+## Do Not Expose the Gateway
+
+```yaml
+# DEFAULT (safe) - only accessible from your machine
+gateway:
+  host: 127.0.0.1
+  port: 3000
+
+# DANGEROUS - accessible from your entire network
+gateway:
+  host: 0.0.0.0  # DO NOT do this
+  port: 3000
+```
+
+Binding to `0.0.0.0` means anyone on your local network (or the internet, if port-forwarded) can access your agent's gateway. This includes:
+
+- The web chat interface (full agent access)
+- API endpoints (can send commands to your agent)
+- Health check and debug endpoints (can leak system info)
+
+---
+
+## If You Need Remote Access
+
+There are legitimate reasons to access your agent remotely — maybe it runs on a home server and you want to reach it from your phone. The safe way to do this:
+
+**Option 1: Tailscale (Recommended)**
+
+```bash
+# Install Tailscale on your server and devices
+# Your OpenClaw gateway stays on 127.0.0.1
+# Access it via your Tailscale IP (e.g., 100.x.y.z:3000)
+```
+
+Tailscale creates an encrypted mesh VPN between your devices. The gateway never touches the public internet.
+
+**Option 2: VPN or WireGuard**
+
+Similar to Tailscale but self-hosted. Set up a WireGuard tunnel between your devices and the server running OpenClaw.
+
+**Option 3: Reverse Proxy with Auth (Advanced)**
+
+If you must expose the gateway, put it behind a reverse proxy (Nginx, Caddy) with authentication:
+
+```nginx
+server {
+    listen 443 ssl;
+    server_name openclaw.yourdomain.com;
+
+    ssl_certificate /path/to/cert.pem;
+    ssl_certificate_key /path/to/key.pem;
+
+    location / {
+        auth_basic "OpenClaw";
+        auth_basic_user_file /etc/nginx/.htpasswd;
+        proxy_pass http://127.0.0.1:3000;
+    }
+}
+```
+
+**Never** expose the gateway directly to the internet without authentication and TLS.
+
+---
+
+## Monitoring Network Activity
+
+Keep an eye on what your agent is doing on the network:
+
+```bash
+# Watch outbound connections from the OpenClaw process
+lsof -i -P -n | grep openclaw
+
+# Monitor in real time
+watch -n 5 'lsof -i -P -n | grep openclaw'
+```
+
+If you see connections to domains you do not recognize, investigate immediately. It could be a malicious skill phoning home.
+
+---
+
+## Logging and Auditing
+
+Security without visibility is guesswork. Enable logging so you can review what your agent has been doing.
+
+### What to Log
+
+```yaml
+logging:
+  level: info  # Options: debug, info, warn, error
+  file: ~/.openclaw/logs/openclaw.log
+  maxSize: 50MB
+  maxFiles: 10
+  logToolCalls: true      # Log every tool invocation
+  logMessages: true       # Log all incoming/outgoing messages
+  logApiCalls: true       # Log external API calls
+  redactSecrets: true     # Mask API keys in logs
+```
+
+### Regular Review
+
+Make it a habit to review logs periodically:
+
+```bash
+# Check for shell command executions
+grep "tool:shell" ~/.openclaw/logs/openclaw.log
+
+# Check for outbound messages
+grep "tool:send_message" ~/.openclaw/logs/openclaw.log
+
+# Check for file writes
+grep "tool:write_file" ~/.openclaw/logs/openclaw.log
+
+# Look for errors or unusual activity
+grep -i "error\|warn\|denied\|blocked" ~/.openclaw/logs/openclaw.log
+```
+
+---
+
+## Updates and Maintenance
+
+Security is not a one-time setup. OpenClaw is actively developed, and new vulnerabilities are discovered regularly.
+
+- **Keep OpenClaw updated** — Security patches are released frequently
+- **Review ClawHub skills after updates** — A skill update could introduce malicious code
+- **Rotate API keys periodically** — Especially if you suspect exposure
+- **Review paired contacts** — Remove contacts who no longer need access
+- **Check gateway binding** — Make sure it has not been changed to `0.0.0.0` by a config update
+
+---
+
+## The Security Checklist
+
+Work through this checklist when setting up a new OpenClaw instance or auditing an existing one.
+
+### DM Policies and Pairing
+
+- [ ] Set `dmPolicy: allowlist` on all personal channels (iMessage, WhatsApp, Signal)
+- [ ] Set `dmPolicy: approval` on semi-public channels (Telegram, Discord)
+- [ ] Review your allowed contacts list — remove anyone who no longer needs access
+- [ ] Confirm that pairing is required for new contacts on sensitive channels
+- [ ] Test that unapproved contacts cannot reach your agent
+
+### Sandboxing and Isolation
+
+- [ ] Enable `sandbox: true` in your main config
+- [ ] Restrict file system access to specific directories
+- [ ] Block access to `~/.ssh`, `~/.aws`, `~/.config`, and other sensitive directories
+- [ ] Consider running OpenClaw in Docker for stronger isolation
+- [ ] Set memory and CPU limits if using Docker
+
+### API Keys and Secrets
+
+- [ ] Remove all API keys from `SOUL.md` and other config files
+- [ ] Move API keys to environment variables or OpenClaw's secrets manager
+- [ ] Use OAuth instead of API keys where available
+- [ ] Verify that API keys do not appear in logs (`redactSecrets: true`)
+- [ ] Rotate any keys that were previously in plaintext config files
+
+### Tool Permissions
+
+- [ ] Review which tools are enabled — disable anything you do not actively use
+- [ ] Set `requireApproval: true` on high-risk tools (shell, send_message, send_email)
+- [ ] Configure shell command allowlists if shell access is enabled
+- [ ] Restrict `write_file` to workspace directories only
+- [ ] Test that blocked commands and tools are actually blocked
+
+### ClawHub Skills
+
+- [ ] Review all installed skills — remove any you do not recognize or use
+- [ ] Check skill source code for suspicious patterns (outbound requests, env access, eval)
+- [ ] Verify skill authors are legitimate
+- [ ] Install new skills with `--sandbox` flag
+- [ ] Subscribe to OpenClaw security advisories for skill vulnerability alerts
+
+### Network Security
+
+- [ ] Confirm gateway is bound to `127.0.0.1` (not `0.0.0.0`)
+- [ ] If remote access is needed, use Tailscale or VPN — not port forwarding
+- [ ] If using a reverse proxy, confirm TLS and authentication are configured
+- [ ] Monitor outbound network connections periodically
+
+### Logging and Auditing
+
+- [ ] Enable logging with `logToolCalls: true` and `logMessages: true`
+- [ ] Enable `redactSecrets: true` in logging config
+- [ ] Set up a schedule to review logs (weekly minimum)
+- [ ] Check for unexpected shell commands, file writes, and outbound messages
+
+### Ongoing Maintenance
+
+- [ ] Keep OpenClaw updated to the latest version
+- [ ] Rotate API keys on a regular schedule (quarterly minimum)
+- [ ] Review and prune paired contacts monthly
+- [ ] Re-audit installed ClawHub skills after updates
+- [ ] Test your security configuration after any major config change
+
+---
+
+## What to Do If Something Goes Wrong
+
+If you suspect your agent has been compromised:
+
+1. **Stop the agent immediately** — `openclaw stop` or kill the process
+2. **Revoke API keys** — Rotate every key the agent had access to
+3. **Review logs** — Check for unauthorized commands, messages, or data exfiltration
+4. **Check installed skills** — Look for recently installed or modified skills
+5. **Review paired contacts** — Remove any contacts you did not authorize
+6. **Restore from backup** — If files were modified, restore from a known-good backup
+7. **Report to the community** — If a malicious skill was involved, report it on GitHub
+
+---
+
+## Next Steps
+
+Security is the foundation. Once your agent is locked down, you are ready to connect it to the world:
+
+- **[Channel Setup Guide](/channels/overview)** — Connect iMessage, Slack, WhatsApp, and more
+- **[SOUL.md Guide](/core-concepts/soul-md)** — Define your agent's personality and instructions
+- **[Skills and ClawHub](/core-concepts/skills)** — Safely extend your agent's capabilities
+- **[DM Policies & Pairing](/security/dm-policies)** — Review who can talk to your agent
+- **[Sandboxing](/security/sandboxing)** — Contain the blast radius
+- **[API Keys & Tool Policies](/security/api-keys)** — Secure your credentials

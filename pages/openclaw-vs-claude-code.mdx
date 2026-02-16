@@ -1,0 +1,352 @@
+---
+title: "OpenClaw vs Claude Code — Complementary Tools, Not Competitors"
+description: "A detailed comparison of OpenClaw and Claude Code. They are not competitors — they solve completely different problems. Learn when to use each, how they differ, and how they work together."
+keywords: "openclaw vs claude code, openclaw compared to claude code, openclaw claude code difference, openclaw or claude code, openclaw claude code comparison"
+---
+
+# OpenClaw vs Claude Code
+
+This is the comparison everyone asks about. OpenClaw and Claude Code are both AI tools that run on your machine. Both use large language models. Both can interact with files and execute commands. So naturally, people want to know: which one should I use?
+
+The answer is **both** — because they solve completely different problems.
+
+This page breaks down exactly how they differ, when to use each, and how they complement each other. By the end, you will understand why choosing between OpenClaw and Claude Code is like choosing between a phone and a hammer. They are both useful. They are not the same category of thing.
+
+---
+
+## The Core Insight
+
+Here is the key idea, stated plainly:
+
+> **Claude Code is a tool you use for sessions of focused work. OpenClaw is a system that runs your life 24/7.**
+
+Claude Code activates when you open a terminal and start a coding session. It is brilliant at that session. When you close the terminal, it stops.
+
+OpenClaw never stops. It is running while you sleep. It answers your messages. It checks your calendar. It runs your cron jobs. It screens your calls. It exists as an ongoing presence in your digital life, not as a tool you pick up and put down.
+
+They overlap in some capabilities — both can read files, both can reason about problems, both can write text. But the *architecture*, *purpose*, and *daily role* are fundamentally different.
+
+---
+
+## Analogy 1: The Brain Surgeon and the Personal Assistant
+
+Imagine you run a busy life. You need two kinds of help.
+
+**The Brain Surgeon (Claude Code):**
+When you have a specific, complex technical problem — writing software, debugging code, refactoring a codebase, scaffolding a new project — you call in the specialist. The brain surgeon arrives, performs precise, expert-level work in a focused session, and leaves. The surgeon is extraordinary at the procedure but does not manage your life between surgeries.
+
+**The Personal Assistant (OpenClaw):**
+Your personal assistant manages everything else — your calendar, your inbox, your reminders, your communication with other people, your daily briefings. The assistant is always there, always available, always aware of your context. The assistant is not a surgeon, but the assistant makes sure you get to your appointment on time, that your post-op instructions are followed, and that your next meeting is rescheduled.
+
+You would never ask your brain surgeon to manage your calendar. You would never ask your personal assistant to perform surgery. But you desperately need both.
+
+---
+
+## Analogy 2: The CEO and the IT Department
+
+Another way to think about it:
+
+**OpenClaw is the CEO.** It sits at the top of your digital life, delegating tasks, maintaining awareness of everything going on, managing communication across channels, scheduling recurring operations, and running the day-to-day. The CEO does not write code, but the CEO makes sure everything gets done.
+
+**Claude Code is the IT Department.** When the CEO needs infrastructure built — a new application, a complex automation, a technical fix — the IT department handles it. The IT department does deep, focused, technical work. But the IT department does not manage the CEO's inbox or schedule the board meeting.
+
+In a well-run organization, the CEO and IT department communicate constantly. The CEO identifies needs, the IT department builds solutions, and the CEO deploys those solutions across the organization. That is exactly how OpenClaw and Claude Code work together.
+
+---
+
+## The Full Comparison
+
+Here is a detailed, side-by-side comparison of every major capability:
+
+| Capability | Claude Code | OpenClaw |
+|---|---|---|
+| **Always-on** | No — session-based, stops when you close the terminal | Yes — runs 24/7 as a background service |
+| **Multi-channel messaging** | No — terminal only | Yes — iMessage, Slack, WhatsApp, Discord, Telegram, Signal, Teams, and more |
+| **Other people can message it** | No — only you interact with it | Yes — anyone with access to a connected channel can message your assistant |
+| **Persistent memory** | `CLAUDE.md` — project-scoped, resets between sessions | `SOUL.md` + `MEMORY.md` — life-scoped, persists indefinitely |
+| **Scheduled tasks** | No built-in scheduling | Yes — cron jobs, webhooks, heartbeat behaviors |
+| **Voice interaction** | No | Yes — Talk Mode, Voice Wake, TTS, STT |
+| **Visual workspace** | No | Yes — Canvas + A2UI (agent-generated interfaces) |
+| **Phone calls** | No | Yes — make and receive calls via Twilio |
+| **Camera/screen/location** | No | Yes — via Nodes on connected devices |
+| **Sub-agents** | Task tool (in-session, synchronous) | `sessions_spawn` (background, asynchronous) |
+| **Code editing** | Excellent — purpose-built for code | Basic — can edit files but not optimized for it |
+| **Git operations** | Excellent — commits, branches, PRs, reviews | Limited — can run git commands but not its core strength |
+| **Project scaffolding** | Excellent — can create entire projects from scratch | Not designed for this |
+| **File system operations** | Excellent — read, write, search, refactor across codebases | Good — can read and write files, but not optimized for large-scale refactoring |
+| **IDE integration** | Deep terminal integration | No IDE integration |
+| **Multi-file refactoring** | Excellent — can coordinate changes across hundreds of files | Not designed for this |
+| **MCP (Model Context Protocol)** | Yes — can connect to MCP servers | Yes — can connect to MCP servers |
+| **Cost model** | Subscription ($20/month for Claude Pro, $100/month for Max) or API-based | Free software + pay-per-use API costs |
+| **Runs on** | Your local machine (terminal) | Your local machine, Docker, or a VPS |
+| **Context scope** | Current project/repository | Your entire life — work, personal, health, relationships |
+
+### Reading the Table
+
+A few things stand out:
+
+**Claude Code dominates the left column (development tasks).** If the task involves writing, editing, refactoring, or managing code — Claude Code is the clear choice. It was built for exactly this.
+
+**OpenClaw dominates the right column (life management).** If the task involves communication, scheduling, monitoring, automation, voice, or anything that needs to happen when you are not sitting at your computer — OpenClaw is the clear choice.
+
+**The middle ground is small.** Both can read files. Both can process text. Both can reason about problems. But even in this overlap zone, they approach things differently. Claude Code processes files within a coding session. OpenClaw processes files as part of an ongoing life management workflow.
+
+---
+
+## When to Use Claude Code
+
+Use Claude Code when you are sitting down to **do focused technical work**:
+
+- **Building a new application** — "Create a Next.js app with auth, a database, and a dashboard"
+- **Debugging code** — "This function throws an error when the input is null — find and fix the bug"
+- **Refactoring** — "Move all API calls to a centralized service layer"
+- **Code reviews** — "Review this PR and suggest improvements"
+- **Writing tests** — "Add unit tests for the payment processing module"
+- **Documentation** — "Generate API documentation from the codebase"
+- **Complex technical analysis** — "Analyze this codebase's architecture and identify bottlenecks"
+- **Project scaffolding** — "Set up a Python project with Poetry, FastAPI, and Docker"
+
+The common thread: **you open a terminal, do focused work, and close it when you are done**. The session has a clear start and end.
+
+---
+
+## When to Use OpenClaw
+
+Use OpenClaw for **everything that needs to happen continuously or across channels**:
+
+- **Morning briefings** — "Every day at 7 AM, send me weather, calendar, and email summary via iMessage"
+- **Message handling** — "If someone messages me on Slack after 6 PM, tell them I'll respond tomorrow"
+- **Monitoring** — "Check my website every hour and alert me if it goes down"
+- **Communication** — "Draft a reply to that email and send it if I don't object within 10 minutes"
+- **Call screening** — "Answer my phone, take a message, and text me a summary"
+- **Life management** — "Remind me to take my medication at 9 AM and 9 PM"
+- **Research** — "Spend the next hour researching competitors and have a report ready when I wake up"
+- **Coordination** — "When that GitHub issue gets closed, update the project tracker and notify the team in Slack"
+
+The common thread: **things that need to happen in the background, on a schedule, or through communication channels you are not actively watching**.
+
+---
+
+## How They Work Together
+
+The most powerful setup is using both tools in their respective strengths and letting them complement each other.
+
+### The Build-and-Deploy Pattern
+
+This is the most natural way the two tools collaborate:
+
+1. You use **Claude Code** to build something — a new feature, a script, an automation
+2. You deploy the result
+3. You configure **OpenClaw** to orchestrate running it, monitoring it, and alerting you about it
+
+Think of it like creating a company. You bring in Claude Code as the engineering team that designs and builds the product. Once it is built, you hand operations to OpenClaw — the team that runs the business day-to-day, handles customer communication, monitors uptime, and executes the recurring processes that keep things moving.
+
+The build phase is intense and focused. The operations phase is steady and ongoing. Different phases, different tools, same goal.
+
+### Practical Examples
+
+**Example 1: Building and monitoring a side project**
+- Use **Claude Code** to build the project (frontend, backend, database, deployment)
+- Use **OpenClaw** to monitor the deployed site, alert you if it goes down, send you daily analytics summaries, and handle user support messages
+
+**Example 2: Content creation workflow**
+- Use **Claude Code** to build a content pipeline tool (scripts for formatting, publishing, SEO analysis)
+- Use **OpenClaw** to run the pipeline on a schedule, research topics, draft outlines, and notify you when drafts are ready for review
+
+**Example 3: Automating your development workflow**
+- Use **Claude Code** to write the code for a PR review automation
+- Use **OpenClaw** to watch for new PRs on GitHub, trigger the review process, and send you a summary in Slack with the results
+
+**Example 4: Personal CRM**
+- Use **Claude Code** to build a personal CRM system (database, API, dashboard)
+- Use **OpenClaw** to populate it — parsing emails for new contacts, tracking when you last spoke to someone, reminding you to follow up, and drafting outreach messages
+
+### The Feedback Loop
+
+The relationship works both ways:
+
+- OpenClaw can **trigger** Claude Code for technical tasks: "The deployment failed — here are the logs. Fix it."
+- Claude Code results can **feed into** OpenClaw workflows: "The new feature is deployed. Start monitoring the error rate."
+
+This feedback loop turns two individual tools into something greater than the sum of their parts.
+
+---
+
+## What About Overlap?
+
+Yes, there is overlap. Both tools can:
+
+- Read and write files
+- Process and generate text
+- Reason about complex problems
+- Use MCP servers for external integrations
+- Execute commands on your machine
+
+But overlap in capability is not the same as overlap in purpose. A Swiss Army knife and a chef's knife can both cut things. You would not use a Swiss Army knife to prepare dinner for 12 people.
+
+When you encounter a task that either tool could handle, ask yourself:
+
+1. **Is this a one-time focused task or an ongoing process?** One-time → Claude Code. Ongoing → OpenClaw.
+2. **Does this need to happen when I am not at my computer?** If yes → OpenClaw.
+3. **Does this involve code editing or project work?** If yes → Claude Code.
+4. **Does this involve communicating with other people or systems?** If yes → OpenClaw.
+5. **Does this need scheduled execution?** If yes → OpenClaw.
+
+---
+
+## Common Misconceptions
+
+### "OpenClaw is just Claude Code but for non-developers"
+
+No. OpenClaw serves a completely different function. Many OpenClaw users are highly technical. The distinction is not about skill level — it is about use case. Developers use Claude Code for building and OpenClaw for life management. Non-developers might only use OpenClaw, but that does not make OpenClaw "the easy version."
+
+### "Claude Code can do everything OpenClaw does if you just keep it running"
+
+Claude Code is session-based by design. You cannot leave it running in the background answering your iMessages. You cannot set up cron jobs in Claude Code to check your email every morning. The architectures are fundamentally different. Claude Code operates within a terminal session. OpenClaw operates as a persistent service.
+
+### "I only need one of them"
+
+Maybe. If you never write code, you probably do not need Claude Code. If you never need an always-on assistant, you probably do not need OpenClaw. But most people who try both quickly find they want both — because the use cases are so clearly different that each tool handles its domain far better than trying to force the other to do it.
+
+That said, if you are choosing one to start with:
+
+- **Start with Claude Code if** your primary pain point is development productivity — building faster, refactoring better, automating coding tasks.
+- **Start with OpenClaw if** your primary pain point is life management — too many messages, too many manual processes, needing an assistant that handles things while you are away from your desk.
+
+### "OpenClaw is a Claude Code competitor"
+
+This is the biggest misconception. They are not competing for the same use case. Nobody is sitting at their terminal thinking "Should I use Claude Code or OpenClaw to refactor this module?" And nobody is configuring morning briefings thinking "Should I use Claude Code or OpenClaw for this cron job?" The right tool is obvious in context.
+
+---
+
+## The Decision Tree
+
+Still not sure which to use for a specific task? Walk through this:
+
+```
+Is the task about writing, editing, or managing code?
+├── Yes → Use Claude Code
+└── No
+    ├── Does the task need to happen on a schedule or in the background?
+    │   ├── Yes → Use OpenClaw
+    │   └── No
+    │       ├── Does the task involve messaging other people or services?
+    │       │   ├── Yes → Use OpenClaw
+    │       │   └── No
+    │       │       ├── Is it a one-time focused analysis or creation task?
+    │       │       │   ├── Yes → Use either (Claude Code if at your terminal)
+    │       │       │   └── No → Use OpenClaw
+    │       │       └──
+    │       └──
+    └──
+```
+
+Most tasks fall clearly into one camp or the other. For the small number of tasks in the gray zone, default to whichever tool you happen to have open.
+
+---
+
+## Setting Up Both
+
+If you are ready to use both tools, here is the recommended setup:
+
+### Claude Code Setup
+1. Install Claude Code via your preferred method (npm, Homebrew, etc.)
+2. Configure your `CLAUDE.md` for each project repository
+3. Use it when you sit down to do development work
+
+### OpenClaw Setup
+1. Follow the [Getting Started](/getting-started/what-is-openclaw) guide to install OpenClaw
+2. Configure channels (iMessage, Slack, etc.) for communication
+3. Write your SOUL.md for personality and behavior rules
+4. Set up cron jobs for recurring tasks
+5. Deploy to a [VPS](/advanced/deployment) for 24/7 availability
+
+### Connecting Them
+You can connect the two tools through several mechanisms:
+
+- **Shared file system** — Both can read and write to the same directories
+- **MCP servers** — Both support MCP, so they can use the same external integrations
+- **Webhooks** — OpenClaw can trigger actions based on events that Claude Code produces (like a deployment completion)
+- **Git** — Claude Code pushes changes; OpenClaw monitors the repository and reacts
+
+A comprehensive guide to setting up OpenClaw **with** Claude Code — including shared workflows, handoff patterns, and orchestration — is coming soon. This will cover:
+
+- How to structure a shared file system so both tools access the same data
+- Setting up Git-based handoffs (Claude Code commits, OpenClaw detects and reacts)
+- MCP server configurations that work across both tools
+- Workflow templates for common build-and-deploy patterns
+- How to have OpenClaw trigger Claude Code for on-demand technical tasks
+- Real-world case studies from users running both tools together
+
+If you want to be notified when that guide drops, join the mailing list at the bottom of the [home page](/).
+
+---
+
+## A Note on Memory: CLAUDE.md vs SOUL.md
+
+One of the most interesting differences is how each tool handles persistent context.
+
+**Claude Code uses `CLAUDE.md`** — a file that lives in your project repository. It contains project-specific instructions: coding conventions, architecture decisions, deployment procedures, and preferences for that particular codebase. When you open a new Claude Code session in that project, it reads the CLAUDE.md and understands the project context. But this memory is scoped to the project. Switch to a different repository, and you get a different CLAUDE.md. Close the session, and the conversation history is gone.
+
+**OpenClaw uses `SOUL.md` and `MEMORY.md`** — files that define your assistant's personality, values, and accumulated knowledge about you. SOUL.md tells the assistant *who it is* and *how to behave*. MEMORY.md stores facts it has learned about you over time — your preferences, your schedule patterns, your relationships, your goals. This memory is life-scoped, not project-scoped. It persists across all conversations, all channels, all sessions.
+
+The difference matters. Claude Code knows your codebase intimately but knows nothing about your personal life. OpenClaw knows your life intimately but does not have deep project context. Together, they cover both dimensions.
+
+| Aspect | Claude Code (CLAUDE.md) | OpenClaw (SOUL.md + MEMORY.md) |
+|---|---|---|
+| **Scope** | One project/repository | Your entire life |
+| **Persistence** | Exists as a file, but conversation history resets | Persistent across all sessions and channels |
+| **Contains** | Coding conventions, architecture, project context | Personality, values, accumulated life knowledge |
+| **Updated by** | You, manually | The agent, automatically (learns over time) |
+| **Location** | Root of each project directory | OpenClaw config directory |
+
+---
+
+## Summary
+
+| | Claude Code | OpenClaw |
+|---|---|---|
+| **Think of it as** | Your expert engineer on call | Your always-on personal assistant |
+| **Activation** | You open a terminal session | Always running in the background |
+| **Best at** | Code, projects, technical work | Life management, communication, automation |
+| **Stops working when** | You close the session | Never (unless you shut it down) |
+| **Memory scope** | Current project | Your entire life |
+| **Communication** | You talk to it in the terminal | It talks to you across every channel |
+| **Other people** | Cannot interact with it | Can message it on your behalf |
+
+They are not competitors. They are complements. Use the brain surgeon for surgery. Use the personal assistant for everything else. And when they work together, you get something neither can provide alone — a comprehensive AI system that handles both the precision work and the daily operations of your digital life.
+
+---
+
+## A Day in the Life: Using Both
+
+To make the distinction concrete, here is what a typical day looks like for someone running both tools:
+
+**7:00 AM** — OpenClaw sends you a morning briefing via iMessage. Weather, calendar, top emails, news. You did nothing to trigger this. It ran automatically via a cron job.
+
+**8:30 AM** — A client messages your OpenClaw assistant on Slack asking about project timelines. OpenClaw checks your project files and responds with the current status. You were in the shower.
+
+**9:15 AM** — You sit down at your computer, open a terminal, and start a Claude Code session. You spend 2 hours refactoring the authentication module of your SaaS product. Claude Code is exceptional at this — navigating the codebase, making coordinated changes across dozens of files, running tests.
+
+**11:30 AM** — You close the Claude Code session. The refactor is done and pushed to GitHub. OpenClaw detects the new commit (via a webhook) and notifies the team in Slack that the auth module has been updated.
+
+**12:00 PM** — While you eat lunch, OpenClaw screens an incoming phone call, takes a message, and texts you the summary. You decide it can wait until tomorrow.
+
+**2:00 PM** — You open another Claude Code session to build a new API endpoint. Deep technical work for 90 minutes.
+
+**3:30 PM** — Claude Code session closes. You tell OpenClaw to monitor the new endpoint's error rate every 15 minutes and alert you if it exceeds 1%.
+
+**6:00 PM** — OpenClaw sends you a daily wrap-up. Tasks completed, messages received, tomorrow's calendar preview. You reply with a voice note adding a few items to tomorrow's to-do list.
+
+**11:00 PM** — You are asleep. OpenClaw is still running. It processes an incoming webhook, files a support ticket, and queues a response for morning review.
+
+Claude Code was active for about 3.5 hours. OpenClaw was active for 24.
+
+---
+
+## What's Next
+
+- **[What is OpenClaw?](/getting-started/what-is-openclaw)** — Start from the beginning if you are new to OpenClaw
+- **[Sub-Agents](/advanced/sub-agents)** — Learn how OpenClaw's `sessions_spawn` differs from Claude Code's Task tool
+- **[Deployment](/advanced/deployment)** — Get OpenClaw running 24/7 so it is always available
+- **[SOUL.md](/core-concepts/soul-md)** — Design your assistant's personality and behavior rules

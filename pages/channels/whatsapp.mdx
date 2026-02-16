@@ -1,0 +1,65 @@
+---
+title: 'WhatsApp Setup — Connect OpenClaw to WhatsApp'
+description: 'Set up OpenClaw with WhatsApp using the Baileys library. Covers QR code authentication, session management, phone number formatting, and known limitations of the unofficial API.'
+keywords: 'openclaw WhatsApp, openclaw WhatsApp setup, openclaw Baileys, openclaw WhatsApp QR code, openclaw WhatsApp session, openclaw WhatsApp config, openclaw global messaging'
+---
+
+# WhatsApp
+
+WhatsApp reaches more people globally than any other messaging platform. If your contacts are on WhatsApp, this is how you bring your agent to them. But it comes with trade-offs.
+
+### Setup Overview
+
+OpenClaw uses **Baileys** — an unofficial WhatsApp Web API library — to connect to WhatsApp. This means:
+
+- It connects by emulating a WhatsApp Web session
+- You scan a QR code with your phone to authenticate
+- The connection can be fragile (WhatsApp may disconnect sessions periodically)
+- This is not an official WhatsApp Business API integration
+
+```yaml
+# channels/whatsapp.yaml
+channel: whatsapp
+enabled: true
+library: baileys
+dmPolicy: allowlist
+allowedContacts:
+  - "+15551234567"
+  - "+44207123456"
+groupPolicy: mention
+requireMention: true
+sessionPath: ~/.openclaw/whatsapp-session
+```
+
+### Key Config Options
+
+| Option | Values | What It Does |
+|--------|--------|-------------|
+| `dmPolicy` | `allowlist`, `approval`, `open` | Controls who can DM the agent |
+| `groupPolicy` | `mention`, `always`, `never` | When to respond in group chats |
+| `requireMention` | `true` / `false` | Require @mention in groups |
+| `allowedContacts` | Array of phone numbers | Whitelist (with country code) |
+| `sessionPath` | File path | Where to store the WhatsApp session |
+| `reconnectInterval` | Number (seconds) | How often to attempt reconnection |
+
+### Tips and Gotchas
+
+**Baileys is unofficial — expect occasional breakage.** WhatsApp does not offer an open API for personal accounts. Baileys reverse-engineers the WhatsApp Web protocol. When WhatsApp updates their protocol (which happens without notice), Baileys can break until the library is updated. Budget for occasional downtime.
+
+**QR code auth is a one-time step.** The first time you connect, you will see a QR code in your terminal. Scan it with WhatsApp on your phone (Settings -> Linked Devices -> Link a Device). After that, the session is stored at `sessionPath` and reconnects automatically.
+
+**Session files are sensitive.** The `sessionPath` directory contains your WhatsApp session credentials. Protect it like you would a password. Do not commit it to git, do not back it up to cloud storage unencrypted.
+
+**Phone number format is critical.** Use full international format without spaces or dashes: `+15551234567`, not `+1 (555) 123-4567`. Mismatched formats are the number one cause of "my allowlist isn't working" issues.
+
+**WhatsApp can disconnect multi-device sessions.** If you have too many linked devices, or if your phone is offline for extended periods, WhatsApp may disconnect your agent's session. You will need to re-scan the QR code.
+
+**Best for reaching non-tech contacts.** WhatsApp is the right choice when the people you want to interact with your agent are on WhatsApp and nowhere else. For personal use, iMessage or Telegram are usually less maintenance.
+
+---
+
+## Next Steps
+
+- **[Channel Overview](/channels/overview)** — Compare all channels and build a multi-channel strategy
+- **[iMessage](/channels/imessage)** — A lower-maintenance alternative for personal messaging
+- **[DM Policies & Pairing](/security/dm-policies)** — Lock down DM policies and protect session credentials

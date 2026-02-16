@@ -1,0 +1,511 @@
+---
+title: "Installing OpenClaw"
+description: "Step-by-step guide to installing OpenClaw on macOS, Linux, or Windows. Covers prerequisites, the onboarding wizard, configuration files, and common troubleshooting."
+keywords: "openclaw installation, openclaw setup guide, how to install openclaw, openclaw getting started, openclaw onboard, openclaw config"
+---
+
+# Installing OpenClaw
+
+This guide walks you through installing OpenClaw from scratch. By the end, you will have a running Gateway, a basic configuration, and a working WebChat interface you can use to verify everything is operational.
+
+The entire process takes about 15-20 minutes if everything goes smoothly. Most of that time is spent answering the onboarding wizard's questions, not waiting for things to download.
+
+---
+
+## Prerequisites
+
+Before you start, make sure you have the following:
+
+### 1. A Supported Operating System
+
+OpenClaw runs on:
+
+- **macOS** (most common and best-supported — macOS 13 Ventura or later recommended)
+- **Linux** (Ubuntu 22.04+, Debian 12+, Fedora 38+, or any modern distribution)
+- **Windows** (Windows 10/11 with WSL2 recommended for the best experience)
+
+If you are on Windows, we strongly recommend installing [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) and running OpenClaw inside a Linux environment. It will save you from a significant number of compatibility headaches.
+
+### 2. Node.js 22 or Later
+
+OpenClaw requires **Node.js version 22** or higher. Check your current version:
+
+```bash
+node --version
+```
+
+If you see something like `v22.x.x` or higher, you are good. If not, install or update Node.js:
+
+**macOS (using Homebrew):**
+
+```bash
+brew install node@22
+```
+
+**macOS/Linux (using nvm — recommended):**
+
+```bash
+# Install nvm if you don't have it
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash
+
+# Restart your terminal, then:
+nvm install 22
+nvm use 22
+```
+
+**Windows (using the official installer):**
+
+Download the latest LTS installer from [nodejs.org](https://nodejs.org) and make sure it is version 22 or later.
+
+### 3. An AI Provider API Key
+
+OpenClaw does not include its own AI model. It calls external models through their APIs. You need at least one API key from:
+
+- **Anthropic** (Claude) — [console.anthropic.com](https://console.anthropic.com)
+- **OpenAI** (GPT) — [platform.openai.com](https://platform.openai.com)
+- **Google** (Gemini) — [aistudio.google.com](https://aistudio.google.com)
+
+**Which one should you pick?** If you are only going to set up one, we recommend Anthropic (Claude). It handles the broadest range of tasks well and is the most commonly used model in the OpenClaw community. But you can always add more later — and you *should*, for fallback purposes.
+
+Have your API key ready. You will be asked for it during the onboarding process.
+
+### 4. A Package Manager (Optional but Recommended)
+
+On macOS, [Homebrew](https://brew.sh) makes installing dependencies easier:
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+On Linux, your distribution's package manager (`apt`, `dnf`, `pacman`) will work fine.
+
+---
+
+## Step 1: Install OpenClaw
+
+Install OpenClaw globally using npm:
+
+```bash
+npm install -g openclaw
+```
+
+This installs the `openclaw` command-line tool globally on your system. Verify the installation:
+
+```bash
+openclaw --version
+```
+
+You should see a version number printed. If you see a "command not found" error, see the troubleshooting section below.
+
+---
+
+## Step 2: Run the Onboarding Wizard
+
+This is where the magic happens. OpenClaw includes an interactive onboarding wizard that walks you through the entire setup process:
+
+```bash
+openclaw onboard
+```
+
+The wizard will ask you a series of questions and set everything up based on your answers. Here is what happens during onboarding:
+
+### What the Wizard Creates
+
+**1. The configuration directory: `~/.openclaw/`**
+
+This is where OpenClaw stores all of its configuration. The `~` means your home directory — so on macOS that is `/Users/yourname/.openclaw/`, on Linux it is `/home/yourname/.openclaw/`.
+
+**2. The main config file: `openclaw.json`**
+
+This is the central configuration file. It contains:
+
+- Your AI provider API keys (encrypted)
+- Model preferences (which model to use for different tasks)
+- Channel configurations
+- Plugin settings
+- Server settings (port, host, etc.)
+
+A basic `openclaw.json` looks something like this:
+
+```json
+{
+  "version": "1.0",
+  "gateway": {
+    "host": "127.0.0.1",
+    "port": 18789
+  },
+  "models": {
+    "primary": {
+      "provider": "anthropic",
+      "model": "claude-sonnet-4-20250514"
+    }
+  },
+  "channels": [],
+  "skills": [],
+  "cron": []
+}
+```
+
+You do not need to edit this file manually during onboarding — the wizard handles it. But knowing it exists and what it contains is useful for later.
+
+**3. The workspace directory: `~/clawd/`**
+
+This is your assistant's working directory — the folder where OpenClaw stores documents, downloads, generated files, and other artifacts. Think of it as your assistant's desk.
+
+The `~/clawd/` directory is created in your home folder. You can change this location later in the config if you prefer a different path.
+
+**4. Identity and personality files**
+
+The wizard creates several Markdown files that define who your assistant is and what it knows about you:
+
+| File | Purpose | Analogy |
+|---|---|---|
+| `SOUL.md` | Your assistant's personality, values, and communication style | Their character and temperament |
+| `USER.md` | Information about you — name, timezone, interests, projects | What they know about their boss |
+| `IDENTITY.md` | Your assistant's name and avatar | Their name tag |
+| `MEMORY.md` | Long-term memory storage — things learned over time | Their notebook of things to remember |
+
+These files are plain Markdown. You can (and should) edit them directly. We will cover how to write an effective SOUL.md and USER.md in the [First 24 Hours](/getting-started/first-24-hours) guide.
+
+### What the Wizard Asks You
+
+Expect the wizard to ask about:
+
+- **Your name** — So your assistant knows what to call you
+- **Your timezone** — So scheduled tasks fire at the right time
+- **Your preferred AI provider** — Anthropic, OpenAI, or Google
+- **Your API key** — For the provider you chose
+- **Your assistant's name** — What do you want to call it?
+- **Basic personality preferences** — Formal or casual? Concise or detailed?
+
+Answer honestly. You can change everything later. The wizard is just getting you to a working baseline.
+
+---
+
+## Step 3: Start the Gateway
+
+Once onboarding is complete, start the Gateway:
+
+```bash
+openclaw start
+```
+
+You should see output indicating the Gateway is running:
+
+```
+🔧 Loading configuration from ~/.openclaw/openclaw.json
+🧠 Gateway starting on ws://127.0.0.1:18789
+📡 WebChat available at http://localhost:18789
+✅ OpenClaw is running
+```
+
+The Gateway is now active and listening for connections.
+
+### Running in the Background
+
+By default, `openclaw start` runs in the foreground — it takes over your terminal. For daily use, you will want it running in the background:
+
+```bash
+openclaw start --daemon
+```
+
+This starts the Gateway as a background process. To check its status:
+
+```bash
+openclaw status
+```
+
+To stop it:
+
+```bash
+openclaw stop
+```
+
+To view logs:
+
+```bash
+openclaw logs
+```
+
+To follow logs in real time (useful for debugging):
+
+```bash
+openclaw logs --follow
+```
+
+---
+
+## Step 4: Verify with WebChat
+
+Open your browser and navigate to:
+
+```
+http://localhost:18789
+```
+
+You should see the **WebChat** interface — a simple chat window where you can talk to your assistant directly. Type something like:
+
+```
+Hello! What's your name?
+```
+
+If your assistant responds with the name you configured during onboarding, everything is working. Congratulations — OpenClaw is running on your machine.
+
+Try a few more things to confirm the basics:
+
+```
+What time is it?
+```
+
+```
+What do you know about me?
+```
+
+```
+What model are you using?
+```
+
+These simple tests verify that the Gateway is running, the AI model connection is working, your USER.md is being read, and the configuration is loaded correctly.
+
+---
+
+## QuickClaw: The iOS Fast Path
+
+If you are an iOS user and want the fastest possible path to trying OpenClaw, **QuickClaw** is a standalone iOS app that packages everything together. It handles installation, configuration, and channel setup in a single app experience.
+
+QuickClaw is great for getting started quickly, but it does not give you the same level of control as the full command-line setup described in this guide. We recommend starting with QuickClaw if you want to *try* OpenClaw, and moving to the full setup when you want to *use* OpenClaw seriously.
+
+This guide focuses on the full setup because that is where the real power lives.
+
+---
+
+## Understanding the File Structure
+
+After installation, here is what your OpenClaw file structure looks like:
+
+```
+~/.openclaw/                    # Configuration root
+├── openclaw.json               # Main configuration
+├── SOUL.md                     # Assistant personality
+├── USER.md                     # Info about you
+├── IDENTITY.md                 # Assistant name/avatar
+├── MEMORY.md                   # Long-term memory
+├── MESSAGING.md                # Message routing rules
+├── HEARTBEAT.md                # Proactive behaviors
+├── skills/                     # Installed skills
+├── plugins/                    # Installed plugins
+└── logs/                       # Gateway logs
+
+~/clawd/                        # Workspace directory
+├── documents/                  # Generated documents
+├── downloads/                  # Downloaded files
+└── ...                         # Other working files
+```
+
+Every important file is plain text (Markdown or JSON). There are no proprietary formats, no binary blobs, no databases you cannot inspect. If you want to know what your assistant is doing, you can read every file it uses.
+
+This is a deliberate design choice. Transparency is a core value of OpenClaw.
+
+---
+
+## Common Installation Issues
+
+### "command not found: openclaw"
+
+**Cause:** The npm global bin directory is not in your PATH.
+
+**Fix (macOS/Linux):**
+
+```bash
+# Find where npm installs global packages
+npm config get prefix
+
+# Add the bin directory to your PATH
+# For example, if the prefix is /usr/local:
+export PATH="/usr/local/bin:$PATH"
+
+# Add this line to your ~/.zshrc or ~/.bashrc to make it permanent
+echo 'export PATH="/usr/local/bin:$PATH"' >> ~/.zshrc
+```
+
+**Fix (nvm users):**
+
+```bash
+# Make sure you're using the right Node version
+nvm use 22
+
+# Reinstall
+npm install -g openclaw
+```
+
+### "Error: Node.js version 22 or later required"
+
+**Cause:** You have an older version of Node.js installed.
+
+**Fix:**
+
+```bash
+# Check your version
+node --version
+
+# If using nvm:
+nvm install 22
+nvm use 22
+nvm alias default 22
+
+# If using Homebrew:
+brew install node@22
+brew link --overwrite node@22
+```
+
+### "EACCES: permission denied"
+
+**Cause:** npm does not have permission to install global packages.
+
+**Fix (recommended — do not use sudo):**
+
+```bash
+# Create a directory for global packages
+mkdir -p ~/.npm-global
+
+# Configure npm to use it
+npm config set prefix '~/.npm-global'
+
+# Add to your PATH
+export PATH="$HOME/.npm-global/bin:$PATH"
+echo 'export PATH="$HOME/.npm-global/bin:$PATH"' >> ~/.zshrc
+
+# Now install
+npm install -g openclaw
+```
+
+### "Connection refused" when opening WebChat
+
+**Cause:** The Gateway is not running, or it is running on a different port.
+
+**Fix:**
+
+```bash
+# Check if the Gateway is running
+openclaw status
+
+# If not running, start it
+openclaw start
+
+# Check which port it's using
+grep port ~/.openclaw/openclaw.json
+```
+
+### "API key invalid" or "Authentication failed"
+
+**Cause:** Your AI provider API key is incorrect or expired.
+
+**Fix:**
+
+```bash
+# Re-run the onboard wizard to update your API key
+openclaw onboard --reconfigure
+
+# Or edit the config directly
+# (API keys are stored in openclaw.json)
+```
+
+### Gateway starts but crashes immediately
+
+**Cause:** Usually a configuration error or port conflict.
+
+**Fix:**
+
+```bash
+# Check the logs for error details
+openclaw logs
+
+# Common issue: port 18789 already in use
+# Find what's using the port
+lsof -i :18789
+
+# Kill the process or change the port in openclaw.json
+```
+
+### WSL2-specific issues (Windows)
+
+**Cause:** Networking between WSL2 and Windows can be tricky.
+
+**Fix:**
+
+```bash
+# Make sure you're running inside WSL2, not PowerShell
+wsl --list --verbose
+
+# Access WebChat from Windows browser using:
+# http://localhost:18789
+# (WSL2 usually forwards localhost automatically)
+
+# If that doesn't work, find the WSL IP:
+hostname -I
+# Then use http://<that-ip>:18789 in your Windows browser
+```
+
+---
+
+## Running OpenClaw as a System Service
+
+For always-on operation (which is the whole point), you will want OpenClaw to start automatically when your computer boots.
+
+### macOS (launchd)
+
+```bash
+openclaw service install
+```
+
+This creates a launchd plist that starts OpenClaw automatically on login. To remove it:
+
+```bash
+openclaw service uninstall
+```
+
+### Linux (systemd)
+
+```bash
+openclaw service install
+```
+
+This creates a systemd service. Manage it with:
+
+```bash
+# Check status
+systemctl --user status openclaw
+
+# View logs
+journalctl --user -u openclaw -f
+
+# Restart
+systemctl --user restart openclaw
+```
+
+### Verifying the Service
+
+After setting up the system service, restart your computer and then check:
+
+```bash
+openclaw status
+```
+
+If it reports that the Gateway is running, your always-on setup is complete.
+
+---
+
+## What Comes Next
+
+At this point you have:
+
+- OpenClaw installed on your system
+- A running Gateway with a basic configuration
+- WebChat working in your browser
+- A set of configuration files you can customize
+
+The installation is done, but the *setup* is just beginning. The configuration files created during onboarding are functional defaults — they will get you a working assistant, but not a *great* one.
+
+The next page — [Your First 24 Hours with OpenClaw](/getting-started/first-24-hours) — walks you through the configuration steps that turn a default installation into a personalized assistant that actually understands you, your work, and your preferences.
+
+The difference between a mediocre OpenClaw setup and an excellent one is almost entirely in the configuration files. The software is the same for everyone. The configuration is what makes it yours.

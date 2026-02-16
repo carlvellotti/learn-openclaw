@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700,800,900&f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  width: 1200px;
+  height: 630px;
+  overflow: hidden;
+  display: flex;
+  font-family: 'Satoshi', 'DM Sans', -apple-system, sans-serif;
+}
+
+/* ── Left half ── */
+.left {
+  width: 56%;
+  height: 100%;
+  background: #050810;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 44px 52px;
+  position: relative;
+}
+
+
+.title {
+  font-family: 'Clash Display', 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 90px;
+  color: #f0f4ff;
+  line-height: 1.0;
+  margin-bottom: 12px;
+}
+
+.subtitle {
+  font-size: 22px;
+  font-weight: 500;
+  color: #8892b0;
+  line-height: 1.35;
+  margin-bottom: 28px;
+}
+
+/* Section label */
+.section-label {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #ff4d4d;
+  margin-bottom: 16px;
+}
+
+/* Curriculum grid */
+.curriculum {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 24px;
+}
+
+.curriculum li {
+  font-size: 18px;
+  font-weight: 500;
+  color: #5a6480;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  line-height: 1.3;
+}
+
+.curriculum li .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #00e5cc;
+  flex-shrink: 0;
+  position: relative;
+  top: -2px;
+}
+
+.curriculum li .topic {
+  color: #f0f4ff;
+  font-weight: 700;
+}
+
+.desc {
+  color: #5a6480;
+  font-weight: 400;
+}
+
+
+/* ── Right half ── */
+.right {
+  width: 44%;
+  height: 100%;
+  background: linear-gradient(145deg, #ff4d4d 0%, #b91c1c 60%, #7f1d1d 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.right::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(0,0,0,0.2) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.logo-svg {
+  width: 300px;
+  height: 300px;
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 12px 40px rgba(0,0,0,0.35));
+}
+
+.logo-glow {
+  position: absolute;
+  width: 380px;
+  height: 380px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 65%);
+}
+
+</style>
+</head>
+<body>
+
+<div class="left">
+  <div class="title">Learn<br>OpenClaw</div>
+  <div class="subtitle">The free, comprehensive guide to your always-on AI assistant</div>
+
+  <div class="section-label">What you'll learn</div>
+
+  <ul class="curriculum">
+    <li><span class="dot"></span><span class="topic">Installation</span> <span class="desc">in 5 min</span></li>
+    <li><span class="dot"></span><span class="topic">SOUL.md</span> <span class="desc">personality</span></li>
+    <li><span class="dot"></span><span class="topic">8 Channels</span> <span class="desc">deep-dived</span></li>
+    <li><span class="dot"></span><span class="topic">Memory</span> <span class="desc">+ ClawHub</span></li>
+    <li><span class="dot"></span><span class="topic">Automation</span> <span class="desc">+ cron</span></li>
+    <li><span class="dot"></span><span class="topic">Security</span> <span class="desc">hardened</span></li>
+    <li><span class="dot"></span><span class="topic">Sub-Agents</span> <span class="desc">+ voice</span></li>
+    <li><span class="dot"></span><span class="topic">Deployment</span> <span class="desc">to prod</span></li>
+  </ul>
+
+</div>
+
+<div class="right">
+  <div class="logo-glow"></div>
+  <svg class="logo-svg" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M60 10 C30 10 15 35 15 55 C15 75 30 95 45 100 L45 110 L55 110 L55 100 C55 100 60 102 65 100 L65 110 L75 110 L75 100 C90 95 105 75 105 55 C105 35 90 10 60 10Z" fill="rgba(255,255,255,0.95)"/>
+    <path d="M20 45 C5 40 0 50 5 60 C10 70 20 65 25 55 C28 48 25 45 20 45Z" fill="rgba(255,255,255,0.95)"/>
+    <path d="M100 45 C115 40 120 50 115 60 C110 70 100 65 95 55 C92 48 95 45 100 45Z" fill="rgba(255,255,255,0.95)"/>
+    <path d="M45 15 Q35 5 30 8" stroke="rgba(255,255,255,0.6)" stroke-width="3" stroke-linecap="round"/>
+    <path d="M75 15 Q85 5 90 8" stroke="rgba(255,255,255,0.6)" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="45" cy="35" r="6" fill="#991b1b"/>
+    <circle cx="75" cy="35" r="6" fill="#991b1b"/>
+    <circle cx="46" cy="34" r="2.5" fill="#00e5cc"/>
+    <circle cx="76" cy="34" r="2.5" fill="#00e5cc"/>
+  </svg>
+</div>
+
+</body>
+</html>

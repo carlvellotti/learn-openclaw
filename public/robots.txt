@@ -1,0 +1,11 @@
+# *
+User-agent: *
+Allow: /
+Disallow: /api/*
+Disallow: /_next/*
+
+# Host
+Host: https://learnopenclaw.com
+
+# Sitemaps
+Sitemap: https://learnopenclaw.com/sitemap.xml

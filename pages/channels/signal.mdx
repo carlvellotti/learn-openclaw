@@ -1,0 +1,43 @@
+---
+title: 'Signal Setup — Connect OpenClaw to Signal'
+description: 'Set up OpenClaw with Signal for end-to-end encrypted messaging. Covers signal-cli installation, phone number registration, allowlist config, and privacy guarantees.'
+keywords: 'openclaw Signal, openclaw Signal setup, openclaw signal-cli, openclaw encrypted messaging, openclaw privacy channel, openclaw Signal config, openclaw secure messaging'
+---
+
+# Signal
+
+Signal is the choice for privacy-focused users. End-to-end encrypted, no metadata collection, no phone number exposure to the bot.
+
+### Setup Overview
+
+Signal integration uses the **signal-cli** tool, which needs to be installed separately and linked to a phone number.
+
+```yaml
+# channels/signal.yaml
+channel: signal
+enabled: true
+signalCliPath: /usr/local/bin/signal-cli
+phoneNumber: "+15559876543"
+dmPolicy: allowlist
+allowedContacts:
+  - "+15551234567"
+groupPolicy: never
+```
+
+### Tips and Gotchas
+
+**Setup is the most involved of any channel.** You need to install `signal-cli`, register or link a phone number, and handle the Signal protocol's key exchange. Budget 30-60 minutes for first-time setup.
+
+**Dedicated phone number recommended.** Do not use your personal Signal number for the agent. Get a separate number (Google Voice, Twilio, or a prepaid SIM) to avoid conflicts with your personal Signal account.
+
+**Group support is limited.** Signal groups work differently from other platforms, and the integration has less mature group support. For group use cases, Slack or Telegram are better choices.
+
+**Privacy guarantees are real.** Unlike other channels, Signal messages are end-to-end encrypted even in transit. If privacy is your primary concern — especially for sensitive personal assistant tasks — Signal is the right choice.
+
+---
+
+## Next Steps
+
+- **[Channel Overview](/channels/overview)** — Compare all channels and build a multi-channel strategy
+- **[Telegram](/channels/telegram)** — A simpler alternative with fast BotFather setup
+- **[DM Policies & Pairing](/security/dm-policies)** — Lock down DM policies and tool permissions across all channels

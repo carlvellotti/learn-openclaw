@@ -1,0 +1,542 @@
+---
+title: "Your First 24 Hours with OpenClaw"
+description: "A practical, experience-based guide to configuring OpenClaw after installation. Learn the priority order for setup, common mistakes to avoid, and what most people skip."
+keywords: "openclaw first steps, openclaw what to do first, openclaw configuration, openclaw soul.md, openclaw user.md, openclaw setup tips"
+---
+
+# Your First 24 Hours with OpenClaw
+
+You have installed OpenClaw. The Gateway is running. WebChat works. Now what?
+
+This is the part where most people go wrong. They either try to configure everything at once and get overwhelmed, or they leave everything at the defaults and wonder why their assistant feels generic and unhelpful.
+
+This guide is based on what we learned from our own setup — and what we wish we had done differently. Consider it a cheat sheet from someone who has already made the mistakes so you do not have to.
+
+The order matters. We are going to walk through configuration in priority order: the things that make the biggest difference first, and the nice-to-haves later.
+
+---
+
+## Priority 1: SOUL.md — Your Assistant's Personality
+
+**Time required:** 30-60 minutes (do not rush this)
+
+**File location:** `~/.openclaw/SOUL.md`
+
+This is the single most important configuration step, and it is the one people are most tempted to skip or rush through.
+
+**You do NOT want to rush through the creation of SOUL.md — it is like rushing through the hiring process in real life.** Would you hire a personal assistant without an interview? Without understanding their communication style? Without knowing if they are a good fit for how you work?
+
+SOUL.md defines your assistant's personality, values, tone, communication style, and behavioral boundaries. Every response your assistant gives is filtered through this file. A well-crafted SOUL.md is the difference between an assistant that feels like a generic chatbot and one that feels like it was made for you.
+
+### What to Include in SOUL.md
+
+**Core personality traits:**
+
+```markdown
+## Personality
+
+You are direct and concise. You do not pad responses with unnecessary
+qualifiers or hedging language. When you do not know something, you say so
+plainly rather than speculating.
+
+You have a dry sense of humor but you are not a comedian. Humor shows up
+occasionally and naturally, not forced into every response.
+
+You are proactive — if you notice something relevant to what I'm working on,
+you mention it without being asked.
+```
+
+**Communication style:**
+
+```markdown
+## Communication Style
+
+- Default to short responses unless the topic requires depth
+- Use bullet points for lists of 3+ items
+- Never use corporate buzzwords (synergy, leverage, circle back, etc.)
+- Use plain language. If there is a simpler word, use it.
+- When I ask a yes/no question, start with yes or no
+- Do not ask "is there anything else?" at the end of responses
+```
+
+**Values and priorities:**
+
+```markdown
+## Values
+
+- Accuracy over speed. If you need to take more time to be correct, do so.
+- My privacy is non-negotiable. Never share my information externally.
+- Respect my time. If something can be said in one sentence, do not use three.
+- When giving advice, tell me what you would actually do, not just options.
+```
+
+**Behavioral boundaries:**
+
+```markdown
+## Boundaries
+
+- Do not wake me between 11 PM and 7 AM unless it's an actual emergency
+- Do not send messages on my behalf without confirmation
+- Do not make purchases or financial commitments
+- If you are unsure about something, ask rather than assume
+```
+
+### Common SOUL.md Mistakes
+
+**Too vague:** "Be helpful and friendly" tells your assistant nothing useful. Every AI is trained to be helpful and friendly by default. Be specific about *how* you want it to be helpful and in what style.
+
+**Too long:** A 5,000-word SOUL.md is counterproductive. The AI model has to process this file with every interaction. Keep it focused — aim for 500-1,500 words that cover the essentials.
+
+**Too restrictive:** If you fill SOUL.md with nothing but "do not do this" rules, your assistant will feel paralyzed. Balance restrictions with positive instructions about what you *do* want.
+
+**Copied from someone else:** Your SOUL.md should reflect *your* communication preferences, not someone else's. Use examples as inspiration, but write it in your own voice for your own needs.
+
+### How to Iterate
+
+You will not get SOUL.md right on the first try. That is expected. The process looks like this:
+
+1. Write your first draft
+2. Have a few conversations with your assistant
+3. Notice things that feel off ("it's too wordy," "it hedges too much," "it's not proactive enough")
+4. Edit SOUL.md to address those issues
+5. Repeat
+
+Most people go through 3-5 revisions in the first week before their SOUL.md feels dialed in.
+
+---
+
+## Priority 2: USER.md — Tell OpenClaw About Yourself
+
+**Time required:** 20-30 minutes
+
+**File location:** `~/.openclaw/USER.md`
+
+If SOUL.md is your assistant's personality, USER.md is what your assistant knows about you. The more context you give it, the better it can serve you.
+
+### What to Include in USER.md
+
+**Basic information:**
+
+```markdown
+## About Me
+
+- Name: Alex Chen
+- Location: Seattle, WA
+- Timezone: America/Los_Angeles
+- Work hours: 8 AM - 6 PM, Monday through Friday
+- Preferred name: Alex (never "Mr. Chen" or "Alexander")
+```
+
+**Professional context:**
+
+```markdown
+## Work
+
+- Role: Senior Product Manager at Acme Corp
+- Team: Platform team (8 engineers, 1 designer, 1 data analyst)
+- Current projects:
+  - API v3 migration (Q1 priority, launching March 15)
+  - Customer dashboard redesign (in discovery phase)
+  - Internal tools consolidation (backlog, starts Q2)
+- Tools I use daily: Linear, Figma, Slack, Google Docs, Notion
+- My manager: Jordan Kim (VP of Product)
+```
+
+**Personal context:**
+
+```markdown
+## Personal
+
+- Partner: Sam (works in healthcare, Tuesday/Thursday night shifts)
+- Dog: Biscuit (golden retriever, needs walk by 7 AM and 6 PM)
+- Interests: cooking, hiking, mechanical keyboards, sci-fi novels
+- Currently reading: "Project Hail Mary" by Andy Weir
+- Dietary restrictions: vegetarian
+```
+
+**Preferences and patterns:**
+
+```markdown
+## Preferences
+
+- I process information best in written form, not audio
+- I prefer to batch meetings in the morning and protect afternoons for deep work
+- I make better decisions after sleeping on them — if I'm about to make a
+  big decision impulsively, gently suggest I wait until tomorrow
+- I tend to over-commit. If I'm taking on something new, remind me to check
+  what I'd need to drop
+```
+
+### Why This Level of Detail Matters
+
+Every piece of information in USER.md makes your assistant smarter about your specific situation. Consider the difference:
+
+**Without USER.md context:**
+- You: "Schedule a dinner reservation for Saturday"
+- Assistant: "Sure! What time, how many people, any cuisine preference, and any dietary restrictions?"
+
+**With USER.md context:**
+- You: "Schedule a dinner reservation for Saturday"
+- Assistant: "I'll look for a vegetarian-friendly restaurant. Should I book for two (you and Sam), or are others joining? Sam doesn't have a shift Saturday so evening works. What time were you thinking?"
+
+The second response saves you from answering four follow-up questions because the assistant already knows the answers.
+
+### Keeping USER.md Current
+
+Set a reminder to review USER.md every 2-4 weeks. Projects change, priorities shift, new people enter your life. An outdated USER.md leads to an assistant that references things from two months ago as if they are still relevant.
+
+---
+
+## Priority 3: MESSAGING.md — Routing Rules
+
+**Time required:** 15-20 minutes
+
+**File location:** `~/.openclaw/MESSAGING.md`
+
+MESSAGING.md controls how your assistant handles incoming and outgoing messages. This is critical if you are using channels like iMessage or WhatsApp where other people can message your assistant.
+
+### What to Configure
+
+**Who can message:**
+
+```markdown
+## Allowed Contacts
+
+- Sam Chen (partner) — full access, can ask anything
+- Jordan Kim (manager) — work-related queries only
+- Mom — can ask about my schedule, respond warmly
+- Unknown numbers — do not respond, notify me instead
+```
+
+**Response rules:**
+
+```markdown
+## Response Behavior
+
+- Always respond to Sam within the channel (no confirmation needed)
+- For work contacts, draft a response and ask for my approval before sending
+- For unknown contacts, never respond automatically
+- Between 11 PM and 7 AM, hold all non-emergency responses until morning
+```
+
+**Tone per channel:**
+
+```markdown
+## Channel-Specific Tone
+
+- iMessage: casual, brief, emoji okay
+- Slack: professional but approachable, no emoji
+- Email: formal, complete sentences, proper sign-off
+```
+
+### Why This Cannot Wait
+
+If you connect iMessage as a channel before configuring MESSAGING.md, your assistant will respond to everyone who texts you with default behavior. That might mean your boss gets a weirdly casual response, or a stranger gets a detailed reply. Set the rules before you open the channels.
+
+---
+
+## Priority 4: Connect Your First Channel
+
+**Time required:** 10-15 minutes
+
+Now that your personality, user context, and messaging rules are in place, it is time to connect a real communication channel.
+
+### Which Channel to Start With
+
+**iMessage** is the best first channel if you are on macOS. It is the most natural way to interact — you text your assistant exactly like you would text a friend. It is stable and well-supported.
+
+**Slack** is the best first channel if you primarily want a work assistant. Set it up as a bot in your workspace and talk to it in a dedicated channel or via DM.
+
+**WebChat** (which you already have working) is fine for testing but is not practical for daily use. The whole point of OpenClaw is that it meets you where you already are.
+
+### Connecting iMessage
+
+```bash
+openclaw channel add imessage
+```
+
+The wizard will walk you through the setup. On macOS, this uses the Messages framework to read and send iMessages. You will need to grant the necessary permissions when prompted.
+
+Once connected, try sending a message to your assistant's configured phone number or email from your phone. You should see the message appear in your OpenClaw logs, and a response should come back through iMessage.
+
+### Connecting Slack
+
+```bash
+openclaw channel add slack
+```
+
+This requires creating a Slack app in your workspace. The wizard provides step-by-step instructions for:
+
+1. Creating a new Slack app at api.slack.com
+2. Configuring the necessary permissions (scopes)
+3. Installing the app to your workspace
+4. Copying the bot token into OpenClaw's configuration
+
+### Testing Your Channel
+
+Once connected, have a few test conversations through your new channel:
+
+- Ask a simple question to verify basic connectivity
+- Ask something that requires USER.md knowledge to confirm context is loaded
+- Send a message during your configured "quiet hours" to verify MESSAGING.md rules work
+- If you configured specific contacts, test from a contact that should and should not get responses
+
+---
+
+## Priority 5: Set Your First Cron Job
+
+**Time required:** 5-10 minutes
+
+A cron job is a scheduled task. Setting one up early serves two purposes: it proves that automation works, and it immediately makes OpenClaw useful in a way that goes beyond chat.
+
+### Your First Cron: A Morning Briefing
+
+The simplest and most universally useful cron job is a morning briefing. Add this to your `openclaw.json`:
+
+```json
+{
+  "cron": [
+    {
+      "name": "morning-briefing",
+      "schedule": "0 8 * * *",
+      "channel": "imessage",
+      "prompt": "Good morning! Give me a brief rundown of: today's date and day of the week, any notable events or holidays, the weather if you can access it, and a motivational thought to start the day. Keep it under 200 words."
+    }
+  ]
+}
+```
+
+The `"schedule": "0 8 * * *"` is standard cron syntax meaning "at 8:00 AM every day." If you are not familiar with cron syntax:
+
+| Field | Meaning | Example |
+|---|---|---|
+| First | Minute (0-59) | `0` = at the top of the hour |
+| Second | Hour (0-23) | `8` = 8 AM |
+| Third | Day of month (1-31) | `*` = every day |
+| Fourth | Month (1-12) | `*` = every month |
+| Fifth | Day of week (0-7) | `*` = every day (0 and 7 are Sunday) |
+
+After adding the cron job, restart the Gateway:
+
+```bash
+openclaw restart
+```
+
+Tomorrow morning at 8 AM, you will receive a message from your assistant without having asked for one. That moment — when OpenClaw reaches out to *you* — is when it starts to feel less like a tool and more like an assistant.
+
+### Other Useful Starter Cron Jobs
+
+**End of workday summary (weekdays at 6 PM):**
+
+```json
+{
+  "name": "eod-summary",
+  "schedule": "0 18 * * 1-5",
+  "channel": "imessage",
+  "prompt": "It's the end of the workday. Briefly recap anything notable from today's conversations and remind me of anything I said I'd do tomorrow."
+}
+```
+
+**Weekly review prompt (Sundays at 10 AM):**
+
+```json
+{
+  "name": "weekly-review",
+  "schedule": "0 10 * * 0",
+  "channel": "imessage",
+  "prompt": "It's Sunday. Give me a brief summary of what we worked on this week and ask me what I want to focus on in the coming week."
+}
+```
+
+**Daily journal nudge (every evening at 9 PM):**
+
+```json
+{
+  "name": "journal-nudge",
+  "schedule": "0 21 * * *",
+  "channel": "imessage",
+  "prompt": "Evening check-in: How was your day? Ask me one thoughtful question about my day to help me reflect."
+}
+```
+
+Start with one. You can always add more as you discover what is useful.
+
+---
+
+## What Most People Skip
+
+Everything above covers the critical first steps. But there are several features that most new users either do not know about or intentionally skip, only to wish they had set them up sooner.
+
+### HEARTBEAT.md — The Proactive System
+
+**File location:** `~/.openclaw/HEARTBEAT.md`
+
+HEARTBEAT.md defines your assistant's proactive behaviors — things it should do on its own without waiting for you to ask. This is separate from cron jobs (which run on a fixed schedule). Heartbeat behaviors are triggered by context, events, or patterns.
+
+Examples of heartbeat behaviors:
+
+```markdown
+## Proactive Behaviors
+
+- If I haven't responded to a message for more than 2 hours during work
+  hours, send me a gentle reminder
+- If you notice I've been working past 8 PM three days in a row,
+  suggest I take an evening off
+- If a news article is published about a topic in my current projects,
+  flag it for me
+- After any meeting, ask if I want to capture action items
+```
+
+Most new users leave HEARTBEAT.md completely empty. This means the entire proactive system — one of OpenClaw's most differentiating features — is sitting there dormant. Even adding 3-5 behaviors transforms the experience.
+
+### Memory Management
+
+MEMORY.md grows over time as your assistant learns things about you from conversations. But it needs occasional curation.
+
+**Things to do in your first week:**
+
+- Read through MEMORY.md after a few days to see what your assistant has recorded
+- Correct any inaccuracies (the assistant can misinterpret things)
+- Add important context that has not come up in conversation yet
+- Remove anything you do not want stored
+
+**Things to set up:**
+
+```markdown
+## Memory Rules
+
+- Always remember names and roles of people I mention
+- Remember project deadlines and status updates
+- Do not memorize venting or complaints — those are temporary
+- Update existing memories rather than creating duplicates
+```
+
+Without memory management, MEMORY.md becomes a growing pile of unorganized notes that may contain outdated or incorrect information. Regular review keeps it useful.
+
+### Model Failover
+
+If you only configured one AI provider during onboarding, your assistant stops working when that provider has an outage. And outages happen more often than you might think.
+
+Set up at least one backup model in your `openclaw.json`:
+
+```json
+{
+  "models": {
+    "primary": {
+      "provider": "anthropic",
+      "model": "claude-sonnet-4-20250514"
+    },
+    "fallback": {
+      "provider": "openai",
+      "model": "gpt-4o"
+    },
+    "fast": {
+      "provider": "google",
+      "model": "gemini-2.0-flash"
+    }
+  }
+}
+```
+
+The `fast` model is useful for simple tasks that do not need a top-tier model — checking the time, simple lookups, quick confirmations. It saves money and reduces latency for low-complexity interactions.
+
+---
+
+## The 10 Common Gaps
+
+After working with OpenClaw for a while and helping others set up theirs, we have identified ten gaps that almost every new user has. Use this as a checklist — if any of these apply to you, fix them this week.
+
+### 1. HEARTBEAT.md is Empty
+
+**The problem:** Your assistant is entirely reactive. It never reaches out to you, never notices patterns, never flags things proactively.
+
+**The fix:** Add at least 5 proactive behaviors to HEARTBEAT.md. Start with simple ones — reminders about tasks you mentioned, check-ins at the end of the day, alerts about topics you care about.
+
+### 2. SOUL.md is Still the Default Template
+
+**The problem:** Your assistant has a generic personality that does not match your communication style or preferences. Every response feels like it could be from anyone's assistant.
+
+**The fix:** Rewrite SOUL.md from scratch. Spend 30-60 minutes on it. Read it out loud — does it sound like the kind of assistant you want? If not, revise.
+
+### 3. USER.md Has Bare Minimum Information
+
+**The problem:** Your assistant knows your name and timezone but nothing about your work, your relationships, your preferences, or your projects. It cannot be proactive or contextual because it lacks context.
+
+**The fix:** Add at least 3-4 sections covering your professional life, personal life, preferences, and current projects. The more your assistant knows, the less you have to explain in every conversation.
+
+### 4. MEMORY.md Gets Stale Without Review
+
+**The problem:** Your assistant has been recording memories, but some are wrong, some are outdated, and some are duplicated. Stale memory leads to stale responses.
+
+**The fix:** Schedule a 10-minute MEMORY.md review every two weeks. Delete outdated entries, correct inaccuracies, and consolidate duplicates. Some people add this as a cron job reminder.
+
+### 5. Only One Channel Connected
+
+**The problem:** You set up iMessage and never added anything else. This means you only interact with your assistant from one context.
+
+**The fix:** Add at least one more channel. If you started with iMessage for personal use, add Slack for work. Different channels for different contexts makes the experience feel more natural.
+
+### 6. No Custom Skills Created
+
+**The problem:** You are using OpenClaw out of the box without any skills from ClawHub or any custom skills. Your assistant can talk, but it cannot *do* much.
+
+**The fix:** Browse ClawHub and install 2-3 skills that match your daily needs. Calendar management, weather, and web search are good starting points. Once you see how skills work, consider building a custom one for something specific to your workflow.
+
+### 7. Sub-Agents Never Explored
+
+**The problem:** Every task runs as a single agent. For complex, multi-step tasks, this means slow execution and limited capability.
+
+**The fix:** Experiment with sub-agents for complex tasks. Ask your assistant to "research X thoroughly" or "plan my trip to Y" and observe how it uses sub-agents to break the work into parallel tasks.
+
+### 8. Canvas and A2UI Untouched
+
+**The problem:** You are using OpenClaw as a text-only chat interface, ignoring the visual workspace entirely.
+
+**The fix:** Ask your assistant to "show me" something instead of "tell me" something. "Show me my schedule this week" should produce a visual calendar, not a bulleted list. If it does not, explore Canvas settings and A2UI configuration.
+
+### 9. No Model Failover Configured
+
+**The problem:** You have one AI provider. When it goes down, your assistant goes down. When it is slow, your assistant is slow.
+
+**The fix:** Add at least one fallback provider and one "fast" model for simple tasks. This takes 5 minutes in openclaw.json and saves you from future outages.
+
+### 10. Security Too Open or Too Closed
+
+**The problem (too open):** Your assistant responds to anyone who messages it, shares information freely, and has no boundaries around sensitive topics.
+
+**The problem (too closed):** Your assistant is so restricted that it asks for permission before every minor action, refuses to do basic tasks, and feels more like a bureaucratic gatekeeper than a helpful assistant.
+
+**The fix:** Review MESSAGING.md and SOUL.md with a security lens. Define clear rules for who gets responses, what information can be shared, and what actions require your confirmation. Then test edge cases — have a friend message your assistant and see what happens.
+
+---
+
+## A Realistic Timeline
+
+Here is what a well-paced first 24 hours looks like:
+
+| Time | Activity |
+|---|---|
+| **Hour 1** | Write SOUL.md (first draft) |
+| **Hour 2** | Write USER.md, test conversations in WebChat |
+| **Hour 3** | Configure MESSAGING.md, connect first channel |
+| **Hour 4** | Set up first cron job, test channel communication |
+| **Hours 5-8** | Use your assistant naturally throughout the day |
+| **Evening** | Review SOUL.md based on the day's conversations, make revisions |
+| **Next morning** | Check if your cron job fired, review MEMORY.md for first entries |
+| **Day 2** | Add HEARTBEAT.md behaviors, explore a skill from ClawHub |
+
+You do not need to do everything in a single sitting. In fact, spreading it across a full day is better because you get to *use* the assistant between configuration sessions, and real usage reveals what needs to change.
+
+---
+
+## The Meta-Lesson
+
+The biggest insight from setting up OpenClaw is this: **the quality of your AI assistant is directly proportional to the effort you put into configuring it.**
+
+This is not like most software where you install it and it works. OpenClaw is more like hiring a person — the onboarding period determines the quality of the working relationship. Invest in SOUL.md. Invest in USER.md. Review memory regularly. Add proactive behaviors. Expand channels.
+
+The people who get the most out of OpenClaw are not the ones with the most technical skill. They are the ones who took the time to teach their assistant who they are and how they want to work.
+
+Your first 24 hours set the foundation. Everything you build from here — workflows, automations, skills, integrations — builds on top of the personality, context, and rules you establish now.
+
+Take your time. Get the basics right. The rest will follow.

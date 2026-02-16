@@ -1,0 +1,94 @@
+---
+title: 'Sandboxing — Contain the Blast Radius of Your OpenClaw Agent'
+description: 'Restrict what your OpenClaw agent can access with sandbox mode, Docker isolation, and file system restrictions. Limit the damage from prompt injection, buggy skills, or misconfigured tools.'
+keywords: 'openclaw sandboxing, openclaw docker, openclaw file system restrictions, openclaw sandbox mode, openclaw isolation, openclaw security containment'
+---
+
+# Sandboxing: Containing the Blast Radius
+
+Sandboxing restricts what your OpenClaw agent can do on the host system. Even if something goes wrong — a prompt injection attack, a buggy skill, or a misconfigured tool — sandboxing limits the damage.
+
+---
+
+## Sandbox Mode
+
+OpenClaw has a built-in `sandbox` mode that restricts the agent's execution environment:
+
+```yaml
+# In your main config (openclaw.yaml or config.yaml)
+sandbox: true
+```
+
+When sandbox mode is enabled:
+
+- **File system access is restricted** to a specific directory (usually `~/.openclaw/workspace/`)
+- **Shell commands are filtered** through an allowlist of safe commands
+- **Network requests can be restricted** to specific domains
+- **System-level operations** (installing packages, modifying system files) are blocked
+
+---
+
+## Docker Isolation (Recommended for Advanced Users)
+
+For stronger isolation, run OpenClaw inside a Docker container:
+
+```bash
+docker run -d \
+  --name openclaw \
+  -v ~/.openclaw/config:/app/config:ro \
+  -v ~/.openclaw/workspace:/app/workspace \
+  -p 127.0.0.1:3000:3000 \
+  --memory=2g \
+  --cpus=1.5 \
+  openclaw/openclaw:latest
+```
+
+Key flags explained:
+
+- `-v config:ro` — Mounts config as **read-only** so the agent cannot modify its own configuration
+- `-v workspace` — Gives the agent a dedicated workspace directory (the only place it can write)
+- `-p 127.0.0.1:3000:3000` — Binds the gateway to localhost only (not exposed to the network)
+- `--memory=2g` — Caps memory usage to prevent runaway processes
+- `--cpus=1.5` — Limits CPU to prevent resource exhaustion
+
+---
+
+## File System Restrictions
+
+Even without full Docker isolation, you should restrict which directories the agent can access:
+
+```yaml
+fileSystem:
+  allowedPaths:
+    - ~/.openclaw/workspace
+    - ~/Documents/shared-with-agent
+  blockedPaths:
+    - ~/.ssh
+    - ~/.aws
+    - ~/.config
+    - ~/.*  # All hidden directories
+  readOnly:
+    - ~/Documents/reference  # Can read but not modify
+```
+
+**Critical directories to always block:**
+
+| Directory | Why |
+|-----------|-----|
+| `~/.ssh` | SSH keys — an agent (or malicious skill) could exfiltrate these |
+| `~/.aws` | AWS credentials in plaintext |
+| `~/.config` | App configs often contain tokens and secrets |
+| `~/.gnupg` | GPG keys |
+| `~/.kube` | Kubernetes configs with cluster access |
+| `/etc` | System configuration files |
+
+---
+
+## Next Steps
+
+Sandboxing limits the blast radius. Next, secure your credentials and control what tools the agent can use:
+
+- **[API Keys & Tool Policies](/security/api-keys)** — Secure your credentials and control tool permissions
+- **[DM Policies & Pairing](/security/dm-policies)** — Control who can talk to your agent
+- **[ClawHub Vetting](/security/clawhub-vetting)** — Safely install community skills
+- **[Network Security & Checklist](/security/network-security)** — Lock down your gateway and work through the full security checklist

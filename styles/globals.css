@@ -1,0 +1,169 @@
+/* Fonts loaded via <link> tags in theme.config.tsx head */
+
+:root {
+  --font-sans: 'Satoshi', 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: 'Clash Display', 'Space Grotesk', -apple-system, sans-serif;
+  --coral-bright: #ff4d4d;
+  --coral-mid: #e63946;
+  --cyan-bright: #00e5cc;
+  --cyan-mid: #14b8a6;
+  --bg-deep: #050810;
+  --bg-surface: #0a0f1a;
+  --bg-elevated: #111827;
+  --text-primary: #f0f4ff;
+  --text-secondary: #8892b0;
+  --text-muted: #5a6480;
+  --nextra-primary-hue: 0deg;
+  --nextra-primary-saturation: 100%;
+  --nextra-primary-lightness: 65%;
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+/* Make images span full width */
+.nextra-content img {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+@media (max-width: 768px) {
+  .nextra-content img {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    margin-left: calc(-50vw + 50%) !important;
+    margin-right: calc(-50vw + 50%) !important;
+  }
+}
+
+/* Headings */
+.nextra-content h1 {
+  font-family: var(--font-heading) !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+}
+
+h1 { line-height: 1.1; font-weight: 700; }
+h2 { line-height: 1.2; }
+h3 { line-height: 1.3; }
+
+/* Logo */
+.nx-logo {
+  font-family: var(--font-heading);
+  font-weight: 700;
+}
+
+/* Sidebar */
+.nx-sidebar h2 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+}
+
+.nx-sidebar {
+  font-family: var(--font-sans);
+}
+
+aside.nextra-sidebar-container {
+  width: 300px !important;
+  max-width: 300px !important;
+}
+
+nav.nextra-sidebar {
+  width: 300px !important;
+}
+
+/* Code blocks */
+code, pre {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+}
+
+code {
+  font-weight: 600;
+}
+
+strong {
+  font-weight: 800;
+}
+
+/* List spacing */
+.nextra-content ul,
+.nextra-content ol {
+  margin-top: 0.5rem !important;
+}
+
+.nextra-content p:has(+ ul),
+.nextra-content p:has(+ ol) {
+  margin-bottom: 0.5rem !important;
+}
+
+.nextra-content ul > li,
+.nextra-content ol > li {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+/* Dark mode — OpenClaw Faithful palette */
+.dark {
+  --nextra-primary-hue: 0deg;
+  --nextra-primary-saturation: 100%;
+  --nextra-primary-lightness: 65%;
+}
+
+.dark .nextra-content code:not(pre code) {
+  background-color: rgba(0, 229, 204, 0.08);
+  border: 1px solid rgba(0, 229, 204, 0.2);
+  color: #00e5cc;
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+}
+
+.dark .nextra-content ul > li::marker {
+  color: #ff4d4d;
+}
+
+.dark .nextra-content ol > li::marker {
+  color: #ff4d4d;
+}
+
+.dark .nextra-content a {
+  color: #ff4d4d;
+  text-decoration: none;
+}
+
+.dark .nextra-content a:hover {
+  color: #e63946;
+}
+
+/* Code block copy button */
+.nextra-code > div {
+  opacity: 1 !important;
+}
+
+.dark button[title="Copy code"] {
+  background-color: #ff4d4d !important;
+  color: white !important;
+  border-radius: 6px !important;
+  padding: 6px 8px !important;
+  transition: all 0.2s ease !important;
+}
+
+.dark button[title="Copy code"]:hover {
+  background-color: #e63946 !important;
+  transform: scale(1.05) !important;
+}
+
+.dark button[title="Copied"] {
+  background-color: #00e5cc !important;
+}
+
+pre code {
+  white-space: pre-wrap !important;
+  word-break: break-all !important;
+}

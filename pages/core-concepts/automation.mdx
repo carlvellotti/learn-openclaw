@@ -1,0 +1,536 @@
+---
+title: "Automation — Cron Jobs, Webhooks & Heartbeat"
+description: "Schedule your OpenClaw agent to work autonomously. Set up cron jobs, webhooks, HEARTBEAT.md proactive behaviors, and hooks for a truly always-on assistant."
+keywords: "openclaw automation, openclaw cron jobs, openclaw webhooks, openclaw heartbeat, openclaw scheduling, openclaw hooks"
+---
+
+# Automation
+
+## Making Your Agent Work While You Sleep
+
+Everything we've covered so far — identity, memory, skills — makes your agent better when you're actively talking to it. Automation is what makes it useful when you're not.
+
+Cron jobs, webhooks, heartbeat behaviors, and hooks together create an agent that monitors, reports, reminds, and acts on your behalf around the clock. This is where OpenClaw stops being a chat tool and starts being an assistant.
+
+---
+
+## Cron Jobs
+
+Cron jobs let you schedule your agent to do things on a recurring basis. Daily briefings, weekly reports, monitoring tasks, periodic check-ins — anything you'd put on a recurring calendar event, you can automate.
+
+### Basic Syntax
+
+Cron jobs are defined in your `openclaw.json` file:
+
+```json
+{
+  "crons": [
+    {
+      "label": "Daily Journal Entry",
+      "schedule": "0 5 * * *",
+      "prompt": "Create today's journal entry header in #journal with the date, day of week, and weather forecast for Seattle.",
+      "channel": "slack"
+    }
+  ]
+}
+```
+
+**Fields:**
+- `label` — Human-readable name (shows up in logs)
+- `schedule` — Standard cron expression (minute, hour, day of month, month, day of week)
+- `prompt` — What your agent should do when the cron fires
+- `channel` — Where to send the output (optional; defaults to the primary channel)
+
+### Cron Schedule Quick Reference
+
+If you're not familiar with cron syntax, here's a cheat sheet:
+
+```
+┌───────────── minute (0-59)
+│ ┌───────────── hour (0-23)
+│ │ ┌───────────── day of month (1-31)
+│ │ │ ┌───────────── month (1-12)
+│ │ │ │ ┌───────────── day of week (0-7, where 0 and 7 = Sunday)
+│ │ │ │ │
+* * * * *
+```
+
+| Expression | Meaning |
+|-----------|---------|
+| `0 5 * * *` | Every day at 5:00 AM |
+| `0 9 * * 1` | Every Monday at 9:00 AM |
+| `0 */6 * * *` | Every 6 hours |
+| `30 8 * * 1-5` | Weekdays at 8:30 AM |
+| `0 0 1 * *` | First day of every month at midnight |
+| `*/30 * * * *` | Every 30 minutes |
+| `0 18 * * 0` | Every Sunday at 6:00 PM |
+
+### Practical Cron Examples
+
+Here's a set of cron jobs that form a useful daily and weekly automation system:
+
+```json
+{
+  "crons": [
+    {
+      "label": "Daily Journal Header",
+      "schedule": "0 5 * * *",
+      "prompt": "Post today's date and day of week to #journal. Include the weather forecast for Seattle and any calendar events I have today.",
+      "channel": "slack"
+    },
+    {
+      "label": "Morning Briefing",
+      "schedule": "30 8 * * 1-5",
+      "prompt": "Good morning briefing: summarize my unread emails, today's calendar, any Slack messages I missed overnight, and the top 3 things I should focus on based on my current projects in MEMORY.md.",
+      "channel": "imessage"
+    },
+    {
+      "label": "X Topic Monitor",
+      "schedule": "0 */6 * * *",
+      "prompt": "Search X/Twitter for posts about 'product management AI' and 'AI tools for PMs' from the last 6 hours with 50+ likes. Post a summary to #research with links to the top 3-5 most relevant posts.",
+      "channel": "slack"
+    },
+    {
+      "label": "Weekly Report",
+      "schedule": "0 9 * * 1",
+      "prompt": "Generate the weekly report: review daily logs from the past 7 days, summarize what was accomplished, flag anything unfinished, and suggest the top 3 priorities for this week based on my active projects.",
+      "channel": "slack"
+    },
+    {
+      "label": "Newsletter Reminder",
+      "schedule": "0 10 * * 2",
+      "prompt": "Reminder: The Weekly Stack newsletter goes out tomorrow. Check if the draft is in the content folder. If it is, summarize it and ask if I want to review. If it's not, flag it as missing.",
+      "channel": "imessage"
+    },
+    {
+      "label": "Memory Review Reminder",
+      "schedule": "0 18 * * 0",
+      "prompt": "Time for the weekly memory review. Review daily logs from this past week and propose updates to MEMORY.md. Show me additions, modifications, and removals before making changes.",
+      "channel": "slack"
+    }
+  ]
+}
+```
+
+### The anchorMs Parameter
+
+Over time, cron jobs can drift. If your agent takes 5 minutes to process a cron job that fires every hour, the next execution might be 5 minutes late, then 10, then 15. This is called **cron drift**.
+
+The `anchorMs` parameter prevents this by anchoring the schedule to an absolute time rather than a relative one:
+
+```json
+{
+  "label": "Hourly Weather Check",
+  "schedule": "0 * * * *",
+  "prompt": "Check the current weather in Seattle and post it to #general.",
+  "anchorMs": 1708128000000
+}
+```
+
+`anchorMs` is a Unix timestamp (in milliseconds) that serves as the reference point for scheduling. The cron system calculates the next execution time from this anchor rather than from the last execution time, preventing drift.
+
+**When to use anchorMs:**
+- High-frequency cron jobs (hourly or more often)
+- Time-sensitive tasks where drift would be noticeable
+- Multiple cron jobs that need to stay synchronized
+
+**When you don't need it:**
+- Daily or weekly jobs (drift is negligible at this frequency)
+- Tasks where exact timing doesn't matter
+
+### Writing Good Cron Prompts
+
+The `prompt` field is what your agent actually does when the cron fires. Write it like you're giving instructions to a human assistant.
+
+**Bad prompt:**
+```
+"Check email"
+```
+
+**Good prompt:**
+```
+"Check my Gmail inbox for unread emails from the last 12 hours. Summarize any that need action — categorize as urgent (needs response today), important (needs response this week), or FYI. Post the summary to #inbox-digest."
+```
+
+The difference is specificity. Tell your agent:
+1. What to check
+2. What to look for
+3. How to format the output
+4. Where to put the result
+
+---
+
+## Webhooks
+
+While cron jobs run on a schedule, webhooks let external services trigger your agent. Something happens in the outside world, and your agent responds.
+
+### How Webhooks Work
+
+1. OpenClaw exposes a webhook URL for your workspace
+2. You configure an external service to POST to that URL when something happens
+3. OpenClaw receives the payload and runs a configured prompt with the payload data
+
+### Configuration
+
+```json
+{
+  "webhooks": {
+    "github-push": {
+      "prompt": "A new commit was pushed to the {{repo}} repository by {{author}}. The commit message is: '{{message}}'. Review the changes and post a summary to #dev-updates.",
+      "channel": "slack",
+      "secret": "${WEBHOOK_SECRET_GITHUB}"
+    },
+    "form-submission": {
+      "prompt": "New form submission received from {{name}} ({{email}}). Their message: '{{message}}'. Draft a response and post it to #leads for my review.",
+      "channel": "slack",
+      "secret": "${WEBHOOK_SECRET_FORM}"
+    }
+  }
+}
+```
+
+### Template Variables
+
+Webhook prompts support template variables using the `{{variable}}` syntax. These are populated from the incoming webhook payload. If the external service sends:
+
+```json
+{
+  "repo": "learn-openclaw",
+  "author": "carlvellotti",
+  "message": "Add automation docs"
+}
+```
+
+Then `{{repo}}` becomes "learn-openclaw", `{{author}}` becomes "carlvellotti", and so on.
+
+### Security
+
+Every webhook should have a `secret` — a shared key between OpenClaw and the external service. OpenClaw validates incoming requests against this secret to prevent unauthorized triggers.
+
+Without a secret, anyone who discovers your webhook URL could trigger your agent to do anything the webhook prompt allows. Always set secrets using environment variables, not plain text.
+
+### Common Webhook Use Cases
+
+| Trigger | What Your Agent Does |
+|---------|---------------------|
+| GitHub push | Summarize changes, flag breaking changes |
+| New email (via Zapier/Make) | Categorize and prioritize |
+| Form submission | Draft a response, log the lead |
+| Calendar event starting | Pull context for the meeting, post prep notes |
+| Monitoring alert | Investigate the issue, post findings |
+| Stripe payment | Log the transaction, send a thank-you |
+| RSS feed update | Summarize the new post, evaluate relevance |
+
+---
+
+## HEARTBEAT.md — Proactive Behavior
+
+HEARTBEAT.md is one of the most underused files in OpenClaw. It defines what your agent should do when it's idle — what to check on, what to be proactive about, how to be helpful without being asked.
+
+### The Problem
+
+Most people's HEARTBEAT.md is completely empty. This is like hiring an assistant and never telling them to be proactive. They'll sit there waiting for you to ask for something, even when there are obvious things they could be doing.
+
+A well-configured HEARTBEAT.md turns your agent from reactive (waits for you to ask) to proactive (anticipates what you need).
+
+### What Goes in HEARTBEAT.md
+
+```markdown
+# HEARTBEAT.md
+
+## When Idle, Check These Things
+
+### Priority Checks (every few hours)
+- Are there unread messages in Slack that I haven't responded to?
+- Did any calendar events get added or changed for today?
+- Are there any tasks in my project list with deadlines this week
+  that I haven't made progress on?
+
+### Daily Checks
+- Has the newsletter draft been started if we're within 48 hours
+  of publish date?
+- Are there any GitHub issues or PRs that need my attention?
+- What's the weather forecast — do I need to adjust any outdoor plans?
+
+### Weekly Checks
+- How are my LinkedIn post impressions trending compared to last week?
+- Are there any subscriptions or trials expiring soon?
+- Is MEMORY.md up to date or does it need a review?
+
+## How to Be Proactive
+
+- If you notice I haven't worked on a high-priority project in 3+ days,
+  mention it casually. Don't nag.
+- If you see a pattern in my daily logs (like always forgetting
+  to do something), suggest a cron job for it.
+- If I mention being stressed about a deadline, proactively break
+  the work into smaller tasks and suggest a sequence.
+- If the weather is going to be unusually good, suggest I take a
+  walk during my afternoon break.
+
+## How NOT to Be Proactive
+
+- Don't send me updates about things that haven't changed.
+- Don't remind me about things I've explicitly said I'll handle later.
+- Don't check on personal matters during work hours or work matters
+  during personal time.
+- Don't be proactive about anything that costs money without
+  asking first.
+- Limit proactive messages to 3 per day maximum. I don't want
+  to feel nagged.
+```
+
+### Heartbeat vs. Cron Jobs
+
+There's overlap between HEARTBEAT.md and cron jobs, and it's worth understanding the difference:
+
+| Feature | Cron Jobs | Heartbeat |
+|---------|-----------|-----------|
+| **Timing** | Exact schedule (e.g., every day at 9am) | When idle, opportunistic |
+| **Specificity** | One task per cron entry | General guidelines for behavior |
+| **Output** | Always produces output when it fires | Only produces output when something is worth reporting |
+| **Use case** | Recurring reports, monitoring, reminders | Ambient awareness, proactive suggestions |
+
+Use cron jobs for things that must happen at a specific time. Use HEARTBEAT.md for things your agent should be generally aware of and act on when appropriate.
+
+---
+
+## Hooks
+
+Hooks are event-driven scripts that run automatically when specific things happen in your OpenClaw workspace. Unlike cron jobs (time-based) and webhooks (external-trigger-based), hooks respond to internal events.
+
+### boot-md
+
+Fires when your agent starts a new conversation. Loads specified files into context.
+
+```json
+{
+  "hooks": {
+    "boot-md": {
+      "enabled": true,
+      "files": [
+        "SOUL.md",
+        "IDENTITY.md",
+        "USER.md",
+        "MEMORY.md",
+        "HEARTBEAT.md"
+      ]
+    }
+  }
+}
+```
+
+**Why it matters:** This is what ensures your agent always starts with the right context. Without boot-md, your agent would start every conversation blank.
+
+**Optimization tip:** Every file loaded at boot consumes context tokens. If your identity files are getting large, consider what truly needs to be loaded every time vs. what can be retrieved on demand.
+
+### session-memory
+
+Fires at the end of each conversation. Summarizes and saves the conversation to daily logs.
+
+```json
+{
+  "hooks": {
+    "session-memory": {
+      "enabled": true,
+      "summaryLength": "medium",
+      "includeActions": true,
+      "dailyLogPath": "./memory/daily/"
+    }
+  }
+}
+```
+
+**Why it matters:** This is the backbone of the medium-term memory layer. Without it, conversations are lost when they end.
+
+**Common issue:** If your agent crashes or the connection drops unexpectedly, session-memory may not fire. Check your daily logs periodically to make sure entries are being created.
+
+### command-logger
+
+Fires after every command or tool use. Logs what your agent did.
+
+```json
+{
+  "hooks": {
+    "command-logger": {
+      "enabled": true,
+      "logPath": "./memory/commands/",
+      "includeOutput": false,
+      "excludeTools": ["read_file", "list_files"]
+    }
+  }
+}
+```
+
+**Why it matters:** Accountability and debugging. When you need to understand what your agent did and why, the command log is your audit trail.
+
+**Tip:** Use `excludeTools` to filter out noisy, low-risk operations like file reads. This keeps the log focused on meaningful actions like shell commands, API calls, and file writes.
+
+---
+
+## Real Working Examples
+
+Here are two automation setups running in production. These aren't theoretical — they're actual configurations producing real output.
+
+### Example 1: X Topic Monitor
+
+**Goal:** Stay on top of trending discussions about AI tools for product managers without manually checking X/Twitter multiple times a day.
+
+**Configuration:**
+
+```json
+{
+  "crons": [
+    {
+      "label": "X Topic Monitor",
+      "schedule": "0 */6 * * *",
+      "prompt": "Search X/Twitter for the following topics from the last 6 hours:\n- 'product management AI'\n- 'AI tools for PMs'\n- 'Claude Code'\n- 'OpenClaw'\n\nFilter for posts with 50+ likes. For each relevant post, capture:\n- Author and handle\n- Post text (truncated to 280 chars if longer)\n- Like count\n- Link to the post\n\nPost a summary to #x-monitoring in Slack. Group by topic. If nothing meets the threshold, post 'No notable activity in the last 6 hours.' instead of staying silent.",
+      "channel": "slack",
+      "anchorMs": 1708128000000
+    }
+  ]
+}
+```
+
+**What the output looks like in Slack:**
+
+```
+## X Topic Monitor — Feb 16, 2:00 PM
+
+### "product management AI" (3 posts)
+- @pmleader: "The PMs who learn to build with AI tools aren't
+  replacing engineers — they're becoming 10x more effective at their
+  own job..." (127 likes)
+  https://x.com/pmleader/status/...
+
+- @aibuilder: "Hot take: every PM should be able to spin up a
+  prototype with Claude Code in under an hour..." (89 likes)
+  https://x.com/aibuilder/status/...
+
+- @techcrunch: "The rise of the 'full stack PM' — product managers
+  who code, design, and ship..." (203 likes)
+  https://x.com/techcrunch/status/...
+
+### "OpenClaw" (1 post)
+- @clawdev: "Just hit 150K stars. What a ride..." (342 likes)
+  https://x.com/clawdev/status/...
+
+### "Claude Code" — No notable activity
+### "AI tools for PMs" — No notable activity
+```
+
+This fires every 6 hours. Over a week, it surfaces 20-30 relevant posts that would have taken hours of manual scrolling to find.
+
+### Example 2: Daily Journal Header
+
+**Goal:** Start every day with an automatically-generated journal entry that includes the date, weather, and any context needed for the day.
+
+**Configuration:**
+
+```json
+{
+  "crons": [
+    {
+      "label": "Daily Journal Header",
+      "schedule": "0 5 * * *",
+      "prompt": "Create today's daily journal header. Include:\n1. Date in format: '## Monday, February 16, 2026'\n2. Weather forecast for Seattle (high/low, conditions)\n3. Sunrise and sunset times\n4. Calendar events for today (if calendar skill is available)\n5. Any active reminders or deadlines from MEMORY.md\n\nPost to #journal channel in Slack. Keep it clean and scannable — this is a header, not an essay.",
+      "channel": "slack"
+    }
+  ]
+}
+```
+
+**What the output looks like:**
+
+```
+## Monday, February 16, 2026
+
+🌧️ Seattle: 45°F / 38°F — Rain, clearing by afternoon
+🌅 Sunrise 7:12 AM | Sunset 5:38 PM
+
+### Today's Schedule
+- 10:00 AM — Weekly sync with Mike
+- 1:00 PM — Content review block
+- 3:30 PM — Dentist appointment
+
+### Active Deadlines
+- Newsletter draft due tomorrow (Wednesday publish)
+- Course Module 5 outline due Friday
+```
+
+This fires at 5am, so by the time you wake up and check Slack, your day is already organized.
+
+---
+
+## Designing Your Automation System
+
+### Start Small
+
+Don't try to automate everything on day one. Start with one or two cron jobs and build from there:
+
+1. **Week 1:** Set up a daily morning briefing
+2. **Week 2:** Add a weekly report and memory review reminder
+3. **Week 3:** Set up one monitoring job (X, news, competitors)
+4. **Week 4:** Write your HEARTBEAT.md based on what you've learned
+
+### The Notification Problem
+
+More automation means more messages from your agent. If every cron job posts to the same channel, you'll start ignoring all of them.
+
+**Solution:** Use channel routing to separate signal from noise:
+
+```json
+{
+  "crons": [
+    {
+      "label": "Morning Briefing",
+      "channel": "imessage"
+    },
+    {
+      "label": "X Monitor",
+      "channel": "slack:#x-monitoring"
+    },
+    {
+      "label": "Weekly Report",
+      "channel": "slack:#weekly-reports"
+    }
+  ]
+}
+```
+
+Put high-priority, actionable notifications in iMessage. Put monitoring and reports in dedicated Slack channels. This way, your agent's output doesn't compete with your human conversations.
+
+### Debugging Cron Jobs
+
+When a cron job isn't working as expected:
+
+1. **Check the logs.** The command-logger hook shows when crons fired and what happened.
+2. **Test the prompt manually.** Copy the cron prompt and send it to your agent in a normal conversation. If the output is wrong, it's a prompt issue, not a scheduling issue.
+3. **Check the schedule expression.** Use a cron expression validator (crontab.guru is the classic) to confirm your schedule means what you think it means.
+4. **Check the timezone.** Cron schedules run in your configured timezone. If your agent is hosted on a server in a different timezone, the times won't match your local clock.
+5. **Check skill availability.** If your cron prompt references a skill (like web search), make sure that skill is installed and has valid API keys.
+
+### Cost Awareness
+
+Every cron job that fires consumes API tokens. A daily briefing that pulls email, calendar, weather, and project status might cost $0.05-0.15 per run depending on the model and response length.
+
+That's $1.50-4.50 per month for a daily briefing — totally reasonable. But if you have 10 cron jobs running every hour, costs add up. Monitor your usage and adjust frequency as needed.
+
+---
+
+## Summary
+
+| System | Trigger | Best For |
+|--------|---------|----------|
+| **Cron Jobs** | Time-based schedule | Recurring tasks, reports, monitoring |
+| **Webhooks** | External events | Responding to GitHub, forms, payments, alerts |
+| **HEARTBEAT.md** | Agent idle time | Ambient awareness, proactive suggestions |
+| **boot-md hook** | Conversation start | Loading identity and context |
+| **session-memory hook** | Conversation end | Saving conversation summaries |
+| **command-logger hook** | Every tool use | Audit trail and debugging |
+
+The automation layer is what makes OpenClaw an "always-on" assistant rather than a chat tool you open when you need something. Start with a daily briefing, add a weekly report, write a basic HEARTBEAT.md, and expand from there.
+
+The agents that feel magical aren't using a different model — they've built the systems around it. Identity, memory, skills, and automation are those systems. Now you have the knowledge to build yours.
+
+Next up: **[Sub-Agents](/advanced/sub-agents)** — Learn how to orchestrate multiple specialized agents for complex workflows.

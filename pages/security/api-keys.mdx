@@ -1,0 +1,180 @@
+---
+title: 'API Keys & Tool Policies — Secure Your OpenClaw Credentials'
+description: 'Stop putting API keys in SOUL.md. Learn where to store credentials safely and how to configure tool policies to control what your OpenClaw agent can do.'
+keywords: 'openclaw api keys, openclaw secrets management, openclaw tool policies, openclaw tool permissions, openclaw require approval, openclaw environment variables, openclaw oauth'
+---
+
+# API Keys & Tool Policies
+
+The two most important security decisions after DM policies: where your credentials live and what your agent is allowed to do with them.
+
+---
+
+## API Key Management: The Most Common Mistake
+
+The single most common security mistake in the OpenClaw community is **putting API keys directly in SOUL.md or other shared configuration files.**
+
+### Why This Is Dangerous
+
+Your `SOUL.md` file defines your agent's personality and instructions. It is often:
+
+- Synced across devices
+- Backed up to cloud storage
+- Shared in community forums for inspiration
+- Readable by any skill the agent runs
+
+If your API keys are in `SOUL.md`, they are one accidental share away from being exposed.
+
+### Where to Put API Keys Instead
+
+**Option 1: Environment Variables (Simplest)**
+
+```bash
+# In your shell profile (~/.zshrc, ~/.bashrc)
+export OPENAI_API_KEY="sk-..."
+export ANTHROPIC_API_KEY="sk-ant-..."
+export GOOGLE_API_KEY="AIza..."
+```
+
+Then reference them in your OpenClaw config:
+
+```yaml
+# openclaw.yaml
+llm:
+  provider: anthropic
+  apiKey: ${ANTHROPIC_API_KEY}
+```
+
+**Option 2: OpenClaw's Built-in Secrets Management (Recommended)**
+
+OpenClaw has a secrets store that encrypts keys at rest:
+
+```bash
+# Add a secret
+openclaw secrets set OPENAI_API_KEY "sk-..."
+
+# List secrets (values are masked)
+openclaw secrets list
+
+# Remove a secret
+openclaw secrets remove OPENAI_API_KEY
+```
+
+Secrets added this way are:
+
+- Encrypted on disk
+- Available to the agent at runtime
+- Never exposed in logs or config files
+- Not synced to cloud backups by default
+
+**Option 3: OAuth Where Available (Best for Services)**
+
+For services that support OAuth (Google, Slack, GitHub, etc.), use OAuth instead of API keys:
+
+```yaml
+integrations:
+  google:
+    auth: oauth
+    clientId: ${GOOGLE_CLIENT_ID}
+    scopes:
+      - calendar.readonly
+      - gmail.send
+```
+
+**Why OAuth is better:** The token is scoped (limited permissions), time-limited (expires), and revocable (you can cut access without rotating a key). API keys, by contrast, are usually permanent, broadly scoped, and hard to rotate.
+
+### What Never to Do
+
+```markdown
+<!-- NEVER do this in SOUL.md -->
+You have access to the following API keys:
+- OpenAI: sk-abc123...
+- Anthropic: sk-ant-xyz789...
+
+<!-- NEVER do this in a skill file -->
+const API_KEY = "sk-abc123...";
+```
+
+---
+
+## Tool Policies: Controlling What Your Agent Can Do
+
+OpenClaw's power comes from its tools — shell access, file operations, web browsing, messaging. But not every tool should be enabled all the time.
+
+### Tool Risk Tiers
+
+Think about tools in three risk tiers:
+
+**Low Risk — Generally safe to leave enabled:**
+- `read_file` — Reading files (if file system paths are restricted)
+- `web_search` — Searching the web
+- `get_weather` — Fetching weather data
+- `calendar_read` — Reading calendar events
+- `memory_read` — Accessing the agent's own memory
+
+**Medium Risk — Enable with restrictions:**
+- `web_browse` — Can visit any URL (risk: prompt injection from web content)
+- `send_message` — Can message your contacts (risk: impersonation, spam)
+- `write_file` — Can create and modify files (risk: data loss, overwriting)
+- `calendar_write` — Can create and modify calendar events
+
+**High Risk — Enable only when needed:**
+- `shell` — Can execute arbitrary system commands
+- `install_package` — Can install software
+- `send_email` — Can send emails as you
+- `api_call` — Can make arbitrary HTTP requests
+
+### Configuring Tool Policies
+
+```yaml
+# openclaw.yaml
+tools:
+  shell:
+    enabled: true
+    requireApproval: true  # Agent must ask you before running commands
+    allowedCommands:
+      - ls
+      - cat
+      - grep
+      - date
+      - curl
+    blockedCommands:
+      - rm -rf
+      - sudo
+      - chmod
+      - mkfs
+  write_file:
+    enabled: true
+    requireApproval: false
+    restrictToWorkspace: true  # Can only write to workspace directory
+  send_message:
+    enabled: true
+    requireApproval: true  # Must confirm before sending
+  web_browse:
+    enabled: true
+    blockedDomains:
+      - "*.exe"
+      - "paste*.com"
+```
+
+### The `requireApproval` Pattern
+
+For medium and high risk tools, the `requireApproval` flag is your best friend. When enabled, the agent will:
+
+1. Decide it wants to use a tool
+2. Show you what it plans to do (the command, the message, the file change)
+3. Wait for your explicit approval
+4. Only then execute
+
+This gives you a human-in-the-loop safety net without disabling the tool entirely. Start with `requireApproval: true` on everything, then selectively remove it as you build confidence.
+
+---
+
+## Next Steps
+
+With your credentials secured and tools locked down, vet the skills you install:
+
+- **[ClawHub Vetting](/security/clawhub-vetting)** — Safely install community skills
+- **[DM Policies & Pairing](/security/dm-policies)** — Control who can talk to your agent
+- **[Sandboxing](/security/sandboxing)** — Contain the blast radius with sandbox mode and Docker
+- **[Network Security & Checklist](/security/network-security)** — Lock down your gateway and work through the full security checklist

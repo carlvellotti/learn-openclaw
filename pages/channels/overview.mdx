@@ -1,0 +1,216 @@
+---
+title: 'Channel Overview — Choosing the Right Channels for Your AI Assistant'
+description: 'Compare OpenClaw channels — iMessage, Slack, WhatsApp, Telegram, Discord, Signal, and WebChat — across stability, setup difficulty, and use cases. Learn message routing with MESSAGING.md and build a multi-channel strategy.'
+keywords: 'openclaw channels, openclaw channel comparison, openclaw multi-channel, openclaw messaging routing, openclaw MESSAGING.md, openclaw channel strategy, openclaw troubleshooting channels'
+---
+
+# OpenClaw Channel Setup Guide
+
+## Channels are how you (and others) communicate with your AI assistant. Pick the right ones and configure them well.
+
+Channels are the communication layer between the outside world and your OpenClaw agent. Every message you send to your agent — whether it is a text on iMessage, a Slack message, or a Telegram chat — flows through a channel.
+
+You can run multiple channels simultaneously. Most people start with one, realize they want different channels for different contexts, and end up running two or three.
+
+This guide covers every major channel: what it is good at, how to set it up, what breaks, and how to build a multi-channel strategy.
+
+---
+
+## Channel Comparison
+
+Before diving into individual channels, here is how they compare across the dimensions that matter most:
+
+| Channel | Stability | Setup Difficulty | Best For | DM Support | Group Support |
+|---------|-----------|-----------------|----------|------------|---------------|
+| iMessage | High | Medium | Personal use, iOS users | Yes | Yes |
+| Slack | High | Easy | Work, teams, logging | Yes | Yes |
+| WhatsApp | Medium | Hard (Baileys) | Global messaging | Yes | Yes |
+| Telegram | High | Easy | Tech users, bots | Yes | Yes |
+| Discord | Medium | Medium | Communities | Yes | Yes |
+| Signal | High | Hard | Privacy-focused | Yes | Yes |
+| WebChat | High | None (built-in) | Testing, quick access | Yes | No |
+
+### Reading the Table
+
+**Stability** reflects how reliably the channel stays connected over days and weeks of continuous use. "High" means you can set it and forget it. "Medium" means you should expect occasional reconnection issues.
+
+**Setup Difficulty** factors in both the technical steps and the ongoing maintenance. "Easy" means you can be running in under 15 minutes. "Hard" means you will need to install additional dependencies, handle authentication flows, and potentially troubleshoot connection issues.
+
+**DM Support** means the agent can have private one-on-one conversations. **Group Support** means the agent can participate in group chats (with the right mention or trigger configuration).
+
+---
+
+## Message Routing with MESSAGING.md
+
+Once you have multiple channels running, you need a way to control which channel gets which types of messages. This is where `MESSAGING.md` comes in.
+
+`MESSAGING.md` is a configuration file (in your OpenClaw config directory) that defines routing rules for outbound messages from your agent.
+
+### Basic Routing
+
+```markdown
+# MESSAGING.md
+
+## Default Channel
+All messages go to iMessage unless otherwise specified.
+
+## Routing Rules
+
+### Work Messages
+Messages related to work, meetings, or professional contacts should go through Slack.
+- Channel: slack
+- Contacts: @work-team
+
+### Personal Messages
+Personal messages to family and friends go through iMessage.
+- Channel: imessage
+- Contacts: @family, @friends
+
+### Notifications
+System notifications, reminders, and alerts go to Telegram.
+- Channel: telegram
+- Contact: self
+```
+
+### How Routing Decisions Work
+
+When your agent decides to send a message (proactively or in response to an instruction), it uses `MESSAGING.md` to determine:
+
+1. **Which channel** to send through
+2. **Which contact** to send to (resolved across channels)
+3. **What format** to use (some channels support rich formatting, others are plain text)
+
+The agent reads `MESSAGING.md` as natural language instructions, so you can write routing rules conversationally:
+
+```markdown
+If someone asks me to message my wife, always use iMessage.
+If I ask to send something to the engineering team, use Slack in #engineering.
+Daily briefings should go to Telegram.
+```
+
+### Contact Resolution Across Channels
+
+A single person might exist on multiple channels. Your mom might be on iMessage and WhatsApp. A coworker might be on Slack and Telegram. `MESSAGING.md` helps the agent resolve which channel to use for which person:
+
+```markdown
+## Contact Preferences
+
+### Mom
+- Preferred: iMessage (+15551234567)
+- Backup: WhatsApp (+15551234567)
+
+### Jake (coworker)
+- Work topics: Slack (@jake.smith)
+- Personal topics: Telegram (@jakesmth)
+```
+
+---
+
+## Multi-Channel Strategy
+
+Running multiple channels is not about connecting everything. It is about using the right channel for the right purpose.
+
+### Recommended Starting Setup
+
+| Purpose | Channel | Why |
+|---------|---------|-----|
+| Personal daily use | iMessage | Already on your phone, natural texting experience |
+| Work and teams | Slack (Socket Mode) | Most reliable, great logging, workspace isolation |
+| Testing and debugging | WebChat | Zero setup, instant feedback |
+
+### Expanded Setup (After You Are Comfortable)
+
+| Purpose | Channel | Why |
+|---------|---------|-----|
+| Personal daily use | iMessage | Natural, always available |
+| Work | Slack | Reliable, threaded, team-friendly |
+| Bot-to-bot and automations | Telegram | Easy bot API, great for programmatic use |
+| Family abroad | WhatsApp | Global reach, everyone has it |
+| Testing | WebChat | Quick iteration |
+
+### Principles for Multi-Channel
+
+**Start with one channel.** Get it stable, learn the configuration patterns, understand how DM policies and tool permissions interact. Then add a second.
+
+**Each channel should have a clear purpose.** If you cannot articulate why you need a channel, you probably do not need it yet.
+
+**Security settings are per-channel.** A restrictive `dmPolicy: allowlist` on iMessage does not affect your Slack channel's `dmPolicy: open`. Review security settings for each channel independently.
+
+**Your agent's personality can vary by channel.** You can configure different response styles per channel in your `SOUL.md`:
+
+```markdown
+## Channel-Specific Behavior
+
+On Slack: Be professional, use bullet points, keep responses concise.
+On iMessage: Be casual, use shorter messages, feel like a friend texting.
+On Telegram: Be technical, include code blocks when relevant.
+```
+
+**Monitor channel health.** Channels can disconnect silently. Set up a health check — a cron job that sends a test message to each channel and alerts you if the agent does not respond within a timeout:
+
+```yaml
+# cron/channel-health.yaml
+schedule: "0 */6 * * *"  # Every 6 hours
+task: |
+  Send a test message to each active channel.
+  If any channel does not respond within 60 seconds, send an alert to Telegram.
+```
+
+---
+
+## Common Issues and Troubleshooting
+
+### Agent Not Responding on a Channel
+
+1. **Check channel status:** `openclaw status` shows which channels are connected
+2. **Check DM policy:** Is the sender in your allowlist or approved?
+3. **Check group policy:** In group chats, does the message include a mention?
+4. **Check logs:** `grep "channel:imessage" ~/.openclaw/logs/openclaw.log` (replace with your channel)
+5. **Test in WebChat:** If WebChat works but the channel does not, the issue is channel-specific
+
+### Messages Sending to the Wrong Channel
+
+1. **Review MESSAGING.md:** Are your routing rules unambiguous?
+2. **Check contact resolution:** Does the agent know which channel to use for the contact?
+3. **Be more explicit:** Instead of "message Jake," say "message Jake on Slack"
+
+### Channel Keeps Disconnecting
+
+| Channel | Common Cause | Fix |
+|---------|-------------|-----|
+| WhatsApp | WhatsApp protocol update | Update Baileys, re-scan QR code |
+| Discord | WebSocket zombie connection | Restart OpenClaw, check heartbeat config |
+| Slack | Token expired or revoked | Regenerate tokens in Slack App settings |
+| iMessage | Mac went to sleep | Disable sleep, use `caffeinate` command |
+| Telegram | Bot token revoked | Generate new token via BotFather |
+
+### Agent Responding Too Much in Groups
+
+Set `requireMention: true` and `groupPolicy: mention` on the channel. The agent will only respond when explicitly addressed.
+
+### Latency or Slow Responses
+
+1. **Check your LLM provider:** Response time depends on your AI provider's API latency
+2. **Reduce context:** Long conversation histories slow down responses. Configure memory limits.
+3. **Check network:** If the agent is running on a remote server, network latency adds to response time
+4. **Check rate limits:** Some channels (Discord, WhatsApp) aggressively rate-limit bots
+
+---
+
+## Next Steps
+
+Set up your individual channels:
+
+- **[iMessage](/channels/imessage)** — Connect your agent to the iOS Messages app
+- **[Slack](/channels/slack)** — The most reliable channel for always-on team use
+- **[Telegram](/channels/telegram)** — Fast setup, great for tech users and bots
+- **[WhatsApp](/channels/whatsapp)** — Reach contacts on the world's most popular messenger
+- **[Discord](/channels/discord)** — Add your agent to community servers
+- **[Signal](/channels/signal)** — End-to-end encrypted, privacy-first messaging
+- **[WebChat](/channels/webchat)** — Built-in testing and quick access
+
+Then lock down and extend your agent:
+
+- **[DM Policies & Pairing](/security/dm-policies)** — Lock down every channel with the right DM policies and tool permissions
+- **[SOUL.md Guide](/core-concepts/soul-md)** — Define your agent's personality and instructions
+- **[Cron and Automation](/core-concepts/automation)** — Set up scheduled tasks, daily briefings, and proactive messaging

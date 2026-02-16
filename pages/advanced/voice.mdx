@@ -1,0 +1,461 @@
+---
+title: "Voice & Talk Mode"
+description: "Set up OpenClaw voice capabilities — Talk Mode for hands-free conversation, ElevenLabs TTS, OpenAI Whisper STT, Voice Wake activation, and Twilio phone calls. Complete setup guide for each."
+keywords: "openclaw voice, openclaw talk mode, openclaw voice setup, openclaw elevenlabs, openclaw whisper, openclaw tts, openclaw stt, openclaw twilio, openclaw phone calls"
+---
+
+# Voice & Talk Mode
+
+Text is not always the most natural way to interact with your AI assistant. When you are cooking, driving, exercising, or just sitting on the couch, talking is easier than typing. OpenClaw has a full voice stack that turns your assistant into something you can have a spoken conversation with — and even call on the phone.
+
+This page covers every voice capability in OpenClaw, how to set each one up, and practical workflows that make voice genuinely useful rather than a gimmick.
+
+---
+
+## The Voice Stack at a Glance
+
+OpenClaw's voice capabilities are built from several independent components. You can use them individually or combine them:
+
+| Component | What It Does | Provider | Cost |
+|---|---|---|---|
+| **Talk Mode** | Hands-free spoken conversation | Built-in | Free (uses your existing model API) |
+| **TTS (Text-to-Speech)** | Agent speaks responses aloud | ElevenLabs | ~$5-22/month depending on plan |
+| **STT (Speech-to-Text)** | Your speech converted to text | OpenAI Whisper | ~$0.006 per minute of audio |
+| **Voice Wake** | Wake word activation ("Hey OpenClaw") | Built-in | Free |
+| **Twilio Calling** | Make and receive actual phone calls | Twilio | ~$0.013/min outbound, ~$0.0085/min inbound |
+
+You do not need all of these. Most people start with Talk Mode and Whisper STT, then add ElevenLabs TTS if they want a natural-sounding voice, and Twilio if they need phone call capabilities.
+
+---
+
+## Talk Mode
+
+Talk Mode is the foundation of voice interaction in OpenClaw. When activated, it turns your session into a live, hands-free conversation. You speak, OpenClaw listens and transcribes, processes your request, and responds — either as text or spoken audio.
+
+### How It Works
+
+1. You activate Talk Mode (via a command, a button in the client, or Voice Wake)
+2. OpenClaw starts listening through your device's microphone
+3. Your speech is transcribed to text using STT (speech-to-text)
+4. The text is processed by the agent like any other message
+5. The response is converted to audio using TTS (text-to-speech) and played back
+6. The cycle repeats until you end the session
+
+### Activating Talk Mode
+
+There are several ways to start Talk Mode:
+
+**From the web client:**
+Navigate to `http://localhost:18789` and click the microphone icon in the chat interface.
+
+**From a voice command (if Voice Wake is enabled):**
+Say the wake word, then start talking.
+
+**From a channel message:**
+Send a message like "Start talk mode" or "Let's talk" — your SOUL.md can include instructions for how the agent should handle this.
+
+### Talk Mode Configuration
+
+In your OpenClaw configuration, you can control Talk Mode behavior:
+
+```yaml
+voice:
+  talk_mode:
+    enabled: true
+    auto_detect_silence: true
+    silence_threshold_ms: 1500
+    language: "en"
+    continuous: true
+```
+
+Key settings:
+
+- **`auto_detect_silence`** — When `true`, OpenClaw automatically detects when you stop speaking and processes your input. When `false`, you need to manually signal when you are done (like pressing a button).
+- **`silence_threshold_ms`** — How many milliseconds of silence before OpenClaw decides you are finished speaking. `1500` (1.5 seconds) is a good default. Increase it if OpenClaw keeps cutting you off mid-thought.
+- **`continuous`** — When `true`, Talk Mode stays active after each exchange. When `false`, it deactivates after one exchange and you need to reactivate it.
+
+---
+
+## Text-to-Speech (TTS) with ElevenLabs
+
+OpenClaw uses ElevenLabs for text-to-speech — the technology that gives your assistant an actual voice. ElevenLabs produces remarkably natural-sounding speech, far beyond the robotic voices you might remember from older TTS systems.
+
+In OpenClaw, TTS is exposed through the **"sag" skill** (speech audio generation).
+
+### Setting Up ElevenLabs
+
+**Step 1: Create an ElevenLabs account**
+
+Go to [elevenlabs.io](https://elevenlabs.io) and sign up. They have a free tier with limited characters per month, which is fine for testing. For regular use, their Starter plan covers most personal assistant needs.
+
+**Step 2: Get your API key**
+
+In the ElevenLabs dashboard, navigate to your profile settings and copy your API key.
+
+**Step 3: Add the key to OpenClaw**
+
+Add your ElevenLabs API key to your OpenClaw environment configuration:
+
+```bash
+ELEVENLABS_API_KEY=your_key_here
+```
+
+Or in your configuration file:
+
+```yaml
+tts:
+  provider: "elevenlabs"
+  api_key: "${ELEVENLABS_API_KEY}"
+  voice_id: "21m00Tcm4TlvDq8ikWAM"
+  model: "eleven_monolingual_v1"
+```
+
+**Step 4: Choose a voice**
+
+ElevenLabs offers dozens of pre-made voices, and you can also clone voices. Browse their voice library to find one that fits your assistant's personality. Each voice has an ID you will use in the configuration.
+
+Popular choices for AI assistants:
+
+| Voice Name | Character | Voice ID |
+|---|---|---|
+| Rachel | Calm, clear, professional | `21m00Tcm4TlvDq8ikWAM` |
+| Adam | Warm, conversational male | `pNInz6obpgDQGcFmaJgB` |
+| Bella | Friendly, approachable female | `EXAVITQu4vr4xnSDxMaL` |
+| Antoni | Authoritative, confident male | `ErXwobaYiN019PkySvjV` |
+
+Replace the `voice_id` in your config with the ID of your chosen voice.
+
+### Controlling Voice Output
+
+You can configure when your assistant speaks versus types:
+
+```yaml
+tts:
+  auto_speak: "talk_mode_only"  # Options: always, talk_mode_only, never
+  max_speak_length: 500         # Max characters to speak (longer responses are summarized)
+  speed: 1.0                    # Playback speed (0.5 to 2.0)
+```
+
+The `max_speak_length` setting is important. If your assistant generates a 2,000-word research summary, you probably do not want it read aloud in its entirety. Setting a limit means the assistant will speak a summary and deliver the full text version through your channel.
+
+---
+
+## Speech-to-Text (STT) with OpenAI Whisper
+
+Whisper is OpenAI's speech recognition model, and it is what OpenClaw uses to understand what you say. It supports over 50 languages, handles accents well, and is remarkably accurate.
+
+### Setting Up Whisper
+
+**Step 1: Ensure you have an OpenAI API key**
+
+You likely already have one if you use any OpenAI models with OpenClaw. If not, sign up at [platform.openai.com](https://platform.openai.com) and generate an API key.
+
+**Step 2: Configure STT in OpenClaw**
+
+```yaml
+stt:
+  provider: "whisper"
+  api_key: "${OPENAI_API_KEY}"
+  model: "whisper-1"
+  language: "en"        # Optional: auto-detects if not specified
+  temperature: 0        # Lower = more conservative transcription
+```
+
+**Step 3: Test it**
+
+Activate Talk Mode and say something. Check the Gateway logs to verify your speech is being transcribed correctly:
+
+```bash
+# Watch the logs for STT activity
+tail -f ~/.openclaw/logs/gateway.log | grep "stt"
+```
+
+### Whisper Cost Considerations
+
+Whisper charges approximately **$0.006 per minute** of audio. That is extremely cheap — an hour of continuous conversation costs about $0.36. For most users, Whisper costs are negligible compared to the LLM model costs.
+
+However, if you leave Talk Mode running continuously (with Voice Wake), the costs can add up over a month. The `auto_detect_silence` setting prevents unnecessary transcription of silence, which helps keep costs down.
+
+### Language Support
+
+Whisper auto-detects language by default, but you get better accuracy by specifying your primary language. If you regularly switch between languages, leave the `language` field unset and let Whisper detect automatically.
+
+---
+
+## Voice Wake
+
+Voice Wake is the feature that lets you activate OpenClaw with a spoken word or phrase — just like saying "Hey Siri" or "Alexa." This enables truly hands-free operation. Your assistant is always listening for the wake word, and when it hears it, it activates Talk Mode.
+
+### Setting Up Voice Wake
+
+```yaml
+voice:
+  wake:
+    enabled: true
+    wake_word: "hey claw"
+    sensitivity: 0.5          # 0.0 to 1.0 (higher = more sensitive, more false positives)
+    cooldown_seconds: 2        # Minimum time between activations
+```
+
+### Choosing a Wake Word
+
+The default wake word is configurable. Good wake words are:
+
+- **Two or more syllables** — reduces false positives
+- **Phonetically distinct** — does not sound like common words
+- **Easy to say** — you will be saying it often
+
+Examples: "hey claw," "open claw," "yo claw," or whatever feels natural to you.
+
+### Sensitivity Tuning
+
+The `sensitivity` value controls how aggressively Voice Wake listens:
+
+- **0.3** — Conservative. Fewer false positives, but you might need to speak louder or more clearly.
+- **0.5** — Balanced. Good for most environments.
+- **0.7** — Sensitive. Good for noisy environments, but may trigger on TV audio or other conversations.
+
+Start at 0.5 and adjust based on your experience. If your assistant keeps activating when you did not say the wake word, lower the sensitivity. If it is not responding when you do say it, raise it.
+
+### Privacy Consideration
+
+Voice Wake means your device's microphone is always active, listening for the wake word. The audio processing for wake word detection happens **locally on your device** — it is not sent to any cloud service. Only after the wake word is detected does audio get sent to Whisper for transcription.
+
+If you are uncomfortable with an always-on microphone, you can disable Voice Wake and activate Talk Mode manually instead.
+
+---
+
+## Phone Calls with Twilio
+
+This is where OpenClaw's voice capabilities get genuinely surprising. Using Twilio integration, your assistant can **make and receive actual phone calls**. It gets a real phone number that anyone can call, and it can dial out to real phone numbers.
+
+### Use Cases for Phone Calls
+
+- **Screening calls** — OpenClaw answers your phone, takes a message, and texts you a summary
+- **Making reservations** — "Call that restaurant and book a table for 4 at 7 PM tonight"
+- **Automated check-ins** — Schedule your assistant to call you with your morning briefing
+- **Outbound notifications** — "Call me if the server goes down" or "Call me at 3 PM to remind me about the meeting"
+- **Accessibility** — People who prefer phone communication can interact with your OpenClaw assistant by calling it
+
+### Setting Up Twilio
+
+**Step 1: Create a Twilio account**
+
+Go to [twilio.com](https://www.twilio.com) and sign up. Twilio is a pay-as-you-go service. You will need to add a small amount of credit to get started (usually $20 is more than enough for months of use).
+
+**Step 2: Get a phone number**
+
+In the Twilio console, purchase a phone number. This is the number people will call to reach your OpenClaw assistant, and the number it uses for outbound calls. Numbers cost about $1.15/month.
+
+**Step 3: Get your Twilio credentials**
+
+From the Twilio console, note your:
+- Account SID
+- Auth Token
+- Phone number (in E.164 format, like `+15551234567`)
+
+**Step 4: Configure OpenClaw**
+
+```yaml
+twilio:
+  enabled: true
+  account_sid: "${TWILIO_ACCOUNT_SID}"
+  auth_token: "${TWILIO_AUTH_TOKEN}"
+  phone_number: "+15551234567"
+  voice: "Polly.Joanna"        # Or use ElevenLabs for higher quality
+  recording: false              # Set to true to record calls
+  max_call_duration: 300        # Max call length in seconds
+```
+
+**Step 5: Configure the webhook**
+
+Twilio needs to reach your OpenClaw instance when someone calls. This requires either:
+
+- **A public URL** — If you have deployed OpenClaw on a VPS with a domain name
+- **A tunnel** — Using a service like ngrok or Tailscale Funnel to expose your local instance
+
+In the Twilio console, set the voice webhook URL to:
+
+```
+https://your-openclaw-domain.com/api/twilio/voice
+```
+
+### Cost Breakdown
+
+Twilio costs are very reasonable for personal use:
+
+| Item | Cost |
+|---|---|
+| Phone number | ~$1.15/month |
+| Outbound calls (US) | ~$0.013/minute |
+| Inbound calls (US) | ~$0.0085/minute |
+| SMS (outbound) | ~$0.0079/message |
+
+A 5-minute outbound call costs about $0.065. Even with daily use, most people spend under $5/month on Twilio.
+
+### SOUL.md Instructions for Phone Behavior
+
+You will want your SOUL.md to include guidance for how the agent handles phone calls:
+
+```markdown
+## Phone Call Behavior
+
+When receiving an inbound call:
+1. Answer with: "Hello, this is Carl's assistant. How can I help?"
+2. Listen to the caller's request
+3. If the caller wants to leave a message, record it and text it to me via iMessage
+4. If the caller asks about my availability, check my calendar before responding
+5. Always be polite and professional
+6. If you are unsure about something, say "Let me check on that and have Carl get back to you"
+
+When making an outbound call:
+1. Introduce yourself: "Hi, this is calling on behalf of Carl Vellotti"
+2. Be concise and clear about the purpose of the call
+3. If you reach voicemail, leave a brief message and report back to me
+```
+
+---
+
+## The Voice Note Workflow
+
+One of the most practical voice workflows does not involve real-time conversation at all. It is the **voice note workflow**: you speak a thought, Whisper transcribes it, and your agent processes it.
+
+### How It Works
+
+1. You record a voice note (using your phone's voice memo app, a dedicated voice note app, or Talk Mode)
+2. The audio file is sent to OpenClaw (via a channel, a file drop, or directly through the client)
+3. Whisper transcribes the audio to text
+4. The agent processes the transcription based on your instructions
+
+### Why This Matters
+
+Voice notes are the fastest way to get thoughts out of your head. You can speak roughly 150 words per minute. Most people type 40-60 words per minute. That is a 3x speed advantage.
+
+But raw voice transcriptions are messy — full of "um," "uh," repeated words, and half-finished thoughts. The power of combining Whisper with an LLM agent is that the agent cleans up, structures, and acts on your raw thoughts.
+
+### Example: Voice Note to Structured Notes
+
+Add this to your SOUL.md:
+
+```markdown
+## Voice Note Processing
+
+When I send a voice note or audio file:
+1. Transcribe it using Whisper
+2. Clean up the transcription (remove filler words, fix grammar)
+3. Identify the type of content:
+   - If it's a task or to-do → Add to my task list
+   - If it's an idea → Save to my ideas folder with a title
+   - If it's a note about a person → Update the relevant contact notes
+   - If it's a journal entry → Save with today's date
+4. Confirm what you did with a brief summary
+```
+
+### Example: Voice Brainstorm to Draft
+
+```markdown
+## Brainstorm Processing
+
+When I say "brainstorm mode" and send a voice note:
+1. Transcribe and clean the voice note
+2. Extract the key ideas and themes
+3. Organize them into a structured outline
+4. Draft a first version based on the outline
+5. Save both the outline and draft for my review
+```
+
+---
+
+## Putting It All Together
+
+Here is a complete voice configuration that combines all the components:
+
+```yaml
+voice:
+  talk_mode:
+    enabled: true
+    auto_detect_silence: true
+    silence_threshold_ms: 1500
+    language: "en"
+    continuous: true
+
+  wake:
+    enabled: true
+    wake_word: "hey claw"
+    sensitivity: 0.5
+    cooldown_seconds: 2
+
+stt:
+  provider: "whisper"
+  api_key: "${OPENAI_API_KEY}"
+  model: "whisper-1"
+  language: "en"
+  temperature: 0
+
+tts:
+  provider: "elevenlabs"
+  api_key: "${ELEVENLABS_API_KEY}"
+  voice_id: "21m00Tcm4TlvDq8ikWAM"
+  model: "eleven_monolingual_v1"
+  auto_speak: "talk_mode_only"
+  max_speak_length: 500
+  speed: 1.0
+
+twilio:
+  enabled: true
+  account_sid: "${TWILIO_ACCOUNT_SID}"
+  auth_token: "${TWILIO_AUTH_TOKEN}"
+  phone_number: "+15551234567"
+  max_call_duration: 300
+```
+
+### Recommended Starting Point
+
+If this feels like a lot, here is the path most people follow:
+
+1. **Week 1:** Enable Talk Mode + Whisper STT. Get comfortable talking to your assistant through the web client. This costs almost nothing.
+
+2. **Week 2:** Add ElevenLabs TTS. Choose a voice, configure it. Now your assistant talks back. This adds roughly $5/month.
+
+3. **Week 3:** Enable Voice Wake. Start using hands-free activation. Tune the sensitivity for your environment.
+
+4. **Later (if needed):** Add Twilio for phone calls. This is optional and most useful if you want call screening or need your assistant to make calls on your behalf.
+
+---
+
+## Troubleshooting
+
+### "OpenClaw is not hearing me"
+
+- Check that your microphone is working (test it in another app)
+- Verify the `stt` section of your config has the correct API key
+- Check Gateway logs for errors: `tail -f ~/.openclaw/logs/gateway.log | grep "stt\|microphone\|audio"`
+- Make sure Talk Mode is actually active (not just Voice Wake listening)
+
+### "The voice sounds robotic"
+
+- Make sure you are using ElevenLabs, not a built-in system TTS
+- Try a different ElevenLabs voice — some sound more natural than others
+- Check that the `model` is set to `eleven_monolingual_v1` or newer
+
+### "Voice Wake keeps activating on its own"
+
+- Lower the `sensitivity` value (try 0.3)
+- Check if your TV, music, or podcast audio contains words similar to your wake word
+- Choose a more phonetically distinct wake word
+
+### "Phone calls connect but there is no audio"
+
+- Verify your Twilio webhook URL is correct and reachable from the internet
+- Check that your OpenClaw instance is not behind a firewall blocking Twilio
+- Review Twilio's debugger in their console for detailed error logs
+- Make sure the TTS provider is configured correctly for phone output
+
+---
+
+## What's Next
+
+- **[Sub-Agents](/advanced/sub-agents)** — Combine voice commands with sub-agent workflows for powerful hands-free automation
+- **[Cost Management](/advanced/cost-management)** — Understand and optimize the costs of TTS, STT, and Twilio
+- **[Deployment](/advanced/deployment)** — Deploy OpenClaw on an always-on server so Voice Wake works 24/7
+- **[SOUL.md](/core-concepts/soul-md)** — Design your assistant's personality for voice interactions

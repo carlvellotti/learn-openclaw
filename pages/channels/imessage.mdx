@@ -1,0 +1,56 @@
+---
+title: 'iMessage Setup — Connect OpenClaw to iMessage'
+description: 'Set up OpenClaw with iMessage for a natural texting experience on iPhone and Mac. Covers configuration options, allowlists, group chat settings, and common gotchas.'
+keywords: 'openclaw iMessage, openclaw iMessage setup, openclaw iOS, openclaw Mac Messages, openclaw texting, openclaw personal channel, openclaw allowlist'
+---
+
+# iMessage
+
+iMessage is the natural choice for iPhone and Mac users who want their agent to feel like texting a friend. It integrates with the Messages app you already use every day.
+
+### Setup Overview
+
+iMessage integration requires a Mac (or a Mac server) running the agent, because it relies on the macOS Messages framework.
+
+```yaml
+# channels/imessage.yaml
+channel: imessage
+enabled: true
+dmPolicy: allowlist
+allowedContacts:
+  - "+15551234567"
+  - "friend@icloud.com"
+groupPolicy: mention  # Only respond in groups when @mentioned
+```
+
+### Key Config Options
+
+| Option | Values | What It Does |
+|--------|--------|-------------|
+| `dmPolicy` | `allowlist`, `approval`, `open` | Controls who can DM the agent |
+| `groupPolicy` | `mention`, `always`, `never` | When to respond in group chats |
+| `requireMention` | `true` / `false` | In groups, require @mention to respond |
+| `allowedContacts` | Array of phone numbers/emails | Whitelist for `allowlist` policy |
+| `responseDelay` | Number (seconds) | Wait before responding (feels more natural) |
+
+### Tips and Gotchas
+
+**The allowlist is your best friend.** iMessage is tied to your personal phone number. Anyone who has your number can text you — and without an allowlist, they can text your agent. Start with `dmPolicy: allowlist` and add contacts one by one.
+
+**Phone numbers must include country code.** Use `+15551234567` format, not `(555) 123-4567`. If contacts are not being matched, the number format is almost always the issue.
+
+**iCloud email addresses work too.** You can add contacts by their iCloud email if you do not have their phone number, or if they message you from a non-phone Apple device.
+
+**Group chats need `requireMention: true`.** Without this, your agent will respond to every message in every group chat, which gets noisy fast. With `requireMention: true`, it only responds when someone explicitly addresses it.
+
+**Response delay makes it feel human.** A `responseDelay` of 2-5 seconds prevents the uncanny instant reply. Your contacts will not feel like they are talking to a bot.
+
+**Mac must stay running.** Since iMessage integration uses the macOS Messages framework, your Mac needs to be on and awake. If you are running OpenClaw on a headless Mac Mini server, disable sleep and screen lock.
+
+---
+
+## Next Steps
+
+- **[Channel Overview](/channels/overview)** — Compare all channels and build a multi-channel strategy
+- **[Slack](/channels/slack)** — The most reliable channel for work and team use
+- **[DM Policies & Pairing](/security/dm-policies)** — Lock down DM policies and tool permissions

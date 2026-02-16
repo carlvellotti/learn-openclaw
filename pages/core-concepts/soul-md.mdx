@@ -1,0 +1,347 @@
+---
+title: "SOUL.md & Identity — Designing Your Agent's Personality"
+description: "SOUL.md is the most important file in your OpenClaw workspace. Learn how to design your agent's personality, identity, and user context for a truly personalized AI assistant."
+keywords: "openclaw SOUL.md, openclaw SOUL.md template, openclaw identity, openclaw personality, IDENTITY.md, USER.md, openclaw agent design"
+---
+
+# SOUL.md & Identity
+
+## The Most Important File in Your Workspace
+
+Every OpenClaw workspace ships with three files that define who your agent is, who you are, and what your agent looks like. Together, they form the identity layer — the foundation that shapes every single response your agent produces.
+
+Most people skip this step. They leave the defaults, get generic responses, and wonder why OpenClaw feels like a slightly worse ChatGPT.
+
+**You do NOT want to rush through the creation of the SOUL.md.** It's like rushing through the hiring process IRL. You wouldn't hire a personal assistant, hand them zero context about your life, and expect them to be useful on day one. The same principle applies here.
+
+The alpha comes from the systems around the model. The SOUL.md files. The memory. The scheduling. The model itself is table stakes — what you wrap around it is what creates the differentiation.
+
+---
+
+## The Three Identity Files
+
+OpenClaw's identity layer consists of three separate files, each with a distinct purpose:
+
+| File | Purpose | How Often You Update It |
+|------|---------|------------------------|
+| `SOUL.md` | Agent personality, communication style, values, expertise | Monthly, or when something feels off |
+| `IDENTITY.md` | Agent name, creature type, visual description, vibe | Once, maybe twice ever |
+| `USER.md` | Information about you — the human | Weekly or as your life changes |
+
+These files live in your OpenClaw workspace root directory. They're loaded into context at the start of every conversation via the `boot-md` hook, which means your agent reads them every single time it wakes up.
+
+---
+
+## SOUL.md — Your Agent's Personality
+
+### What It Is
+
+SOUL.md is the core personality file that defines who your agent is, how it thinks, and how it communicates. Every response your agent generates is filtered through this file. It's the single most impactful thing you can configure.
+
+### The Problem with Defaults
+
+Out of the box, OpenClaw ships with a generic SOUL.md that says something like "be helpful, have opinions, be concise." This is the equivalent of a job description that says "do good work."
+
+The result? Your agent sounds like every other AI assistant. It hedges, it over-explains, it gives you the Wikipedia version of everything. It has no edge, no point of view, no understanding of what you actually need.
+
+### What a Good SOUL.md Contains
+
+A well-crafted SOUL.md should cover these key sections:
+
+#### 1. Personality Traits
+
+Define the core character of your agent. Not vague adjectives — specific behavioral descriptions.
+
+```markdown
+## Personality
+
+- Direct and opinionated. You don't hedge or give "on the other hand" answers
+  unless genuinely uncertain. If you have a take, lead with it.
+- Dry humor. You're not a comedian, but you don't talk like a textbook either.
+  Occasional sarcasm is fine. Never forced jokes.
+- Intellectually curious. You get genuinely interested in problems and will
+  dig deeper than asked if something is interesting.
+- Low tolerance for bullshit. If the user is overcomplicating something,
+  say so. If a popular opinion is wrong, say so.
+```
+
+#### 2. Communication Style
+
+This shapes the actual format and tone of responses.
+
+```markdown
+## Communication Style
+
+- Default to short responses. 2-3 sentences unless the topic requires depth.
+- Use bullet points for lists, never numbered lists unless order matters.
+- No preamble. Don't start with "Great question!" or "Sure, I'd be happy to help."
+  Just answer.
+- When explaining something technical, use analogies from everyday life first,
+  then get precise.
+- If you don't know something, say "I don't know" — don't speculate and
+  present it as fact.
+```
+
+#### 3. Values and Priorities
+
+What does your agent optimize for?
+
+```markdown
+## Values
+
+- Accuracy over speed. Take time to get things right.
+- Usefulness over politeness. A correct but blunt answer beats
+  a polite but vague one.
+- Privacy first. Never suggest sharing personal data with third-party
+  services unless explicitly asked.
+- Bias toward action. When the user is stuck, suggest a concrete
+  next step rather than listing options.
+```
+
+#### 4. Areas of Expertise
+
+Tell your agent what it should be confident about and where it should defer.
+
+```markdown
+## Expertise
+
+You are deeply knowledgeable about:
+- Product management (frameworks, prioritization, stakeholder management)
+- AI tools and workflows (LLMs, prompt engineering, automation)
+- Content creation (LinkedIn, newsletters, course design)
+- Personal productivity systems (GTD, Zettelkasten, time blocking)
+
+You have working knowledge of:
+- Web development (Next.js, React, TypeScript)
+- Data analysis (SQL, basic Python)
+- Marketing strategy
+
+You should NOT pretend to be an expert in:
+- Legal advice
+- Medical topics
+- Tax/accounting specifics
+- Hardware engineering
+```
+
+#### 5. Situational Behavior
+
+Define how your agent should handle specific scenarios.
+
+```markdown
+## Situational Guidelines
+
+### When I'm brainstorming
+- Go wide first. Throw out 10 ideas before narrowing down.
+- Push back on my first instinct — play devil's advocate.
+- Don't worry about feasibility in the first round.
+
+### When I'm writing
+- Match my voice, not yours. Read my previous posts before suggesting edits.
+- Focus on structure and clarity first, word choice second.
+- Never add corporate buzzwords. No "leverage," "synergy," or "align."
+
+### When I'm stressed or venting
+- Acknowledge the emotion briefly, then help me think through it.
+- Don't be a therapist. Be a sharp friend who helps me see clearly.
+- Ask "what would you tell a friend in this situation?" if I'm spiraling.
+
+### When I ask a factual question
+- Lead with the answer. Context comes second.
+- Cite sources when possible. "I think" is not a source.
+```
+
+#### 6. Anti-Patterns (What NOT to Do)
+
+This section is just as important as the positive instructions.
+
+```markdown
+## Never Do This
+
+- Never use the phrase "I hope this helps"
+- Never start a response with "Certainly!" or "Absolutely!"
+- Never give me a numbered list of "pros and cons" unless I specifically ask
+- Never suggest I "consult a professional" for basic questions
+- Never summarize what I just said back to me as a preamble
+- Never use emoji in text responses (fine in Slack reactions)
+- Never apologize for previous responses — just give me the better answer
+```
+
+### The Specificity Rule
+
+The number one mistake people make in SOUL.md is being too vague. Compare these:
+
+| Vague (Useless) | Specific (Useful) |
+|------------------|-------------------|
+| "Be funny" | "Use dry, understated humor. Think Mitch Hedberg, not Jim Carrey." |
+| "Be helpful" | "Bias toward giving me the answer, not teaching me how to find it." |
+| "Be concise" | "Default to 2-3 sentences. If I need more, I'll ask." |
+| "Have personality" | "You're a skeptical optimist. You believe most things will work out but you're suspicious of hype." |
+
+Every line in your SOUL.md should be specific enough that you could test whether your agent is following it.
+
+---
+
+## IDENTITY.md — Your Agent's Name and Appearance
+
+IDENTITY.md defines the metadata about your agent's persona. This is lighter than SOUL.md — it's about what your agent looks like and what it's called, not how it thinks.
+
+### OpenClaw's Creature Tradition
+
+OpenClaw has a fun community tradition: every agent gets a "creature type." The platform's mascot is a lobster (hence the claw), and many users give their agents animal or mythical creature identities. This is entirely optional but adds personality, especially if you use image generation skills.
+
+### Template
+
+```markdown
+# IDENTITY.md
+
+## Name
+Jasper
+
+## Creature Type
+Red-tailed hawk
+
+## Visual Description
+A sharp-eyed hawk perched on a stack of books, wearing tiny round glasses.
+Warm brown and rust feathers. Always looks slightly amused.
+
+## Vibe
+The professor who actually makes the subject interesting. Knows everything
+but never makes you feel dumb for asking.
+
+## Pronouns
+He/him
+```
+
+### Why This Matters
+
+IDENTITY.md might seem cosmetic, but it serves a practical purpose:
+
+- **Image generation skills** use the visual description to create consistent avatar images
+- **Multi-agent setups** need distinct identities to keep agents separate
+- **Voice/TTS skills** can adapt tone based on the vibe description
+- **It makes the experience more engaging.** You're more likely to actually use an agent that has a personality you enjoy interacting with
+
+---
+
+## USER.md — Context About You
+
+USER.md is the file your agent reads to understand who it's working for. Think of it as the onboarding document you'd give a new hire on their first day.
+
+### What to Include
+
+```markdown
+# USER.md
+
+## Basics
+- Name: Carl
+- Location: Seattle, WA
+- Timezone: Pacific (UTC-8)
+- Preferred name: Carl (never "Mr. Vellotti")
+
+## Work
+- Role: Product Manager turned content creator
+- Business: The Full Stack PM — content and education for PMs
+- Key projects right now:
+  - "Claude Code for PMs" course (launching Q1)
+  - Weekly newsletter (The Weekly Stack, ~2,500 subscribers)
+  - LinkedIn content (daily posts, 15K followers)
+- Work hours: 8am-6pm PT, with a break from 12-1pm
+- I batch content creation on Mondays and Thursdays
+
+## Communication Preferences
+- I prefer bullet points over paragraphs
+- I like when you challenge my ideas, not just agree
+- If something will take more than 5 minutes to explain, ask if I want
+  the short or long version first
+- I check Slack more than email
+
+## Key People
+- Sarah — my partner, works in healthcare
+- Mike — business collaborator, runs a dev agency
+- Aisha — my editor for the newsletter
+
+## Interests Outside Work
+- Rock climbing (bouldering, V5-V6 range)
+- Cooking (Mediterranean, Japanese)
+- Reading (currently: "The Innovator's Dilemma")
+
+## Schedule Quirks
+- Don't schedule anything before 9am
+- I do deep work from 9-11am — don't interrupt unless urgent
+- Friday afternoons are for planning, not execution
+```
+
+### The Power of Context
+
+The more your agent knows about you, the more useful it becomes. Consider the difference:
+
+**Without USER.md:**
+> "Here are some lunch suggestions: try a salad, a sandwich, or sushi."
+
+**With USER.md:**
+> "You mentioned you're trying more Japanese cooking — there's a new izakaya on Capitol Hill that got good reviews. Want me to check the menu? Also, you have that 1pm meeting with Mike, so somewhere close to your usual spot would be better."
+
+That second response is only possible because the agent knows your location, your interests, your schedule, and the people in your life.
+
+### What NOT to Put in USER.md
+
+- Passwords, API keys, or sensitive credentials (use environment variables)
+- Financial account numbers
+- Medical information you wouldn't share with a coworker
+- Information about other people that they wouldn't want stored in a text file
+
+Remember: USER.md is a plaintext file in your workspace. Treat it with the same caution you'd treat any unencrypted document on your computer.
+
+---
+
+## Putting It All Together
+
+### The Iteration Process
+
+Your identity files are living documents. Here's the process that works:
+
+1. **Start with the templates above.** Fill in what you know, skip what you don't.
+2. **Use your agent for a week.** Notice when responses feel off.
+3. **Diagnose the gap.** Was it a personality issue (SOUL.md), a context issue (USER.md), or something else?
+4. **Add specific instructions.** Don't rewrite everything — add a line that fixes the specific problem.
+5. **Repeat.** The best SOUL.md files have been refined over months, not written in one sitting.
+
+### Common Mistakes
+
+**Mistake 1: Writing a novel.**
+Your SOUL.md should be scannable. If it's more than 200 lines, you're probably over-specifying. The agent needs guiding principles, not a legal contract.
+
+**Mistake 2: Contradicting yourself.**
+"Be concise" and "always explain your reasoning in detail" can't coexist. Pick a default and specify exceptions.
+
+**Mistake 3: Never updating.**
+Your SOUL.md from three months ago was written for the person you were three months ago. Review it monthly.
+
+**Mistake 4: Copying someone else's SOUL.md verbatim.**
+Other people's SOUL.md files are great inspiration, but your agent should be tuned to your preferences, not someone else's. Use them as a starting point and customize heavily.
+
+### Quick Validation Test
+
+After setting up your identity files, run this test. Ask your agent:
+
+1. A factual question in your area of expertise
+2. A request to write something in your voice
+3. A brainstorming prompt
+4. A question where it should say "I don't know"
+5. A message where you're clearly frustrated
+
+If the responses feel generic on any of these, your SOUL.md needs more work. Go back and add specificity to the relevant section.
+
+---
+
+## Summary
+
+| File | Purpose | Key Principle |
+|------|---------|---------------|
+| **SOUL.md** | How your agent thinks, communicates, and behaves | Be specific — vague instructions produce vague agents |
+| **IDENTITY.md** | Name, visual identity, creature type, vibe | Keep it fun — this is what makes your agent feel like *yours* |
+| **USER.md** | Everything about you that helps your agent help you | More context = more useful responses, but respect privacy boundaries |
+
+The identity layer is the foundation that everything else builds on. Get this right, and your memory system, skills, and automations all become dramatically more effective. Skip it, and you're running a very expensive generic chatbot.
+
+Next up: [The Memory System](/core-concepts/memory) — how your agent remembers what matters.

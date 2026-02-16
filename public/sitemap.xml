@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+<url><loc>https://learnopenclaw.com</loc><lastmod>2026-02-16T21:55:26.455Z</lastmod><changefreq>weekly</changefreq><priority>1</priority></url>
+<url><loc>https://learnopenclaw.com/advanced/cost-management</loc><lastmod>2026-02-16T21:55:26.458Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://learnopenclaw.com/advanced/deployment</loc><lastmod>2026-02-16T21:55:26.458Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://learnopenclaw.com/advanced/sub-agents</loc><lastmod>2026-02-16T21:55:26.458Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://learnopenclaw.com/advanced/voice</loc><lastmod>2026-02-16T21:55:26.458Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://learnopenclaw.com/channels/discord</loc><lastmod>2026-02-16T21:55:26.458Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://learnopenclaw.com/channels/imessage</loc><lastmod>2026-02-16T21:55:26.458Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://learnopenclaw.com/channels/overview</loc><lastmod>2026-02-16T21:55:26.458Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://learnopenclaw.com/channels/signal</loc><lastmod>2026-02-16T21:55:26.458Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://learnopenclaw.com/channels/slack</loc><lastmod>2026-02-16T21:55:26.458Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://learnopenclaw.com/channels/telegram</loc><lastmod>2026-02-16T21:55:26.458Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://learnopenclaw.com/channels/webchat</loc><lastmod>2026-02-16T21:55:26.458Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://learnopenclaw.com/channels/whatsapp</loc><lastmod>2026-02-16T21:55:26.458Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://learnopenclaw.com/cheatsheet</loc><lastmod>2026-02-16T21:55:26.458Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://learnopenclaw.com/core-concepts/automation</loc><lastmod>2026-02-16T21:55:26.458Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://learnopenclaw.com/core-concepts/memory</loc><lastmod>2026-02-16T21:55:26.458Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://learnopenclaw.com/core-concepts/skills</loc><lastmod>2026-02-16T21:55:26.458Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://learnopenclaw.com/core-concepts/soul-md</loc><lastmod>2026-02-16T21:55:26.458Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://learnopenclaw.com/getting-started/first-24-hours</loc><lastmod>2026-02-16T21:55:26.458Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://learnopenclaw.com/getting-started/installation</loc><lastmod>2026-02-16T21:55:26.458Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://learnopenclaw.com/getting-started/what-is-openclaw</loc><lastmod>2026-02-16T21:55:26.458Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://learnopenclaw.com/openclaw-vs-claude-code</loc><lastmod>2026-02-16T21:55:26.458Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://learnopenclaw.com/playbooks</loc><lastmod>2026-02-16T21:55:26.458Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://learnopenclaw.com/search</loc><lastmod>2026-02-16T21:55:26.458Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://learnopenclaw.com/security/api-keys</loc><lastmod>2026-02-16T21:55:26.458Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://learnopenclaw.com/security/clawhub-vetting</loc><lastmod>2026-02-16T21:55:26.458Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://learnopenclaw.com/security/dm-policies</loc><lastmod>2026-02-16T21:55:26.458Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://learnopenclaw.com/security/network-security</loc><lastmod>2026-02-16T21:55:26.458Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://learnopenclaw.com/security/sandboxing</loc><lastmod>2026-02-16T21:55:26.458Z</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+</urlset>

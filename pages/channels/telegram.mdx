@@ -1,0 +1,61 @@
+---
+title: 'Telegram Setup — Connect OpenClaw to Telegram'
+description: 'Set up OpenClaw with Telegram using BotFather. Covers bot tokens, user ID allowlists, group privacy settings, and tips for the fastest channel to get running.'
+keywords: 'openclaw Telegram, openclaw Telegram setup, openclaw BotFather, openclaw Telegram bot, openclaw Telegram token, openclaw Telegram group, openclaw bot channel'
+---
+
+# Telegram
+
+Telegram is the easiest channel to set up and is a natural fit for tech-oriented users who already live in the Telegram ecosystem.
+
+### Setup Overview
+
+Create a bot through Telegram's BotFather, get your token, and point OpenClaw at it.
+
+```bash
+# 1. Open Telegram, search for @BotFather
+# 2. Send /newbot
+# 3. Follow the prompts to name your bot
+# 4. Copy the bot token
+```
+
+```yaml
+# channels/telegram.yaml
+channel: telegram
+enabled: true
+botToken: ${TELEGRAM_BOT_TOKEN}
+dmPolicy: approval
+groupPolicy: mention
+requireMention: true
+```
+
+### Key Config Options
+
+| Option | Values | What It Does |
+|--------|--------|-------------|
+| `dmPolicy` | `allowlist`, `approval`, `open` | Controls who can DM the bot |
+| `groupPolicy` | `mention`, `always`, `never` | When to respond in group chats |
+| `requireMention` | `true` / `false` | Require /command or @mention |
+| `botToken` | String | Token from BotFather |
+| `allowedUserIds` | Array of Telegram user IDs | Restrict to specific users |
+| `parseMode` | `Markdown`, `HTML` | Message formatting |
+
+### Tips and Gotchas
+
+**BotFather setup takes under 5 minutes.** This is the fastest channel to get running. If you just want to try OpenClaw with a real messaging app, start here.
+
+**Telegram bots are discoverable by default.** Anyone who finds your bot's username can message it. Use `dmPolicy: approval` at minimum, or `allowlist` with `allowedUserIds` if you want to lock it down completely.
+
+**User IDs are not usernames.** The `allowedUserIds` field takes numeric Telegram user IDs, not `@username` handles. You can find your user ID by messaging `@userinfobot` on Telegram.
+
+**Group permissions need to be configured in BotFather too.** If you want your bot in group chats, you need to disable privacy mode in BotFather (`/setprivacy` -> Disable). Otherwise the bot only sees messages that start with a `/command` or directly `@mention` it.
+
+**Telegram is rock solid for uptime.** The Telegram Bot API handles reconnection, message queuing, and delivery acknowledgment. If your agent goes offline briefly, messages are queued and delivered when it comes back.
+
+---
+
+## Next Steps
+
+- **[Channel Overview](/channels/overview)** — Compare all channels and build a multi-channel strategy
+- **[WhatsApp](/channels/whatsapp)** — Reach contacts on the world's most popular messenger
+- **[Cron and Automation](/core-concepts/automation)** — Set up scheduled tasks and proactive messaging via Telegram

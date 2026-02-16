@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learn OpenClaw — Theme Picker</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Code+Pro:wght@400;500;600;700&family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700,800,900&f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #050505;
+  color: #e5e5e5;
+  font-family: 'Inter', sans-serif;
+  padding: 40px 20px;
+  line-height: 1.5;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 24px;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.header h1 {
+  font-size: 36px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 8px;
+}
+.header p {
+  color: #888;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* Filter bar */
+.filter-bar {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 48px;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.filter-btn {
+  padding: 6px 16px;
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 500;
+  background: #111;
+  border: 1px solid #333;
+  color: #888;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.filter-btn:hover { border-color: #555; color: #ccc; }
+.filter-btn.active { background: #fff; color: #000; border-color: #fff; }
+
+/* Grid */
+.themes-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  max-width: 1500px;
+  margin: 0 auto;
+}
+@media (max-width: 1100px) { .themes-grid { grid-template-columns: 1fr; max-width: 700px; } }
+
+/* Theme card */
+.theme-card {
+  border: 2px solid #1a1a1a;
+  border-radius: 14px;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+.theme-card:hover { border-color: #333; transform: translateY(-2px); }
+.theme-card.hidden { display: none; }
+
+.theme-label {
+  padding: 14px 20px;
+  background: #0a0a0a;
+  border-bottom: 1px solid #1a1a1a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.theme-label h2 { font-size: 16px; font-weight: 700; color: #fff; white-space: nowrap; }
+.theme-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.tag {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Universal preview structure */
+.preview {
+  padding: 28px 24px;
+  min-height: 580px;
+}
+.preview .site-title { margin-bottom: 4px; }
+.preview .subtitle { margin-bottom: 18px; }
+.preview .body-text { margin-bottom: 14px; }
+.preview .code-block {
+  padding: 14px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 14px 0;
+  overflow-x: auto;
+}
+.preview .code-block code { background: none !important; border: none !important; padding: 0 !important; }
+.preview .list-section { margin: 14px 0; padding: 0; list-style: none; }
+.preview .list-section li { padding: 3px 0; font-size: 14px; }
+.preview .callout {
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin: 14px 0;
+}
+.preview .callout-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+.preview .callout p { margin: 0; }
+.preview .btn-cta {
+  display: inline-block;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  margin-top: 10px;
+  transition: all 0.2s;
+}
+.preview .meta-line {
+  margin-top: 16px;
+  font-size: 11px;
+  opacity: 0.5;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ============================================================
+   THEME 1: Amber Glow — OpenClaw-native
+   ============================================================ */
+.t1 .preview { background: #111; font-family: 'Inter', sans-serif; }
+.t1 .site-title { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 26px; color: #fff; }
+.t1 .subtitle { color: #f59e0b; font-size: 14px; font-weight: 500; }
+.t1 .body-text { color: #a3a3a3; font-size: 14px; line-height: 1.7; }
+.t1 code { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.25); color: #fbbf24; padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+.t1 a:not(.btn-cta) { color: #f59e0b; }
+.t1 .code-block { background: #0a0a0a; border: 1px solid #222; font-family: 'JetBrains Mono', monospace; color: #e5e5e5; }
+.t1 .code-block .cm { color: #f59e0b; }
+.t1 .list-section li { color: #a3a3a3; font-size: 14px; }
+.t1 .list-section li::before { content: "→ "; color: #f59e0b; font-weight: 600; }
+.t1 .callout { background: #1a1600; border: 1px solid rgba(245,158,11,0.2); }
+.t1 .callout-title { color: #f59e0b; }
+.t1 .callout p { color: #a3a3a3; font-size: 13px; }
+.t1 .btn-cta { background: #f59e0b; color: #000; }
+.t1 .btn-cta:hover { background: #fbbf24; }
+.t1 h3 { color: #fff; font-size: 16px; font-weight: 700; margin: 16px 0 8px; font-family: 'Inter', sans-serif; }
+
+/* ============================================================
+   THEME 2: Teal + Coral — CC4E lineage
+   ============================================================ */
+.t2 .preview { background: #111; font-family: 'DM Sans', sans-serif; }
+.t2 .site-title { font-family: 'DM Sans', sans-serif; font-weight: 800; font-size: 26px; color: #fff; }
+.t2 .subtitle { color: #1dd3b0; font-size: 14px; font-weight: 500; }
+.t2 .body-text { color: #a3a3a3; font-size: 14px; line-height: 1.7; }
+.t2 code { background: rgba(29,211,176,0.1); border: 1px solid rgba(29,211,176,0.25); color: #1dd3b0; padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+.t2 a:not(.btn-cta) { color: #1dd3b0; }
+.t2 .code-block { background: #0a0a0a; border: 1px solid #222; font-family: 'JetBrains Mono', monospace; color: #e5e5e5; }
+.t2 .code-block .cm { color: #1dd3b0; }
+.t2 .list-section li { color: #a3a3a3; font-size: 14px; }
+.t2 .list-section li::before { content: "→ "; color: #FF5856; font-weight: 600; }
+.t2 .callout { background: #0a1a16; border: 1px solid rgba(29,211,176,0.2); }
+.t2 .callout-title { color: #FF5856; }
+.t2 .callout p { color: #a3a3a3; font-size: 13px; }
+.t2 .btn-cta { background: #FF5856; color: #fff; }
+.t2 .btn-cta:hover { background: #ff6e6c; }
+.t2 h3 { color: #fff; font-size: 16px; font-weight: 700; margin: 16px 0 8px; font-family: 'DM Sans', sans-serif; }
+
+/* ============================================================
+   THEME 3: Electric Blue — Dev docs
+   ============================================================ */
+.t3 .preview { background: #0b0d11; font-family: 'Space Grotesk', sans-serif; }
+.t3 .site-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 26px; color: #fff; }
+.t3 .subtitle { color: #38bdf8; font-size: 14px; font-weight: 500; }
+.t3 .body-text { color: #94a3b8; font-size: 14px; line-height: 1.7; }
+.t3 code { background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.2); color: #7dd3fc; padding: 2px 6px; border-radius: 4px; font-family: 'Fira Code', monospace; font-size: 13px; }
+.t3 a:not(.btn-cta) { color: #38bdf8; }
+.t3 .code-block { background: #080a0e; border: 1px solid #1e293b; font-family: 'Fira Code', monospace; color: #cbd5e1; }
+.t3 .code-block .cm { color: #38bdf8; }
+.t3 .list-section li { color: #94a3b8; font-size: 14px; }
+.t3 .list-section li::before { content: "▸ "; color: #38bdf8; }
+.t3 .callout { background: #0c1524; border: 1px solid rgba(56,189,248,0.15); }
+.t3 .callout-title { color: #38bdf8; }
+.t3 .callout p { color: #94a3b8; font-size: 13px; }
+.t3 .btn-cta { background: #38bdf8; color: #0b0d11; }
+.t3 .btn-cta:hover { background: #7dd3fc; }
+.t3 h3 { color: #e2e8f0; font-size: 16px; font-weight: 700; margin: 16px 0 8px; font-family: 'Space Grotesk', sans-serif; }
+
+/* ============================================================
+   THEME 4: Purple Haze — Modern SaaS
+   ============================================================ */
+.t4 .preview { background: #0c0a14; font-family: 'Plus Jakarta Sans', sans-serif; }
+.t4 .site-title { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 26px; color: #fff; }
+.t4 .subtitle { color: #a78bfa; font-size: 14px; font-weight: 500; }
+.t4 .body-text { color: #9ca3af; font-size: 14px; line-height: 1.7; }
+.t4 code { background: rgba(167,139,250,0.08); border: 1px solid rgba(167,139,250,0.2); color: #c4b5fd; padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+.t4 a:not(.btn-cta) { color: #a78bfa; }
+.t4 .code-block { background: #08071a; border: 1px solid #1e1b3a; font-family: 'JetBrains Mono', monospace; color: #d1d5db; }
+.t4 .code-block .cm { color: #a78bfa; }
+.t4 .list-section li { color: #9ca3af; font-size: 14px; }
+.t4 .list-section li::before { content: "◆ "; color: #a78bfa; font-size: 8px; vertical-align: middle; }
+.t4 .callout { background: #110e24; border: 1px solid rgba(167,139,250,0.15); }
+.t4 .callout-title { color: #a78bfa; }
+.t4 .callout p { color: #9ca3af; font-size: 13px; }
+.t4 .btn-cta { background: #7c3aed; color: #fff; }
+.t4 .btn-cta:hover { background: #8b5cf6; }
+.t4 h3 { color: #f3f4f6; font-size: 16px; font-weight: 700; margin: 16px 0 8px; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+/* ============================================================
+   THEME 5: Emerald Terminal — Hacker
+   ============================================================ */
+.t5 .preview { background: #0a110e; font-family: 'Inter', sans-serif; }
+.t5 .site-title { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 26px; color: #ecfdf5; }
+.t5 .subtitle { color: #10b981; font-size: 14px; font-weight: 500; }
+.t5 .body-text { color: #6b8f80; font-size: 14px; line-height: 1.7; }
+.t5 code { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); color: #34d399; padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+.t5 a:not(.btn-cta) { color: #10b981; }
+.t5 .code-block { background: #060d09; border: 1px solid #163b2a; font-family: 'JetBrains Mono', monospace; color: #a7f3d0; }
+.t5 .code-block .cm { color: #10b981; }
+.t5 .list-section li { color: #6b8f80; font-size: 14px; }
+.t5 .list-section li::before { content: "$ "; color: #10b981; font-family: 'JetBrains Mono', monospace; }
+.t5 .callout { background: #0d1a14; border: 1px solid rgba(16,185,129,0.15); }
+.t5 .callout-title { color: #10b981; }
+.t5 .callout p { color: #6b8f80; font-size: 13px; }
+.t5 .btn-cta { background: #10b981; color: #000; }
+.t5 .btn-cta:hover { background: #34d399; }
+.t5 h3 { color: #d1fae5; font-size: 16px; font-weight: 700; margin: 16px 0 8px; font-family: 'Inter', sans-serif; }
+
+/* ============================================================
+   THEME 6: Sunset Gradient — Eye-catching
+   ============================================================ */
+.t6 .preview { background: #111; font-family: 'DM Sans', sans-serif; }
+.t6 .site-title { font-family: 'DM Sans', sans-serif; font-weight: 800; font-size: 26px; background: linear-gradient(135deg, #fb923c, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.t6 .subtitle { color: #fb923c; font-size: 14px; font-weight: 500; }
+.t6 .body-text { color: #a3a3a3; font-size: 14px; line-height: 1.7; }
+.t6 code { background: rgba(249,115,22,0.08); border: 1px solid rgba(249,115,22,0.2); color: #fb923c; padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+.t6 a:not(.btn-cta) { color: #fb923c; }
+.t6 .code-block { background: #0a0a0a; border: 1px solid #2a1a1a; font-family: 'JetBrains Mono', monospace; color: #e5e5e5; }
+.t6 .code-block .cm { color: #ec4899; }
+.t6 .list-section li { color: #a3a3a3; font-size: 14px; }
+.t6 .list-section li::before { content: "→ "; color: #ec4899; font-weight: 600; }
+.t6 .callout { background: #1a1210; border: 1px solid rgba(249,115,22,0.15); }
+.t6 .callout-title { color: #ec4899; }
+.t6 .callout p { color: #a3a3a3; font-size: 13px; }
+.t6 .btn-cta { background: linear-gradient(135deg, #f97316, #ec4899); color: #fff; }
+.t6 .btn-cta:hover { opacity: 0.9; }
+.t6 h3 { color: #fff; font-size: 16px; font-weight: 700; margin: 16px 0 8px; font-family: 'DM Sans', sans-serif; }
+
+/* ============================================================
+   THEME 7: Midnight Gold — Premium
+   ============================================================ */
+.t7 .preview { background: #0a0c1a; font-family: 'Sora', sans-serif; }
+.t7 .site-title { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 26px; color: #fff; }
+.t7 .subtitle { color: #eab308; font-size: 14px; font-weight: 500; }
+.t7 .body-text { color: #94a3b8; font-size: 14px; line-height: 1.7; }
+.t7 code { background: rgba(234,179,8,0.06); border: 1px solid rgba(234,179,8,0.2); color: #facc15; padding: 2px 6px; border-radius: 4px; font-family: 'Source Code Pro', monospace; font-size: 13px; }
+.t7 a:not(.btn-cta) { color: #eab308; }
+.t7 .code-block { background: #060818; border: 1px solid #1e2040; font-family: 'Source Code Pro', monospace; color: #cbd5e1; }
+.t7 .code-block .cm { color: #eab308; }
+.t7 .list-section li { color: #94a3b8; font-size: 14px; }
+.t7 .list-section li::before { content: "— "; color: #eab308; }
+.t7 .callout { background: #0f1028; border: 1px solid rgba(234,179,8,0.12); border-left: 3px solid #eab308; }
+.t7 .callout-title { color: #eab308; }
+.t7 .callout p { color: #94a3b8; font-size: 13px; }
+.t7 .btn-cta { background: #eab308; color: #0a0c1a; }
+.t7 .btn-cta:hover { background: #facc15; }
+.t7 h3 { color: #e2e8f0; font-size: 16px; font-weight: 700; margin: 16px 0 8px; font-family: 'Sora', sans-serif; }
+
+/* ============================================================
+   THEME 8: Rose Quartz — Warm modern
+   ============================================================ */
+.t8 .preview { background: #110e0e; font-family: 'Outfit', sans-serif; }
+.t8 .site-title { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 26px; color: #fff; }
+.t8 .subtitle { color: #fb7185; font-size: 14px; font-weight: 500; }
+.t8 .body-text { color: #a3a3a3; font-size: 14px; line-height: 1.7; }
+.t8 code { background: rgba(251,113,133,0.08); border: 1px solid rgba(251,113,133,0.2); color: #fda4af; padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+.t8 a:not(.btn-cta) { color: #fb7185; }
+.t8 .code-block { background: #0a0808; border: 1px solid #2a1a1a; font-family: 'JetBrains Mono', monospace; color: #e5e5e5; }
+.t8 .code-block .cm { color: #fb7185; }
+.t8 .list-section li { color: #a3a3a3; font-size: 14px; }
+.t8 .list-section li::before { content: "• "; color: #fb7185; }
+.t8 .callout { background: #1a0f12; border: 1px solid rgba(251,113,133,0.15); }
+.t8 .callout-title { color: #fb7185; }
+.t8 .callout p { color: #a3a3a3; font-size: 13px; }
+.t8 .btn-cta { background: #e11d48; color: #fff; }
+.t8 .btn-cta:hover { background: #f43f5e; }
+.t8 h3 { color: #fff; font-size: 16px; font-weight: 700; margin: 16px 0 8px; font-family: 'Outfit', sans-serif; }
+
+/* ============================================================
+   THEME 9: Cyan Minimal — Clean docs
+   ============================================================ */
+.t9 .preview { background: #0f1113; font-family: 'Manrope', sans-serif; }
+.t9 .site-title { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 26px; color: #fff; }
+.t9 .subtitle { color: #22d3ee; font-size: 14px; font-weight: 500; }
+.t9 .body-text { color: #9ca3af; font-size: 14px; line-height: 1.7; }
+.t9 code { background: rgba(34,211,238,0.06); border: 1px solid rgba(34,211,238,0.18); color: #67e8f9; padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+.t9 a:not(.btn-cta) { color: #22d3ee; }
+.t9 .code-block { background: #0a0c0d; border: 1px solid #1f2937; font-family: 'JetBrains Mono', monospace; color: #d1d5db; }
+.t9 .code-block .cm { color: #22d3ee; }
+.t9 .list-section li { color: #9ca3af; font-size: 14px; }
+.t9 .list-section li::before { content: "› "; color: #22d3ee; font-weight: 700; }
+.t9 .callout { background: #0d1416; border: 1px solid rgba(34,211,238,0.12); }
+.t9 .callout-title { color: #22d3ee; }
+.t9 .callout p { color: #9ca3af; font-size: 13px; }
+.t9 .btn-cta { background: #06b6d4; color: #000; }
+.t9 .btn-cta:hover { background: #22d3ee; }
+.t9 h3 { color: #f3f4f6; font-size: 16px; font-weight: 700; margin: 16px 0 8px; font-family: 'Manrope', sans-serif; }
+
+/* ============================================================
+   THEME 10: Lime Punch — Bold + fresh
+   ============================================================ */
+.t10 .preview { background: #0d0f0a; font-family: 'Space Grotesk', sans-serif; }
+.t10 .site-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 26px; color: #fff; }
+.t10 .subtitle { color: #a3e635; font-size: 14px; font-weight: 500; }
+.t10 .body-text { color: #9ca3af; font-size: 14px; line-height: 1.7; }
+.t10 code { background: rgba(163,230,53,0.06); border: 1px solid rgba(163,230,53,0.18); color: #bef264; padding: 2px 6px; border-radius: 4px; font-family: 'Fira Code', monospace; font-size: 13px; }
+.t10 a:not(.btn-cta) { color: #a3e635; }
+.t10 .code-block { background: #080a06; border: 1px solid #1a2010; font-family: 'Fira Code', monospace; color: #d1d5db; }
+.t10 .code-block .cm { color: #a3e635; }
+.t10 .list-section li { color: #9ca3af; font-size: 14px; }
+.t10 .list-section li::before { content: "// "; color: #a3e635; font-family: 'Fira Code', monospace; font-size: 12px; }
+.t10 .callout { background: #111408; border: 1px solid rgba(163,230,53,0.12); }
+.t10 .callout-title { color: #a3e635; }
+.t10 .callout p { color: #9ca3af; font-size: 13px; }
+.t10 .btn-cta { background: #84cc16; color: #000; }
+.t10 .btn-cta:hover { background: #a3e635; }
+.t10 h3 { color: #f3f4f6; font-size: 16px; font-weight: 700; margin: 16px 0 8px; font-family: 'Space Grotesk', sans-serif; }
+
+/* ============================================================
+   THEME 11: Crimson Slate — Sharp + serious
+   ============================================================ */
+.t11 .preview { background: #0f0e0e; font-family: 'IBM Plex Sans', sans-serif; }
+.t11 .site-title { font-family: 'IBM Plex Sans', sans-serif; font-weight: 700; font-size: 26px; color: #fff; }
+.t11 .subtitle { color: #ef4444; font-size: 14px; font-weight: 500; }
+.t11 .body-text { color: #a3a3a3; font-size: 14px; line-height: 1.7; }
+.t11 code { background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.18); color: #fca5a5; padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+.t11 a:not(.btn-cta) { color: #ef4444; }
+.t11 .code-block { background: #0a0808; border: 1px solid #261818; font-family: 'JetBrains Mono', monospace; color: #e5e5e5; }
+.t11 .code-block .cm { color: #ef4444; }
+.t11 .list-section li { color: #a3a3a3; font-size: 14px; }
+.t11 .list-section li::before { content: "● "; color: #ef4444; font-size: 8px; vertical-align: middle; }
+.t11 .callout { background: #160e0e; border-left: 3px solid #ef4444; }
+.t11 .callout-title { color: #ef4444; }
+.t11 .callout p { color: #a3a3a3; font-size: 13px; }
+.t11 .btn-cta { background: #dc2626; color: #fff; }
+.t11 .btn-cta:hover { background: #ef4444; }
+.t11 h3 { color: #fff; font-size: 16px; font-weight: 700; margin: 16px 0 8px; font-family: 'IBM Plex Sans', sans-serif; }
+
+/* ============================================================
+   THEME 12: Monochrome — Content-first minimal
+   ============================================================ */
+.t12 .preview { background: #111; font-family: 'Inter', sans-serif; }
+.t12 .site-title { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 26px; color: #fff; }
+.t12 .subtitle { color: #737373; font-size: 14px; font-weight: 500; }
+.t12 .body-text { color: #a3a3a3; font-size: 14px; line-height: 1.7; }
+.t12 code { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #e5e5e5; padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+.t12 a:not(.btn-cta) { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+.t12 .code-block { background: #0a0a0a; border: 1px solid #222; font-family: 'JetBrains Mono', monospace; color: #d4d4d4; }
+.t12 .code-block .cm { color: #737373; }
+.t12 .list-section li { color: #a3a3a3; font-size: 14px; }
+.t12 .list-section li::before { content: "— "; color: #525252; }
+.t12 .callout { background: #171717; border: 1px solid #262626; }
+.t12 .callout-title { color: #e5e5e5; }
+.t12 .callout p { color: #a3a3a3; font-size: 13px; }
+.t12 .btn-cta { background: #fff; color: #000; }
+.t12 .btn-cta:hover { background: #e5e5e5; }
+.t12 h3 { color: #fff; font-size: 16px; font-weight: 700; margin: 16px 0 8px; font-family: 'Inter', sans-serif; }
+
+/* ============================================================
+   THEME 13: OpenClaw Faithful — Exact brand match
+   ============================================================ */
+.t13 .preview { background: #050810; font-family: 'Satoshi', 'DM Sans', sans-serif; }
+.t13 .site-title { font-family: 'Clash Display', 'Space Grotesk', sans-serif; font-weight: 700; font-size: 26px; color: #f0f4ff; }
+.t13 .subtitle { color: #ff4d4d; font-size: 14px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; }
+.t13 .body-text { color: #8892b0; font-size: 14px; line-height: 1.7; }
+.t13 code { background: rgba(0,229,204,0.08); border: 1px solid rgba(0,229,204,0.2); color: #00e5cc; padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+.t13 a:not(.btn-cta) { color: #ff4d4d; }
+.t13 .code-block { background: #0a0f1a; border: 1px solid rgba(136,146,176,0.15); font-family: 'JetBrains Mono', monospace; color: #f0f4ff; }
+.t13 .code-block .cm { color: #5a6480; }
+.t13 .list-section li { color: #8892b0; font-size: 14px; }
+.t13 .list-section li::before { content: "› "; color: #ff4d4d; font-weight: 700; }
+.t13 .callout { background: rgba(10,15,26,0.65); border: 1px solid rgba(255,77,77,0.15); backdrop-filter: blur(8px); }
+.t13 .callout-title { color: #ff4d4d; }
+.t13 .callout p { color: #8892b0; font-size: 13px; }
+.t13 .btn-cta { background: #ff4d4d; color: #fff; border-radius: 999px; }
+.t13 .btn-cta:hover { background: #e63946; }
+.t13 h3 { color: #f0f4ff; font-size: 16px; font-weight: 600; margin: 16px 0 8px; font-family: 'Clash Display', 'Space Grotesk', sans-serif; }
+
+/* ============================================================
+   THEME 14: OpenClaw + Inter — Brand colors, universal font
+   ============================================================ */
+.t14 .preview { background: #050810; font-family: 'Inter', sans-serif; }
+.t14 .site-title { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 26px; color: #f0f4ff; }
+.t14 .subtitle { color: #ff4d4d; font-size: 14px; font-weight: 600; }
+.t14 .body-text { color: #8892b0; font-size: 14px; line-height: 1.7; }
+.t14 code { background: rgba(0,229,204,0.08); border: 1px solid rgba(0,229,204,0.2); color: #00e5cc; padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+.t14 a:not(.btn-cta) { color: #ff4d4d; }
+.t14 .code-block { background: #0a0f1a; border: 1px solid rgba(136,146,176,0.15); font-family: 'JetBrains Mono', monospace; color: #f0f4ff; }
+.t14 .code-block .cm { color: #5a6480; }
+.t14 .list-section li { color: #8892b0; font-size: 14px; }
+.t14 .list-section li::before { content: "→ "; color: #ff4d4d; font-weight: 600; }
+.t14 .callout { background: rgba(10,15,26,0.65); border: 1px solid rgba(255,77,77,0.15); }
+.t14 .callout-title { color: #ff4d4d; }
+.t14 .callout p { color: #8892b0; font-size: 13px; }
+.t14 .btn-cta { background: #ff4d4d; color: #fff; border-radius: 999px; }
+.t14 .btn-cta:hover { background: #e63946; }
+.t14 h3 { color: #f0f4ff; font-size: 16px; font-weight: 700; margin: 16px 0 8px; font-family: 'Inter', sans-serif; }
+
+/* ============================================================
+   THEME 15: OpenClaw Docs — Tuned for long-form reading
+   ============================================================ */
+.t15 .preview { background: #0a0f1a; font-family: 'Satoshi', 'DM Sans', sans-serif; }
+.t15 .site-title { font-family: 'Clash Display', 'Space Grotesk', sans-serif; font-weight: 700; font-size: 26px; color: #f0f4ff; }
+.t15 .subtitle { color: #00e5cc; font-size: 14px; font-weight: 500; }
+.t15 .body-text { color: #a3b1cc; font-size: 14px; line-height: 1.8; }
+.t15 code { background: rgba(0,229,204,0.06); border: 1px solid rgba(0,229,204,0.15); color: #00e5cc; padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+.t15 a:not(.btn-cta) { color: #00e5cc; }
+.t15 .code-block { background: #050810; border: 1px solid rgba(136,146,176,0.12); font-family: 'JetBrains Mono', monospace; color: #e2e8f0; }
+.t15 .code-block .cm { color: #5a6480; }
+.t15 .list-section li { color: #a3b1cc; font-size: 14px; }
+.t15 .list-section li::before { content: "› "; color: #ff4d4d; font-weight: 700; }
+.t15 .callout { background: #111827; border: 1px solid rgba(136,146,176,0.12); }
+.t15 .callout-title { color: #ff4d4d; }
+.t15 .callout p { color: #a3b1cc; font-size: 13px; }
+.t15 .btn-cta { background: #ff4d4d; color: #fff; border-radius: 8px; }
+.t15 .btn-cta:hover { background: #e63946; }
+.t15 h3 { color: #f0f4ff; font-size: 16px; font-weight: 600; margin: 16px 0 8px; font-family: 'Clash Display', 'Space Grotesk', sans-serif; }
+
+/* ============================================================
+   THEME 16: OpenClaw Cyan — Cyan-forward, coral accent
+   ============================================================ */
+.t16 .preview { background: #050810; font-family: 'Satoshi', 'DM Sans', sans-serif; }
+.t16 .site-title { font-family: 'Clash Display', 'Space Grotesk', sans-serif; font-weight: 700; font-size: 26px; color: #f0f4ff; }
+.t16 .subtitle { color: #00e5cc; font-size: 14px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; }
+.t16 .body-text { color: #8892b0; font-size: 14px; line-height: 1.7; }
+.t16 code { background: rgba(0,229,204,0.08); border: 1px solid rgba(0,229,204,0.2); color: #00e5cc; padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+.t16 a:not(.btn-cta) { color: #00e5cc; }
+.t16 .code-block { background: #0a0f1a; border: 1px solid rgba(0,229,204,0.1); font-family: 'JetBrains Mono', monospace; color: #f0f4ff; }
+.t16 .code-block .cm { color: #00e5cc; }
+.t16 .list-section li { color: #8892b0; font-size: 14px; }
+.t16 .list-section li::before { content: "$ "; color: #00e5cc; font-family: 'JetBrains Mono', monospace; }
+.t16 .callout { background: rgba(10,15,26,0.65); border: 1px solid rgba(0,229,204,0.15); }
+.t16 .callout-title { color: #ff4d4d; }
+.t16 .callout p { color: #8892b0; font-size: 13px; }
+.t16 .btn-cta { background: #00e5cc; color: #050810; border-radius: 999px; }
+.t16 .btn-cta:hover { background: #14b8a6; }
+.t16 h3 { color: #f0f4ff; font-size: 16px; font-weight: 600; margin: 16px 0 8px; font-family: 'Clash Display', 'Space Grotesk', sans-serif; }
+
+/* ============================================================
+   Bottom mix-match section
+   ============================================================ */
+.bottom-section {
+  max-width: 900px;
+  margin: 60px auto 0;
+  padding: 32px;
+  background: #0a0a0a;
+  border: 1px solid #1a1a1a;
+  border-radius: 14px;
+}
+.bottom-section h2 {
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-align: center;
+}
+.grid-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.grid-table th {
+  text-align: left;
+  padding: 10px 12px;
+  color: #666;
+  font-weight: 600;
+  border-bottom: 1px solid #1a1a1a;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.grid-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #111;
+  color: #a3a3a3;
+}
+.grid-table tr:hover td { background: #111; }
+.grid-table .swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+.grid-table .font-sample {
+  color: #e5e5e5;
+}
+.mix-note {
+  text-align: center;
+  color: #555;
+  font-size: 13px;
+  margin-top: 20px;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Learn OpenClaw — Theme Picker</h1>
+  <p>16 themes showing real site elements. 1-12 are original options, 13-16 match the official OpenClaw brand (scraped from openclaw.ai). Pick one or mix-and-match.</p>
+</div>
+
+<div class="filter-bar">
+  <button class="filter-btn active" data-filter="all">All 16</button>
+  <button class="filter-btn" data-filter="warm">Warm</button>
+  <button class="filter-btn" data-filter="cool">Cool</button>
+  <button class="filter-btn" data-filter="bold">Bold</button>
+  <button class="filter-btn" data-filter="minimal">Minimal</button>
+  <button class="filter-btn" data-filter="techy">Techy</button>
+  <button class="filter-btn" data-filter="openclaw">OpenClaw Brand</button>
+</div>
+
+<div class="themes-grid">
+
+<!-- ========== THEME 1: Amber Glow ========== -->
+<div class="theme-card t1" data-tags="warm bold">
+  <div class="theme-label">
+    <h2>1. Amber Glow</h2>
+    <div class="theme-tags">
+      <span class="tag" style="background:rgba(245,158,11,0.15);color:#f59e0b;">Inter</span>
+      <span class="tag" style="background:rgba(245,158,11,0.15);color:#f59e0b;">JetBrains Mono</span>
+    </div>
+  </div>
+  <div class="preview">
+    <div class="site-title">Learn OpenClaw</div>
+    <div class="subtitle">The comprehensive guide to your always-on AI assistant</div>
+    <p class="body-text">OpenClaw is the fastest-growing open source project in history. But <strong style="color:#fff">70% of the content out there is surface-level</strong>. This guide covers everything from <code>SOUL.md</code> to sub-agents and <code>cron</code> automation.</p>
+    <div class="code-block"><span class="cm"># Install OpenClaw</span><br>npx openclaw@latest<br><br><span class="cm"># Start the Gateway</span><br>openclaw start</div>
+    <h3>What's Inside</h3>
+    <ul class="list-section">
+      <li>Architecture fundamentals & mental models</li>
+      <li>Security hardening for non-developers</li>
+      <li>Channel setup (iMessage, Slack, WhatsApp, 4 more)</li>
+      <li>SOUL.md personality design</li>
+    </ul>
+    <div class="callout">
+      <div class="callout-title">Security First</div>
+      <p>90% of people installing OpenClaw have no idea how to set up DM policies. Start with our <a href="#">security checklist</a> before anything else.</p>
+    </div>
+    <a href="#" class="btn-cta">Get the Cheat Sheet</a>
+    <div class="meta-line">Body: Inter / Code: JetBrains Mono / Primary: #f59e0b / BG: #111</div>
+  </div>
+</div>
+
+<!-- ========== THEME 2: Teal + Coral ========== -->
+<div class="theme-card t2" data-tags="warm cool">
+  <div class="theme-label">
+    <h2>2. Teal + Coral</h2>
+    <div class="theme-tags">
+      <span class="tag" style="background:rgba(29,211,176,0.15);color:#1dd3b0;">DM Sans</span>
+      <span class="tag" style="background:rgba(255,88,86,0.15);color:#FF5856;">JetBrains Mono</span>
+    </div>
+  </div>
+  <div class="preview">
+    <div class="site-title">Learn OpenClaw</div>
+    <div class="subtitle">The comprehensive guide to your always-on AI assistant</div>
+    <p class="body-text">OpenClaw is the fastest-growing open source project in history. But <strong style="color:#fff">70% of the content out there is surface-level</strong>. This guide covers everything from <code>SOUL.md</code> to sub-agents and <code>cron</code> automation.</p>
+    <div class="code-block"><span class="cm"># Install OpenClaw</span><br>npx openclaw@latest<br><br><span class="cm"># Start the Gateway</span><br>openclaw start</div>
+    <h3>What's Inside</h3>
+    <ul class="list-section">
+      <li>Architecture fundamentals & mental models</li>
+      <li>Security hardening for non-developers</li>
+      <li>Channel setup (iMessage, Slack, WhatsApp, 4 more)</li>
+      <li>SOUL.md personality design</li>
+    </ul>
+    <div class="callout">
+      <div class="callout-title">Security First</div>
+      <p>90% of people installing OpenClaw have no idea how to set up DM policies. Start with our <a href="#">security checklist</a> before anything else.</p>
+    </div>
+    <a href="#" class="btn-cta">Get the Cheat Sheet</a>
+    <div class="meta-line">Body: DM Sans / Code: JetBrains Mono / Primary: #1dd3b0 / Accent: #FF5856</div>
+  </div>
+</div>
+
+<!-- ========== THEME 3: Electric Blue ========== -->
+<div class="theme-card t3" data-tags="cool techy">
+  <div class="theme-label">
+    <h2>3. Electric Blue</h2>
+    <div class="theme-tags">
+      <span class="tag" style="background:rgba(56,189,248,0.15);color:#38bdf8;">Space Grotesk</span>
+      <span class="tag" style="background:rgba(56,189,248,0.15);color:#38bdf8;">Fira Code</span>
+    </div>
+  </div>
+  <div class="preview">
+    <div class="site-title">Learn OpenClaw</div>
+    <div class="subtitle">The comprehensive guide to your always-on AI assistant</div>
+    <p class="body-text">OpenClaw is the fastest-growing open source project in history. But <strong style="color:#e2e8f0">70% of the content out there is surface-level</strong>. This guide covers everything from <code>SOUL.md</code> to sub-agents and <code>cron</code> automation.</p>
+    <div class="code-block"><span class="cm"># Install OpenClaw</span><br>npx openclaw@latest<br><br><span class="cm"># Start the Gateway</span><br>openclaw start</div>
+    <h3>What's Inside</h3>
+    <ul class="list-section">
+      <li>Architecture fundamentals & mental models</li>
+      <li>Security hardening for non-developers</li>
+      <li>Channel setup (iMessage, Slack, WhatsApp, 4 more)</li>
+      <li>SOUL.md personality design</li>
+    </ul>
+    <div class="callout">
+      <div class="callout-title">Security First</div>
+      <p>90% of people installing OpenClaw have no idea how to set up DM policies. Start with our <a href="#">security checklist</a> before anything else.</p>
+    </div>
+    <a href="#" class="btn-cta">Get the Cheat Sheet</a>
+    <div class="meta-line">Body: Space Grotesk / Code: Fira Code / Primary: #38bdf8 / BG: #0b0d11</div>
+  </div>
+</div>
+
+<!-- ========== THEME 4: Purple Haze ========== -->
+<div class="theme-card t4" data-tags="cool bold">
+  <div class="theme-label">
+    <h2>4. Purple Haze</h2>
+    <div class="theme-tags">
+      <span class="tag" style="background:rgba(167,139,250,0.15);color:#a78bfa;">Plus Jakarta Sans</span>
+      <span class="tag" style="background:rgba(167,139,250,0.15);color:#a78bfa;">JetBrains Mono</span>
+    </div>
+  </div>
+  <div class="preview">
+    <div class="site-title">Learn OpenClaw</div>
+    <div class="subtitle">The comprehensive guide to your always-on AI assistant</div>
+    <p class="body-text">OpenClaw is the fastest-growing open source project in history. But <strong style="color:#f3f4f6">70% of the content out there is surface-level</strong>. This guide covers everything from <code>SOUL.md</code> to sub-agents and <code>cron</code> automation.</p>
+    <div class="code-block"><span class="cm"># Install OpenClaw</span><br>npx openclaw@latest<br><br><span class="cm"># Start the Gateway</span><br>openclaw start</div>
+    <h3>What's Inside</h3>
+    <ul class="list-section">
+      <li>Architecture fundamentals & mental models</li>
+      <li>Security hardening for non-developers</li>
+      <li>Channel setup (iMessage, Slack, WhatsApp, 4 more)</li>
+      <li>SOUL.md personality design</li>
+    </ul>
+    <div class="callout">
+      <div class="callout-title">Security First</div>
+      <p>90% of people installing OpenClaw have no idea how to set up DM policies. Start with our <a href="#">security checklist</a> before anything else.</p>
+    </div>
+    <a href="#" class="btn-cta">Get the Cheat Sheet</a>
+    <div class="meta-line">Body: Plus Jakarta Sans / Code: JetBrains Mono / Primary: #a78bfa / CTA: #7c3aed</div>
+  </div>
+</div>
+
+<!-- ========== THEME 5: Emerald Terminal ========== -->
+<div class="theme-card t5" data-tags="techy cool">
+  <div class="theme-label">
+    <h2>5. Emerald Terminal</h2>
+    <div class="theme-tags">
+      <span class="tag" style="background:rgba(16,185,129,0.15);color:#10b981;">Inter</span>
+      <span class="tag" style="background:rgba(16,185,129,0.15);color:#10b981;">JetBrains Mono</span>
+    </div>
+  </div>
+  <div class="preview">
+    <div class="site-title">Learn OpenClaw</div>
+    <div class="subtitle">The comprehensive guide to your always-on AI assistant</div>
+    <p class="body-text">OpenClaw is the fastest-growing open source project in history. But <strong style="color:#d1fae5">70% of the content out there is surface-level</strong>. This guide covers everything from <code>SOUL.md</code> to sub-agents and <code>cron</code> automation.</p>
+    <div class="code-block"><span class="cm"># Install OpenClaw</span><br>npx openclaw@latest<br><br><span class="cm"># Start the Gateway</span><br>openclaw start</div>
+    <h3>What's Inside</h3>
+    <ul class="list-section">
+      <li>Architecture fundamentals & mental models</li>
+      <li>Security hardening for non-developers</li>
+      <li>Channel setup (iMessage, Slack, WhatsApp, 4 more)</li>
+      <li>SOUL.md personality design</li>
+    </ul>
+    <div class="callout">
+      <div class="callout-title">Security First</div>
+      <p>90% of people installing OpenClaw have no idea how to set up DM policies. Start with our <a href="#">security checklist</a> before anything else.</p>
+    </div>
+    <a href="#" class="btn-cta">Get the Cheat Sheet</a>
+    <div class="meta-line">Body: Inter / Code: JetBrains Mono / Primary: #10b981 / BG: #0a110e</div>
+  </div>
+</div>
+
+<!-- ========== THEME 6: Sunset Gradient ========== -->
+<div class="theme-card t6" data-tags="warm bold">
+  <div class="theme-label">
+    <h2>6. Sunset Gradient</h2>
+    <div class="theme-tags">
+      <span class="tag" style="background:linear-gradient(135deg,rgba(249,115,22,0.15),rgba(236,72,153,0.15));color:#fb923c;">DM Sans</span>
+      <span class="tag" style="background:rgba(236,72,153,0.15);color:#ec4899;">JetBrains Mono</span>
+    </div>
+  </div>
+  <div class="preview">
+    <div class="site-title">Learn OpenClaw</div>
+    <div class="subtitle">The comprehensive guide to your always-on AI assistant</div>
+    <p class="body-text">OpenClaw is the fastest-growing open source project in history. But <strong style="color:#fff">70% of the content out there is surface-level</strong>. This guide covers everything from <code>SOUL.md</code> to sub-agents and <code>cron</code> automation.</p>
+    <div class="code-block"><span class="cm"># Install OpenClaw</span><br>npx openclaw@latest<br><br><span class="cm"># Start the Gateway</span><br>openclaw start</div>
+    <h3>What's Inside</h3>
+    <ul class="list-section">
+      <li>Architecture fundamentals & mental models</li>
+      <li>Security hardening for non-developers</li>
+      <li>Channel setup (iMessage, Slack, WhatsApp, 4 more)</li>
+      <li>SOUL.md personality design</li>
+    </ul>
+    <div class="callout">
+      <div class="callout-title">Security First</div>
+      <p>90% of people installing OpenClaw have no idea how to set up DM policies. Start with our <a href="#">security checklist</a> before anything else.</p>
+    </div>
+    <a href="#" class="btn-cta">Get the Cheat Sheet</a>
+    <div class="meta-line">Body: DM Sans / Code: JetBrains Mono / Primary: #fb923c → #ec4899</div>
+  </div>
+</div>
+
+<!-- ========== THEME 7: Midnight Gold ========== -->
+<div class="theme-card t7" data-tags="warm minimal">
+  <div class="theme-label">
+    <h2>7. Midnight Gold</h2>
+    <div class="theme-tags">
+      <span class="tag" style="background:rgba(234,179,8,0.12);color:#eab308;">Sora</span>
+      <span class="tag" style="background:rgba(234,179,8,0.12);color:#eab308;">Source Code Pro</span>
+    </div>
+  </div>
+  <div class="preview">
+    <div class="site-title">Learn OpenClaw</div>
+    <div class="subtitle">The comprehensive guide to your always-on AI assistant</div>
+    <p class="body-text">OpenClaw is the fastest-growing open source project in history. But <strong style="color:#e2e8f0">70% of the content out there is surface-level</strong>. This guide covers everything from <code>SOUL.md</code> to sub-agents and <code>cron</code> automation.</p>
+    <div class="code-block"><span class="cm"># Install OpenClaw</span><br>npx openclaw@latest<br><br><span class="cm"># Start the Gateway</span><br>openclaw start</div>
+    <h3>What's Inside</h3>
+    <ul class="list-section">
+      <li>Architecture fundamentals & mental models</li>
+      <li>Security hardening for non-developers</li>
+      <li>Channel setup (iMessage, Slack, WhatsApp, 4 more)</li>
+      <li>SOUL.md personality design</li>
+    </ul>
+    <div class="callout">
+      <div class="callout-title">Security First</div>
+      <p>90% of people installing OpenClaw have no idea how to set up DM policies. Start with our <a href="#">security checklist</a> before anything else.</p>
+    </div>
+    <a href="#" class="btn-cta">Get the Cheat Sheet</a>
+    <div class="meta-line">Body: Sora / Code: Source Code Pro / Primary: #eab308 / BG: #0a0c1a</div>
+  </div>
+</div>
+
+<!-- ========== THEME 8: Rose Quartz ========== -->
+<div class="theme-card t8" data-tags="warm bold">
+  <div class="theme-label">
+    <h2>8. Rose Quartz</h2>
+    <div class="theme-tags">
+      <span class="tag" style="background:rgba(251,113,133,0.15);color:#fb7185;">Outfit</span>
+      <span class="tag" style="background:rgba(251,113,133,0.15);color:#fb7185;">JetBrains Mono</span>
+    </div>
+  </div>
+  <div class="preview">
+    <div class="site-title">Learn OpenClaw</div>
+    <div class="subtitle">The comprehensive guide to your always-on AI assistant</div>
+    <p class="body-text">OpenClaw is the fastest-growing open source project in history. But <strong style="color:#fff">70% of the content out there is surface-level</strong>. This guide covers everything from <code>SOUL.md</code> to sub-agents and <code>cron</code> automation.</p>
+    <div class="code-block"><span class="cm"># Install OpenClaw</span><br>npx openclaw@latest<br><br><span class="cm"># Start the Gateway</span><br>openclaw start</div>
+    <h3>What's Inside</h3>
+    <ul class="list-section">
+      <li>Architecture fundamentals & mental models</li>
+      <li>Security hardening for non-developers</li>
+      <li>Channel setup (iMessage, Slack, WhatsApp, 4 more)</li>
+      <li>SOUL.md personality design</li>
+    </ul>
+    <div class="callout">
+      <div class="callout-title">Security First</div>
+      <p>90% of people installing OpenClaw have no idea how to set up DM policies. Start with our <a href="#">security checklist</a> before anything else.</p>
+    </div>
+    <a href="#" class="btn-cta">Get the Cheat Sheet</a>
+    <div class="meta-line">Body: Outfit / Code: JetBrains Mono / Primary: #fb7185 / CTA: #e11d48</div>
+  </div>
+</div>
+
+<!-- ========== THEME 9: Cyan Minimal ========== -->
+<div class="theme-card t9" data-tags="cool minimal">
+  <div class="theme-label">
+    <h2>9. Cyan Minimal</h2>
+    <div class="theme-tags">
+      <span class="tag" style="background:rgba(34,211,238,0.12);color:#22d3ee;">Manrope</span>
+      <span class="tag" style="background:rgba(34,211,238,0.12);color:#22d3ee;">JetBrains Mono</span>
+    </div>
+  </div>
+  <div class="preview">
+    <div class="site-title">Learn OpenClaw</div>
+    <div class="subtitle">The comprehensive guide to your always-on AI assistant</div>
+    <p class="body-text">OpenClaw is the fastest-growing open source project in history. But <strong style="color:#f3f4f6">70% of the content out there is surface-level</strong>. This guide covers everything from <code>SOUL.md</code> to sub-agents and <code>cron</code> automation.</p>
+    <div class="code-block"><span class="cm"># Install OpenClaw</span><br>npx openclaw@latest<br><br><span class="cm"># Start the Gateway</span><br>openclaw start</div>
+    <h3>What's Inside</h3>
+    <ul class="list-section">
+      <li>Architecture fundamentals & mental models</li>
+      <li>Security hardening for non-developers</li>
+      <li>Channel setup (iMessage, Slack, WhatsApp, 4 more)</li>
+      <li>SOUL.md personality design</li>
+    </ul>
+    <div class="callout">
+      <div class="callout-title">Security First</div>
+      <p>90% of people installing OpenClaw have no idea how to set up DM policies. Start with our <a href="#">security checklist</a> before anything else.</p>
+    </div>
+    <a href="#" class="btn-cta">Get the Cheat Sheet</a>
+    <div class="meta-line">Body: Manrope / Code: JetBrains Mono / Primary: #22d3ee / BG: #0f1113</div>
+  </div>
+</div>
+
+<!-- ========== THEME 10: Lime Punch ========== -->
+<div class="theme-card t10" data-tags="bold techy">
+  <div class="theme-label">
+    <h2>10. Lime Punch</h2>
+    <div class="theme-tags">
+      <span class="tag" style="background:rgba(163,230,53,0.12);color:#a3e635;">Space Grotesk</span>
+      <span class="tag" style="background:rgba(163,230,53,0.12);color:#a3e635;">Fira Code</span>
+    </div>
+  </div>
+  <div class="preview">
+    <div class="site-title">Learn OpenClaw</div>
+    <div class="subtitle">The comprehensive guide to your always-on AI assistant</div>
+    <p class="body-text">OpenClaw is the fastest-growing open source project in history. But <strong style="color:#f3f4f6">70% of the content out there is surface-level</strong>. This guide covers everything from <code>SOUL.md</code> to sub-agents and <code>cron</code> automation.</p>
+    <div class="code-block"><span class="cm"># Install OpenClaw</span><br>npx openclaw@latest<br><br><span class="cm"># Start the Gateway</span><br>openclaw start</div>
+    <h3>What's Inside</h3>
+    <ul class="list-section">
+      <li>Architecture fundamentals & mental models</li>
+      <li>Security hardening for non-developers</li>
+      <li>Channel setup (iMessage, Slack, WhatsApp, 4 more)</li>
+      <li>SOUL.md personality design</li>
+    </ul>
+    <div class="callout">
+      <div class="callout-title">Security First</div>
+      <p>90% of people installing OpenClaw have no idea how to set up DM policies. Start with our <a href="#">security checklist</a> before anything else.</p>
+    </div>
+    <a href="#" class="btn-cta">Get the Cheat Sheet</a>
+    <div class="meta-line">Body: Space Grotesk / Code: Fira Code / Primary: #a3e635 / BG: #0d0f0a</div>
+  </div>
+</div>
+
+<!-- ========== THEME 11: Crimson Slate ========== -->
+<div class="theme-card t11" data-tags="bold minimal">
+  <div class="theme-label">
+    <h2>11. Crimson Slate</h2>
+    <div class="theme-tags">
+      <span class="tag" style="background:rgba(239,68,68,0.12);color:#ef4444;">IBM Plex Sans</span>
+      <span class="tag" style="background:rgba(239,68,68,0.12);color:#ef4444;">JetBrains Mono</span>
+    </div>
+  </div>
+  <div class="preview">
+    <div class="site-title">Learn OpenClaw</div>
+    <div class="subtitle">The comprehensive guide to your always-on AI assistant</div>
+    <p class="body-text">OpenClaw is the fastest-growing open source project in history. But <strong style="color:#fff">70% of the content out there is surface-level</strong>. This guide covers everything from <code>SOUL.md</code> to sub-agents and <code>cron</code> automation.</p>
+    <div class="code-block"><span class="cm"># Install OpenClaw</span><br>npx openclaw@latest<br><br><span class="cm"># Start the Gateway</span><br>openclaw start</div>
+    <h3>What's Inside</h3>
+    <ul class="list-section">
+      <li>Architecture fundamentals & mental models</li>
+      <li>Security hardening for non-developers</li>
+      <li>Channel setup (iMessage, Slack, WhatsApp, 4 more)</li>
+      <li>SOUL.md personality design</li>
+    </ul>
+    <div class="callout">
+      <div class="callout-title">Security First</div>
+      <p>90% of people installing OpenClaw have no idea how to set up DM policies. Start with our <a href="#">security checklist</a> before anything else.</p>
+    </div>
+    <a href="#" class="btn-cta">Get the Cheat Sheet</a>
+    <div class="meta-line">Body: IBM Plex Sans / Code: JetBrains Mono / Primary: #ef4444 / BG: #0f0e0e</div>
+  </div>
+</div>
+
+<!-- ========== THEME 12: Monochrome ========== -->
+<div class="theme-card t12" data-tags="minimal">
+  <div class="theme-label">
+    <h2>12. Monochrome</h2>
+    <div class="theme-tags">
+      <span class="tag" style="background:rgba(255,255,255,0.08);color:#888;">Inter</span>
+      <span class="tag" style="background:rgba(255,255,255,0.08);color:#888;">JetBrains Mono</span>
+    </div>
+  </div>
+  <div class="preview">
+    <div class="site-title">Learn OpenClaw</div>
+    <div class="subtitle">The comprehensive guide to your always-on AI assistant</div>
+    <p class="body-text">OpenClaw is the fastest-growing open source project in history. But <strong style="color:#fff">70% of the content out there is surface-level</strong>. This guide covers everything from <code>SOUL.md</code> to sub-agents and <code>cron</code> automation.</p>
+    <div class="code-block"><span class="cm"># Install OpenClaw</span><br>npx openclaw@latest<br><br><span class="cm"># Start the Gateway</span><br>openclaw start</div>
+    <h3>What's Inside</h3>
+    <ul class="list-section">
+      <li>Architecture fundamentals & mental models</li>
+      <li>Security hardening for non-developers</li>
+      <li>Channel setup (iMessage, Slack, WhatsApp, 4 more)</li>
+      <li>SOUL.md personality design</li>
+    </ul>
+    <div class="callout">
+      <div class="callout-title">Security First</div>
+      <p>90% of people installing OpenClaw have no idea how to set up DM policies. Start with our <a href="#">security checklist</a> before anything else.</p>
+    </div>
+    <a href="#" class="btn-cta">Get the Cheat Sheet</a>
+    <div class="meta-line">Body: Inter / Code: JetBrains Mono / Primary: white / BG: #111</div>
+  </div>
+</div>
+
+<!-- ========== THEME 13: OpenClaw Faithful ========== -->
+<div class="theme-card t13" data-tags="openclaw bold">
+  <div class="theme-label">
+    <h2>13. OpenClaw Faithful</h2>
+    <div class="theme-tags">
+      <span class="tag" style="background:rgba(255,77,77,0.12);color:#ff4d4d;">Satoshi + Clash Display</span>
+      <span class="tag" style="background:rgba(0,229,204,0.12);color:#00e5cc;">Exact palette</span>
+    </div>
+  </div>
+  <div class="preview">
+    <div class="site-title">Learn OpenClaw</div>
+    <div class="subtitle">The comprehensive guide to your always-on AI assistant</div>
+    <p class="body-text">OpenClaw is the fastest-growing open source project in history. But <strong style="color:#f0f4ff">70% of the content out there is surface-level</strong>. This guide covers everything from <code>SOUL.md</code> to sub-agents and <code>cron</code> automation.</p>
+    <div class="code-block"><span class="cm"># Install OpenClaw</span><br>npx openclaw@latest<br><br><span class="cm"># Start the Gateway</span><br>openclaw start</div>
+    <h3>What's Inside</h3>
+    <ul class="list-section">
+      <li>Architecture fundamentals & mental models</li>
+      <li>Security hardening for non-developers</li>
+      <li>Channel setup (iMessage, Slack, WhatsApp, 4 more)</li>
+      <li>SOUL.md personality design</li>
+    </ul>
+    <div class="callout">
+      <div class="callout-title">Security First</div>
+      <p>90% of people installing OpenClaw have no idea how to set up DM policies. Start with our <a href="#">security checklist</a> before anything else.</p>
+    </div>
+    <a href="#" class="btn-cta">Get the Cheat Sheet</a>
+    <div class="meta-line">Body: Satoshi / Headings: Clash Display / Coral: #ff4d4d / Cyan: #00e5cc / BG: #050810</div>
+  </div>
+</div>
+
+<!-- ========== THEME 14: OpenClaw + Inter ========== -->
+<div class="theme-card t14" data-tags="openclaw">
+  <div class="theme-label">
+    <h2>14. OpenClaw + Inter</h2>
+    <div class="theme-tags">
+      <span class="tag" style="background:rgba(255,77,77,0.12);color:#ff4d4d;">Inter</span>
+      <span class="tag" style="background:rgba(0,229,204,0.12);color:#00e5cc;">Brand colors</span>
+    </div>
+  </div>
+  <div class="preview">
+    <div class="site-title">Learn OpenClaw</div>
+    <div class="subtitle">The comprehensive guide to your always-on AI assistant</div>
+    <p class="body-text">OpenClaw is the fastest-growing open source project in history. But <strong style="color:#f0f4ff">70% of the content out there is surface-level</strong>. This guide covers everything from <code>SOUL.md</code> to sub-agents and <code>cron</code> automation.</p>
+    <div class="code-block"><span class="cm"># Install OpenClaw</span><br>npx openclaw@latest<br><br><span class="cm"># Start the Gateway</span><br>openclaw start</div>
+    <h3>What's Inside</h3>
+    <ul class="list-section">
+      <li>Architecture fundamentals & mental models</li>
+      <li>Security hardening for non-developers</li>
+      <li>Channel setup (iMessage, Slack, WhatsApp, 4 more)</li>
+      <li>SOUL.md personality design</li>
+    </ul>
+    <div class="callout">
+      <div class="callout-title">Security First</div>
+      <p>90% of people installing OpenClaw have no idea how to set up DM policies. Start with our <a href="#">security checklist</a> before anything else.</p>
+    </div>
+    <a href="#" class="btn-cta">Get the Cheat Sheet</a>
+    <div class="meta-line">Body: Inter / Headings: Inter 800 / Coral: #ff4d4d / Cyan: #00e5cc / BG: #050810</div>
+  </div>
+</div>
+
+<!-- ========== THEME 15: OpenClaw Docs ========== -->
+<div class="theme-card t15" data-tags="openclaw minimal">
+  <div class="theme-label">
+    <h2>15. OpenClaw Docs</h2>
+    <div class="theme-tags">
+      <span class="tag" style="background:rgba(255,77,77,0.12);color:#ff4d4d;">Satoshi + Clash Display</span>
+      <span class="tag" style="background:rgba(136,146,176,0.15);color:#8892b0;">Reading-tuned</span>
+    </div>
+  </div>
+  <div class="preview">
+    <div class="site-title">Learn OpenClaw</div>
+    <div class="subtitle">The comprehensive guide to your always-on AI assistant</div>
+    <p class="body-text">OpenClaw is the fastest-growing open source project in history. But <strong style="color:#f0f4ff">70% of the content out there is surface-level</strong>. This guide covers everything from <code>SOUL.md</code> to sub-agents and <code>cron</code> automation.</p>
+    <div class="code-block"><span class="cm"># Install OpenClaw</span><br>npx openclaw@latest<br><br><span class="cm"># Start the Gateway</span><br>openclaw start</div>
+    <h3>What's Inside</h3>
+    <ul class="list-section">
+      <li>Architecture fundamentals & mental models</li>
+      <li>Security hardening for non-developers</li>
+      <li>Channel setup (iMessage, Slack, WhatsApp, 4 more)</li>
+      <li>SOUL.md personality design</li>
+    </ul>
+    <div class="callout">
+      <div class="callout-title">Security First</div>
+      <p>90% of people installing OpenClaw have no idea how to set up DM policies. Start with our <a href="#">security checklist</a> before anything else.</p>
+    </div>
+    <a href="#" class="btn-cta">Get the Cheat Sheet</a>
+    <div class="meta-line">Body: Satoshi / Headings: Clash Display / Lighter surface #0a0f1a / Higher contrast body text</div>
+  </div>
+</div>
+
+<!-- ========== THEME 16: OpenClaw Cyan ========== -->
+<div class="theme-card t16" data-tags="openclaw techy">
+  <div class="theme-label">
+    <h2>16. OpenClaw Cyan</h2>
+    <div class="theme-tags">
+      <span class="tag" style="background:rgba(0,229,204,0.12);color:#00e5cc;">Cyan-forward</span>
+      <span class="tag" style="background:rgba(255,77,77,0.12);color:#ff4d4d;">Coral accent</span>
+    </div>
+  </div>
+  <div class="preview">
+    <div class="site-title">Learn OpenClaw</div>
+    <div class="subtitle">The comprehensive guide to your always-on AI assistant</div>
+    <p class="body-text">OpenClaw is the fastest-growing open source project in history. But <strong style="color:#f0f4ff">70% of the content out there is surface-level</strong>. This guide covers everything from <code>SOUL.md</code> to sub-agents and <code>cron</code> automation.</p>
+    <div class="code-block"><span class="cm"># Install OpenClaw</span><br>npx openclaw@latest<br><br><span class="cm"># Start the Gateway</span><br>openclaw start</div>
+    <h3>What's Inside</h3>
+    <ul class="list-section">
+      <li>Architecture fundamentals & mental models</li>
+      <li>Security hardening for non-developers</li>
+      <li>Channel setup (iMessage, Slack, WhatsApp, 4 more)</li>
+      <li>SOUL.md personality design</li>
+    </ul>
+    <div class="callout">
+      <div class="callout-title">Security First</div>
+      <p>90% of people installing OpenClaw have no idea how to set up DM policies. Start with our <a href="#">security checklist</a> before anything else.</p>
+    </div>
+    <a href="#" class="btn-cta">Get the Cheat Sheet</a>
+    <div class="meta-line">Body: Satoshi / Headings: Clash Display / Primary: #00e5cc / Accent: #ff4d4d / BG: #050810</div>
+  </div>
+</div>
+
+</div><!-- end themes-grid -->
+
+<!-- ========== COMPARISON TABLE ========== -->
+<div class="bottom-section">
+  <h2>Quick Comparison</h2>
+  <table class="grid-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Theme</th>
+        <th>Body Font</th>
+        <th>Code Font</th>
+        <th>Primary</th>
+        <th>Accent/CTA</th>
+        <th>Vibe</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td style="color:#fff">Amber Glow</td>
+        <td class="font-sample" style="font-family:'Inter'">Inter</td>
+        <td class="font-sample" style="font-family:'JetBrains Mono'">JetBrains Mono</td>
+        <td><span class="swatch" style="background:#f59e0b"></span>#f59e0b</td>
+        <td><span class="swatch" style="background:#f59e0b"></span>same</td>
+        <td>Warm, OpenClaw-native</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td style="color:#fff">Teal + Coral</td>
+        <td class="font-sample" style="font-family:'DM Sans'">DM Sans</td>
+        <td class="font-sample" style="font-family:'JetBrains Mono'">JetBrains Mono</td>
+        <td><span class="swatch" style="background:#1dd3b0"></span>#1dd3b0</td>
+        <td><span class="swatch" style="background:#FF5856"></span>#FF5856</td>
+        <td>CC4E lineage, dual-tone</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td style="color:#fff">Electric Blue</td>
+        <td class="font-sample" style="font-family:'Space Grotesk'">Space Grotesk</td>
+        <td class="font-sample" style="font-family:'Fira Code'">Fira Code</td>
+        <td><span class="swatch" style="background:#38bdf8"></span>#38bdf8</td>
+        <td><span class="swatch" style="background:#38bdf8"></span>same</td>
+        <td>Dev docs, technical</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td style="color:#fff">Purple Haze</td>
+        <td class="font-sample" style="font-family:'Plus Jakarta Sans'">Plus Jakarta Sans</td>
+        <td class="font-sample" style="font-family:'JetBrains Mono'">JetBrains Mono</td>
+        <td><span class="swatch" style="background:#a78bfa"></span>#a78bfa</td>
+        <td><span class="swatch" style="background:#7c3aed"></span>#7c3aed</td>
+        <td>Modern SaaS, polished</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td style="color:#fff">Emerald Terminal</td>
+        <td class="font-sample" style="font-family:'Inter'">Inter</td>
+        <td class="font-sample" style="font-family:'JetBrains Mono'">JetBrains Mono</td>
+        <td><span class="swatch" style="background:#10b981"></span>#10b981</td>
+        <td><span class="swatch" style="background:#10b981"></span>same</td>
+        <td>Hacker, terminal vibes</td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td style="color:#fff">Sunset Gradient</td>
+        <td class="font-sample" style="font-family:'DM Sans'">DM Sans</td>
+        <td class="font-sample" style="font-family:'JetBrains Mono'">JetBrains Mono</td>
+        <td><span class="swatch" style="background:linear-gradient(135deg,#f97316,#ec4899)"></span>#f97316→#ec4899</td>
+        <td><span class="swatch" style="background:#ec4899"></span>#ec4899</td>
+        <td>Eye-catching, gradient</td>
+      </tr>
+      <tr>
+        <td>7</td>
+        <td style="color:#fff">Midnight Gold</td>
+        <td class="font-sample" style="font-family:'Sora'">Sora</td>
+        <td class="font-sample" style="font-family:'Source Code Pro'">Source Code Pro</td>
+        <td><span class="swatch" style="background:#eab308"></span>#eab308</td>
+        <td><span class="swatch" style="background:#eab308"></span>same</td>
+        <td>Premium, authoritative</td>
+      </tr>
+      <tr>
+        <td>8</td>
+        <td style="color:#fff">Rose Quartz</td>
+        <td class="font-sample" style="font-family:'Outfit'">Outfit</td>
+        <td class="font-sample" style="font-family:'JetBrains Mono'">JetBrains Mono</td>
+        <td><span class="swatch" style="background:#fb7185"></span>#fb7185</td>
+        <td><span class="swatch" style="background:#e11d48"></span>#e11d48</td>
+        <td>Warm modern, distinctive</td>
+      </tr>
+      <tr>
+        <td>9</td>
+        <td style="color:#fff">Cyan Minimal</td>
+        <td class="font-sample" style="font-family:'Manrope'">Manrope</td>
+        <td class="font-sample" style="font-family:'JetBrains Mono'">JetBrains Mono</td>
+        <td><span class="swatch" style="background:#22d3ee"></span>#22d3ee</td>
+        <td><span class="swatch" style="background:#06b6d4"></span>#06b6d4</td>
+        <td>Clean docs, minimal</td>
+      </tr>
+      <tr>
+        <td>10</td>
+        <td style="color:#fff">Lime Punch</td>
+        <td class="font-sample" style="font-family:'Space Grotesk'">Space Grotesk</td>
+        <td class="font-sample" style="font-family:'Fira Code'">Fira Code</td>
+        <td><span class="swatch" style="background:#a3e635"></span>#a3e635</td>
+        <td><span class="swatch" style="background:#84cc16"></span>#84cc16</td>
+        <td>Bold, fresh, energetic</td>
+      </tr>
+      <tr>
+        <td>11</td>
+        <td style="color:#fff">Crimson Slate</td>
+        <td class="font-sample" style="font-family:'IBM Plex Sans'">IBM Plex Sans</td>
+        <td class="font-sample" style="font-family:'JetBrains Mono'">JetBrains Mono</td>
+        <td><span class="swatch" style="background:#ef4444"></span>#ef4444</td>
+        <td><span class="swatch" style="background:#dc2626"></span>#dc2626</td>
+        <td>Sharp, serious, editorial</td>
+      </tr>
+      <tr>
+        <td>12</td>
+        <td style="color:#fff">Monochrome</td>
+        <td class="font-sample" style="font-family:'Inter'">Inter</td>
+        <td class="font-sample" style="font-family:'JetBrains Mono'">JetBrains Mono</td>
+        <td><span class="swatch" style="background:#fff"></span>#ffffff</td>
+        <td><span class="swatch" style="background:#fff"></span>#ffffff</td>
+        <td>Minimal, content-first</td>
+      </tr>
+      <tr style="border-top: 2px solid #ff4d4d;">
+        <td style="color:#ff4d4d">13</td>
+        <td style="color:#fff">OpenClaw Faithful</td>
+        <td class="font-sample" style="font-family:'Satoshi','DM Sans'">Satoshi</td>
+        <td class="font-sample" style="font-family:'JetBrains Mono'">JetBrains Mono</td>
+        <td><span class="swatch" style="background:#ff4d4d"></span>#ff4d4d</td>
+        <td><span class="swatch" style="background:#00e5cc"></span>#00e5cc</td>
+        <td>Exact OpenClaw brand match</td>
+      </tr>
+      <tr>
+        <td style="color:#ff4d4d">14</td>
+        <td style="color:#fff">OpenClaw + Inter</td>
+        <td class="font-sample" style="font-family:'Inter'">Inter</td>
+        <td class="font-sample" style="font-family:'JetBrains Mono'">JetBrains Mono</td>
+        <td><span class="swatch" style="background:#ff4d4d"></span>#ff4d4d</td>
+        <td><span class="swatch" style="background:#00e5cc"></span>#00e5cc</td>
+        <td>Brand colors, universal font</td>
+      </tr>
+      <tr>
+        <td style="color:#ff4d4d">15</td>
+        <td style="color:#fff">OpenClaw Docs</td>
+        <td class="font-sample" style="font-family:'Satoshi','DM Sans'">Satoshi</td>
+        <td class="font-sample" style="font-family:'JetBrains Mono'">JetBrains Mono</td>
+        <td><span class="swatch" style="background:#ff4d4d"></span>#ff4d4d</td>
+        <td><span class="swatch" style="background:#00e5cc"></span>#00e5cc</td>
+        <td>Reading-tuned, lighter surface</td>
+      </tr>
+      <tr>
+        <td style="color:#00e5cc">16</td>
+        <td style="color:#fff">OpenClaw Cyan</td>
+        <td class="font-sample" style="font-family:'Satoshi','DM Sans'">Satoshi</td>
+        <td class="font-sample" style="font-family:'JetBrains Mono'">JetBrains Mono</td>
+        <td><span class="swatch" style="background:#00e5cc"></span>#00e5cc</td>
+        <td><span class="swatch" style="background:#ff4d4d"></span>#ff4d4d</td>
+        <td>Cyan-forward, coral accent</td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="mix-note">Mix & match! Say "Theme 7 colors with Theme 3 fonts" or "Theme 4 but with Inter instead."</p>
+</div>
+
+<script>
+// Filter buttons
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const filter = btn.dataset.filter;
+    document.querySelectorAll('.theme-card').forEach(card => {
+      if (filter === 'all') {
+        card.classList.remove('hidden');
+      } else {
+        const tags = card.dataset.tags || '';
+        card.classList.toggle('hidden', !tags.includes(filter));
+      }
+    });
+  });
+});
+</script>
+
+</body>
+</html>

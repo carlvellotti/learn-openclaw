@@ -1,0 +1,409 @@
+---
+title: "What is OpenClaw?"
+description: "A plain-English guide to OpenClaw — the open-source personal AI assistant that runs on your devices 24/7. Learn about its architecture, key components, and why it's different from ChatGPT or Claude."
+keywords: "what is openclaw, openclaw architecture, openclaw explained, openclaw overview, personal ai assistant, self-hosted ai"
+---
+
+# What is OpenClaw?
+
+OpenClaw is a **self-hosted personal AI assistant** that runs on your own devices — your Mac, your phone, your server. It is not a chatbot you visit in a browser tab. It is software you install, configure, and own. It talks to you through the apps you already use (iMessage, Slack, WhatsApp, Discord, and more), it runs 24/7 whether you are awake or not, and it remembers everything you tell it.
+
+Created by [Peter Steinberger](https://github.com/steipete), OpenClaw has become one of the fastest-growing open-source projects in history, surpassing 145,000 GitHub stars. That growth is not accidental. OpenClaw fills a gap that no commercial AI product has addressed: a personal AI that is truly *yours* — running locally, customizable to your exact needs, and always on.
+
+If you have ever wished you could hire a full-time personal assistant who never sleeps, never forgets, and works across every app on your phone and computer — that is the idea behind OpenClaw.
+
+---
+
+## The Hiring Analogy
+
+The best way to understand OpenClaw is to imagine you are hiring a personal assistant.
+
+When you hire someone in real life, several things need to happen:
+
+- **They need a brain** — the ability to think, reason, and make decisions
+- **They need a way to communicate with you** — phone, email, text, Slack
+- **They need skills** — scheduling, research, writing, managing your inbox
+- **They need to remember things about you** — your preferences, your schedule, your projects
+- **They need standing instructions** — "Every Monday morning, send me a summary of my week ahead"
+
+OpenClaw maps directly to this mental model:
+
+| Real-Life Equivalent | OpenClaw Component |
+|---|---|
+| Their brain | **Gateway** |
+| How you communicate | **Channels** |
+| What they know how to do | **Skills** |
+| What they remember about you | **Memory** |
+| Standing instructions | **Cron jobs** |
+| Their personality and values | **SOUL.md** |
+| What they know about you | **USER.md** |
+
+Every piece of OpenClaw exists to make this analogy work in practice. The rest of this page breaks down each component so you understand what you are actually installing and configuring.
+
+---
+
+## The Core Architecture
+
+### Gateway: The Brain
+
+The **Gateway** is the heart of OpenClaw. It is the control plane — the central process that coordinates everything else. When you install OpenClaw, the Gateway is the thing that starts running on your machine.
+
+Technically, the Gateway runs as a local WebSocket server at:
+
+```
+ws://127.0.0.1:18789
+```
+
+That `127.0.0.1` address means it is running on *your* machine, not on someone else's server. The port `18789` is where all the other components connect to talk to the Gateway.
+
+Think of the Gateway as air traffic control. Every message you send, every scheduled task that fires, every skill that runs — they all route through the Gateway. It decides what to do, which AI model to call, and how to respond.
+
+**Key things the Gateway handles:**
+
+- Receiving your messages from any channel
+- Deciding which AI model to use for a given task
+- Managing your sessions (ongoing conversations)
+- Running scheduled jobs (cron)
+- Coordinating skills and plugins
+- Storing and retrieving your memory
+- Managing sub-agents for complex tasks
+
+The Gateway does not *contain* the AI model itself. It calls out to models from Anthropic (Claude), OpenAI (GPT), Google (Gemini), or others via their APIs. You bring your own API keys. This means you can switch models, set up fallbacks (if Claude is down, use GPT), and control costs.
+
+**Why does this matter?** Because it means you are not locked into any one provider. If OpenAI raises prices, switch to Anthropic. If Google launches a breakthrough model, add it as your primary. If a provider has an outage at 2 AM, the Gateway automatically fails over to your backup. You stay in control.
+
+It also means you can assign different models to different tasks. You might use Claude (a powerful, expensive model) for complex reasoning and writing, GPT-4o for general conversation, and Gemini Flash (a fast, cheap model) for simple lookups and quick replies. The Gateway handles this routing automatically based on rules you define.
+
+### Channels: How You Talk to It
+
+A **Channel** is any communication pathway between you and OpenClaw. This is one of the most powerful ideas in the system — you do not need to open a special app to talk to your AI assistant. You talk to it through the apps you already use.
+
+**Supported channels include:**
+
+- **iMessage** — Text your assistant from your iPhone like it is a contact in your phone
+- **Slack** — Talk to it in your workspace alongside your team
+- **WhatsApp** — Message it from the app billions of people already use
+- **Telegram** — A popular option for technical users
+- **Discord** — Great if you live in Discord communities
+- **Signal** — For privacy-focused communication
+- **Microsoft Teams** — For enterprise and work environments
+- **WebChat** — A built-in web interface at `http://localhost:18789` for quick testing
+
+Each channel is a bridge. Your message comes in through iMessage, the channel adapter translates it into something the Gateway understands, the Gateway processes it and generates a response, and the channel adapter translates that response back into an iMessage reply.
+
+You can have multiple channels active at once. You might use iMessage for personal requests, Slack for work-related tasks, and WhatsApp when you are traveling internationally. OpenClaw maintains context across all of them — it knows you are the same person regardless of which channel you use.
+
+**A practical example:** You are at your desk and message OpenClaw via Slack: "Remind me to call the dentist tomorrow at 10 AM." Later that evening, you are on the couch and text via iMessage: "What did I ask you to remind me about?" OpenClaw knows. The context follows you across channels because the Gateway is the single brain behind all of them.
+
+This is one of the features that makes OpenClaw feel less like software and more like a person. You do not think about which app you used to tell your real assistant something. You just tell them, and they remember.
+
+### Agents and the Pi Runtime
+
+When the Gateway receives a task, it spins up an **Agent** to handle it. An agent is an instance of the AI model working on a specific job. Simple questions might need one agent. Complex tasks might spawn multiple sub-agents that work together.
+
+Agents run inside the **Pi runtime**, which is OpenClaw's execution environment. You do not need to understand the Pi runtime deeply to use OpenClaw — just know that it is the sandbox where your agents do their work, with access to the tools and skills you have configured.
+
+**Why sub-agents matter:** Imagine you ask OpenClaw to plan a weekend trip. A single agent could handle this sequentially — research destinations, check your calendar, look at flights, find hotels, compare restaurants. But that would be slow. Instead, the Gateway can spawn multiple sub-agents that work in parallel: one researches flights while another checks hotel availability while a third finds restaurant recommendations. The results are combined and presented to you as a cohesive plan. This is how OpenClaw handles tasks that would take a single-threaded chatbot many minutes.
+
+### Sessions
+
+A **Session** is an ongoing conversation or task context. When you start talking to OpenClaw about planning a trip, that becomes a session. The session holds the conversation history, any relevant context, and the state of any tasks in progress.
+
+Sessions can be short (a single question and answer) or long-running (a multi-day project you keep coming back to). OpenClaw manages session context so your assistant remembers what you were talking about.
+
+The difference between sessions and memory is important. **Sessions** are *working memory* — the context of your current conversation or task. **Memory** (stored in MEMORY.md) is *long-term memory* — facts about you, your preferences, things learned from past interactions. Sessions come and go. Memory persists.
+
+Think of it this way: a session is like the stack of papers on your assistant's desk for the task they are currently working on. Memory is the filing cabinet where they keep everything they have learned about you over time.
+
+### Skills: Extensions from ClawHub
+
+**Skills** are extensions that give OpenClaw new capabilities. If the Gateway is the brain and Channels are how you communicate, Skills are what your assistant knows how to do.
+
+Out of the box, OpenClaw can have conversations and perform basic tasks. But with Skills, it can:
+
+- Manage your calendar
+- Control smart home devices
+- Monitor websites for changes
+- Send emails on your behalf
+- Interact with APIs and services
+- Run scripts and automations
+- And much more
+
+Skills are distributed through **ClawHub**, which is like an app store for OpenClaw capabilities. You browse, install, and configure skills to match your needs. You can also write your own skills if you have specific requirements.
+
+**Examples of popular skills:**
+
+- **Calendar Sync** — Reads and writes to Google Calendar, Apple Calendar, or Outlook
+- **Email Triage** — Scans your inbox, categorizes messages by priority, drafts responses
+- **Web Search** — Searches the web and summarizes results
+- **Home Automation** — Controls HomeKit, SmartThings, or Home Assistant devices
+- **Expense Tracking** — Logs and categorizes expenses from receipt photos
+- **News Monitor** — Watches topics you care about and surfaces relevant articles
+
+The skill ecosystem is community-driven. Anyone can publish a skill to ClawHub, and the best skills get surfaced through ratings and usage metrics.
+
+### Plugins
+
+**Plugins** are similar to Skills but operate at a lower level. While Skills are task-focused ("book a restaurant"), Plugins provide foundational capabilities ("access the filesystem," "make HTTP requests," "query a database"). Think of Plugins as the infrastructure that Skills are built on top of.
+
+If Skills are the apps on your phone, Plugins are the operating system services those apps rely on — networking, storage, permissions. Most users interact with Skills directly and never need to think about Plugins unless they are building custom skills.
+
+### Nodes: Device Access
+
+**Nodes** are how OpenClaw connects to your physical devices. If you have OpenClaw running on your Mac but you also want it to interact with your iPhone or iPad, each device becomes a Node.
+
+Nodes give OpenClaw the ability to:
+
+- Access device-specific features (camera, location, notifications)
+- Run tasks on specific devices
+- Sync information across your devices
+- Trigger actions based on device context (like your location)
+
+**Supported platforms include:** iOS, Android, and macOS.
+
+**A practical example:** You are at home and say to your Mac, "Check the weather and if it's raining, turn on the hallway lights." The Gateway processes the request, uses a weather skill to check conditions, and if it is raining, sends a command through the Node on your iPhone (which has access to HomeKit) to turn on the lights. The Gateway coordinated across two devices seamlessly.
+
+### Voice Wake and Talk Mode
+
+OpenClaw supports **Voice Wake** — a wake word that activates your assistant hands-free, similar to "Hey Siri" or "Alexa." Once activated, **Talk Mode** lets you have a natural spoken conversation with your assistant.
+
+This means OpenClaw is not limited to text. You can talk to it while cooking, driving, or working with your hands. It listens, processes, and responds through your device's speakers.
+
+Voice interactions go through the same Gateway as text. This means your assistant has the same context, the same memory, the same personality whether you are typing or talking. A conversation you started via iMessage in the morning can continue via voice in the afternoon without repeating yourself.
+
+### Canvas and A2UI: The Visual Workspace
+
+**Canvas** is OpenClaw's visual workspace — a shared space where you and your assistant can collaborate on documents, diagrams, code, and other visual content. Think of it as a whiteboard that both you and your AI assistant can draw on.
+
+**A2UI** (Agent-to-User Interface) is the system that lets OpenClaw generate visual interfaces on the fly. Instead of just sending you a text response, OpenClaw can create interactive cards, forms, charts, and dashboards. If you ask "show me my schedule for the week," it does not just list your appointments — it can render an actual visual calendar.
+
+Together, Canvas and A2UI push OpenClaw beyond the limitations of text-only AI. Some tasks are better shown than told. When you are comparing options, reviewing data, organizing ideas, or collaborating on content, a visual workspace is dramatically more effective than a wall of text in a chat window.
+
+### Lobster Workflows
+
+**Lobster** is OpenClaw's visual workflow builder. If you have ever used tools like Zapier, Make, or Shortcuts on iOS, Lobster serves a similar purpose — it lets you chain together actions into automated workflows.
+
+For example, you could build a Lobster workflow that:
+
+1. Triggers every morning at 7 AM
+2. Checks your calendar for the day
+3. Checks the weather
+4. Reads your top emails
+5. Compiles everything into a morning briefing
+6. Sends it to you via iMessage
+
+The difference from tools like Zapier is that Lobster workflows have access to an AI brain. Each step can involve reasoning, not just mechanical data passing. A traditional automation blindly follows rules: "If email subject contains 'invoice', move to invoices folder." A Lobster workflow can reason: "This email looks like an invoice but it is actually a phishing attempt — flag it for review instead."
+
+Lobster workflows are visual — you build them by connecting blocks in a drag-and-drop interface, not by writing code. This makes automation accessible to people who have never written a script.
+
+### Cron Jobs and Webhooks
+
+**Cron jobs** are scheduled tasks — things you want OpenClaw to do at specific times or intervals. "Every morning at 8 AM, summarize my unread emails." "Every Friday at 5 PM, create a weekly review." "Every hour, check if my website is still online."
+
+**Webhooks** are the opposite direction — external events that trigger OpenClaw to take action. A webhook might fire when you receive a payment, when a GitHub issue is created, or when a smart home sensor detects something. OpenClaw receives that webhook and can respond however you have configured it to.
+
+Together, Cron and Webhooks make OpenClaw *proactive*. It does not just wait for you to ask questions. It acts on your behalf, on a schedule, or in response to events.
+
+**Some real examples of what Cron + Webhooks enable:**
+
+- **Cron:** Every Monday at 9 AM, summarize your unread emails from the weekend and draft replies for the important ones
+- **Cron:** Every evening at 7 PM, send you a digest of news related to topics you care about
+- **Webhook:** When a new GitHub issue is assigned to you, summarize it and add it to your task list
+- **Webhook:** When your doorbell camera detects motion after 10 PM, send you a notification with context
+- **Cron + Webhook combo:** Every morning, check your calendar. If a meeting is scheduled with someone you have not met before, research them and send you a brief background
+
+This is where OpenClaw truly separates from traditional AI chatbots. It is not waiting for you. It is working for you.
+
+---
+
+## How It All Fits Together
+
+Here is a simplified diagram of how the components relate to each other:
+
+```
+You (human)
+ |
+ |── iMessage Channel ──┐
+ |── Slack Channel ──────┤
+ |── WhatsApp Channel ───┤
+ |── Voice Wake ─────────┤
+ |                       ▼
+ |               ┌──────────────┐
+ |               │   GATEWAY    │ ← SOUL.md (personality)
+ |               │ (the brain)  │ ← USER.md (context about you)
+ |               │              │ ← MEMORY.md (long-term memory)
+ |               └──────┬───────┘
+ |                      │
+ |          ┌───────────┼───────────┐
+ |          ▼           ▼           ▼
+ |      ┌───────┐  ┌───────┐  ┌──────────┐
+ |      │ Agent │  │ Agent │  │  Agent   │
+ |      │ (Pi)  │  │ (Pi)  │  │  (Pi)    │
+ |      └───┬───┘  └───┬───┘  └────┬─────┘
+ |          │           │           │
+ |          ▼           ▼           ▼
+ |       Skills     Plugins      Nodes
+ |    (ClawHub)   (filesystem,  (iOS, Mac,
+ |                 HTTP, DB)    Android)
+ |
+ |── Cron (scheduled tasks) ───→ Gateway
+ |── Webhooks (external events) → Gateway
+ |── Lobster (workflows) ──────→ Gateway
+```
+
+Everything flows through the Gateway. The Gateway is the single point of coordination. Channels bring your messages in. Agents do the work. Skills, Plugins, and Nodes provide capabilities. Cron and Webhooks trigger actions without your involvement. And the personality files (SOUL.md, USER.md, MEMORY.md) ensure it all feels like *your* assistant, not a generic one.
+
+---
+
+## How OpenClaw Differs from ChatGPT, Claude, and Other AI Tools
+
+If you already use ChatGPT or Claude, you might wonder why you need OpenClaw. The key differences are fundamental:
+
+### Always-On vs. On-Demand
+
+ChatGPT and Claude are **on-demand** tools. You open a browser tab, type a question, get an answer, and close the tab. They do nothing when you are not actively using them.
+
+OpenClaw is **always-on**. It runs continuously on your devices. It can wake you up in the morning with a briefing. It can monitor your email while you sleep. It can respond to messages from other people on your behalf (within rules you define). It does not stop working when you close a browser tab.
+
+### Yours vs. Theirs
+
+When you use ChatGPT, your conversations live on OpenAI's servers. When you use Claude, they live on Anthropic's servers. You are renting access to someone else's system.
+
+OpenClaw runs on **your** hardware. Your configuration, your memory, your conversations — they all live in files on your machine. You can read them, edit them, back them up, and delete them. You own everything.
+
+### Multi-Channel vs. Single Interface
+
+ChatGPT lives at chat.openai.com. Claude lives at claude.ai. Each is a single interface.
+
+OpenClaw meets you **where you already are**. iMessage. Slack. WhatsApp. Discord. Voice. You do not have to change your habits. Your assistant adapts to your communication preferences, not the other way around.
+
+### Proactive vs. Reactive
+
+Traditional AI tools are purely **reactive**. They do nothing until you prompt them.
+
+OpenClaw can be **proactive**. Through Cron jobs, Heartbeat behaviors, and Webhooks, it can initiate actions, send you updates, and manage tasks without being asked. It is the difference between a tool and an assistant.
+
+### Customizable vs. One-Size-Fits-All
+
+ChatGPT and Claude offer limited customization. You can use custom instructions or system prompts, but the fundamental experience is the same for everyone.
+
+OpenClaw is **deeply customizable**. Every aspect of the experience — personality, communication style, proactive behaviors, response formatting, channel routing, model selection, automation rules — is controlled by configuration files you write and own. Two people running OpenClaw can have wildly different experiences, each perfectly tailored to their needs.
+
+### Summary Comparison
+
+| Feature | ChatGPT / Claude | OpenClaw |
+|---|---|---|
+| Runs on | Provider's servers | Your devices |
+| Availability | When you open the app | 24/7, always running |
+| Communication | Browser or dedicated app | iMessage, Slack, WhatsApp, Voice, etc. |
+| Proactivity | None (reactive only) | Cron jobs, Heartbeat, Webhooks |
+| Memory | Limited, provider-controlled | Full local memory you own and edit |
+| Customization | Custom instructions | Full personality, behavior, and routing config |
+| Data ownership | Provider owns data | You own everything |
+| Cost model | Monthly subscription | Pay-per-use API costs (no subscription) |
+| Extensibility | Limited plugins | Open skill ecosystem (ClawHub) |
+
+This is not to say ChatGPT and Claude are bad tools — they are excellent for what they do. But they serve a different purpose. They are tools you use. OpenClaw is an assistant that works for you.
+
+---
+
+## The CEO and IT Department Analogy
+
+Here is a useful way to think about how OpenClaw fits into your broader AI toolkit:
+
+**OpenClaw is the CEO.** It delegates, schedules, monitors, and manages your digital life around the clock. It is always running, always aware of your context, and always ready to act. It coordinates across channels, maintains your memory, and executes your standing instructions.
+
+**Claude Code (or similar developer tools) is the IT Department.** When you need precision work — writing code, debugging a complex problem, refactoring an entire codebase — you call in the specialists. They do focused, expert-level work on demand.
+
+You do not want your CEO writing code. You do not want your IT department managing your calendar. OpenClaw and tools like Claude Code are complementary, not competitive.
+
+In practice, this means you might:
+
+- Use **OpenClaw** to manage your daily routine, handle messages, monitor projects, and automate repetitive tasks
+- Use **Claude Code** when you need to build something specific, debug a tricky problem, or do deep technical work
+
+The two can even work together — OpenClaw can trigger Claude Code for technical tasks and incorporate the results back into your workflow.
+
+Here is a practical example of how the delegation works:
+
+1. You text OpenClaw via iMessage: "My website's contact form is broken. Can you fix it?"
+2. OpenClaw checks your MEMORY.md and knows your website is a Next.js app hosted on Vercel
+3. OpenClaw delegates the debugging task to Claude Code with full context
+4. Claude Code investigates, identifies the issue (a missing API route), and fixes it
+5. OpenClaw receives the result and messages you back: "Fixed. The contact form was missing the /api/contact route handler. Claude Code created it and pushed the fix. Your site should be working now."
+
+You gave one instruction in natural language through iMessage. The CEO (OpenClaw) delegated to the IT department (Claude Code). The result came back through the same channel you started with. That is the vision.
+
+---
+
+## The Open-Source Advantage
+
+OpenClaw is fully open source, licensed under a permissive license. This matters for several practical reasons:
+
+**Transparency.** You can read every line of code that runs on your machine. There are no hidden data collection mechanisms, no telemetry you did not consent to, no black boxes. If you want to know exactly what happens when you send a message, you can trace it through the source code.
+
+**Community.** With over 145,000 GitHub stars, OpenClaw has one of the largest open-source communities in the AI space. That means rapid development, extensive documentation, a deep library of community-built skills, and active forums where you can get help.
+
+**Longevity.** Commercial AI products can shut down, change pricing, or pivot strategy. Open-source software lives as long as the community supports it. Even if the original creator moved on tomorrow, the codebase and community would continue.
+
+**No vendor lock-in.** Your configuration files, your memory, your skills — they all use open formats (Markdown, JSON). You are never locked into a proprietary system. If something better comes along in five years, you can migrate.
+
+---
+
+## What You Need to Get Started
+
+OpenClaw is open source and free to use. You will need:
+
+1. **A computer** — macOS, Linux, or Windows
+2. **Node.js 22 or later** — the runtime that powers the Gateway
+3. **An API key** from at least one AI provider (Anthropic, OpenAI, or Google)
+4. **Time to configure it** — OpenClaw is powerful because it is customizable, and customization takes effort
+
+The API key is the only ongoing cost. You pay the AI providers directly for the model calls your assistant makes. There is no subscription to OpenClaw itself.
+
+### How Much Does It Actually Cost?
+
+Since OpenClaw is free software and you only pay for API usage, the cost depends entirely on how much you use it. Here are some rough benchmarks based on real usage:
+
+- **Light usage** (10-20 messages per day, a couple cron jobs): $5-15/month
+- **Moderate usage** (50+ messages, several automations, proactive behaviors): $20-50/month
+- **Heavy usage** (always talking to it, complex multi-agent tasks, heavy automation): $50-100+/month
+
+These costs can be reduced significantly by routing simple tasks to cheaper, faster models (like Gemini Flash or GPT-4o-mini) and reserving expensive models (like Claude Opus or GPT-4) for tasks that genuinely need them. Smart model routing is one of the first optimizations experienced users set up.
+
+---
+
+## Who Is OpenClaw For?
+
+OpenClaw is not for everyone — at least not yet. Here is an honest assessment of who benefits most today:
+
+**Great fit:**
+
+- People who spend their day across multiple communication tools and want a unified assistant
+- Knowledge workers who do a lot of scheduling, email management, and information processing
+- Automation enthusiasts who want AI-powered automation beyond what Zapier or Shortcuts can offer
+- Privacy-conscious users who want full control over their AI interactions and data
+- Tinkerers and power users who enjoy configuring and optimizing their tools
+
+**Not ideal (yet):**
+
+- People who want something that works perfectly out of the box with zero configuration
+- Users who are uncomfortable with the command line (though this is improving)
+- People who only need AI for occasional questions (ChatGPT or Claude is simpler for that)
+
+OpenClaw's setup effort is front-loaded. The first day takes real work. But that investment pays dividends every day after, as your assistant becomes increasingly tuned to your life and increasingly capable of acting on your behalf.
+
+---
+
+## A Note on Complexity
+
+OpenClaw has a lot of components, and that can feel overwhelming at first glance. But you do not need to understand or configure everything on day one. Most people start with:
+
+1. Install the Gateway
+2. Connect one channel (usually iMessage or WebChat)
+3. Write a basic SOUL.md (your assistant's personality)
+4. Set one cron job (a daily greeting)
+
+From there, you add complexity as you need it — more channels, more skills, voice mode, workflows, and so on. The system is designed to grow with you.
+
+The next page walks you through installation step by step.
